@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>关闭深度思考 - AiTranslate</title>
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<script>
+  (function() {
+    try {
+      const saved = localStorage.getItem('ai-translate-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* CSS Variables */
+:root {
+  --bg-primary: #F5F5F7;
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --border-color: #E5E5EA;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --accent-1: #007AFF;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-secondary: #1C1C1E;
+  --bg-card: #1C1C1E;
+  --border-color: #38383A;
+  --text-primary: #F5F5F7;
+  --text-secondary: #A1A1A6;
+  --accent-1: #0A84FF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
+body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
+
+.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
+
+/* Navbar */
+.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
+.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* Theme Toggle */
+.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
+.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
+.theme-toggle.light::after { transform: translateX(22px); }
+.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
+
+/* Content */
+.header { text-align: center; margin-bottom: 40px; }
+.header h1 { font-size: 2rem; margin-bottom: 8px; }
+.header p { color: var(--text-secondary); }
+
+.card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); line-height: 1.6; }
+.card h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-1); }
+.card p { margin-bottom: 12px; }
+code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
+pre code { padding: 0; background: transparent; }
+.code-wrapper { position: relative; margin-top: 12px; }
+.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
+.copy-btn.success { color: #34C759; border-color: #34C759; background: rgba(52, 199, 89, 0.1); }
+a { color: var(--accent-1); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.table-container { overflow-x: auto; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
+table { width: 100%; border-collapse: collapse; text-align: left; }
+th, td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
+th { background: var(--bg-primary); font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; }
+tr:last-child td { border-bottom: none; }
+
+.footer { text-align: center; margin-top: 40px; color: var(--text-secondary); font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="navbar">
+    <a href="../index.html" class="logo">
+      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
+    </a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="./index.html">文档中心</a>
+      <a href="../tools/param-builder.html">参数构建器</a>
+      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" title="切换主题">
+        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <header class="header">
+      <h1>进阶：如何为模型“关闭思考”？</h1>
+    <p>通过自定义额外参数，强制让满血版的推理模型直接输出结果</p>
+  </header>
+
+  <div class="card">
+    <h2>1. 什么是请求头和请求体？</h2>
+    <p>AiTranslate 插件支持在 Bob 配置界面的高级设置中注入 <strong>额外请求头 (Headers)</strong>、<strong>额外查询参数 (Query)</strong> 和 <strong>额外请求体 (Body)</strong>。它们都接收合法的 JSON 格式字符串。</p>
+    <p>对于关闭深度思考（思维链）这种操作，<strong>几乎都是通过修改“请求体 (Body)”来实现的</strong>，因为这属于修改发给模型的具体指令参数。</p>
+    <p>你可以使用我们提供的 <a href="../tools/param-builder.html">参数构建工具</a>，快速生成所需的 JSON 字符串，然后复制粘贴到 Bob 的「额外请求体」输入框中即可。</p>
+  </div>
+
+  <div class="card">
+    <h2>2. 各大平台关闭思考的 JSON 模板</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>适用服务商 / 模型</th>
+            <th>所需的 JSON 结构（填入额外请求体）</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>DeepSeek 官方 API / 智谱 GLM / 豆包 / 腾讯</td>
+            <td><code>{ "thinking": { "type": "disabled" } }</code></td>
+            <td>DeepSeek 官方 API 及多数国产大厂通用。</td>
+          </tr>
+          <tr>
+            <td>OpenAI (gpt-5.5 / o1 / o3 等)</td>
+            <td><code>{ "reasoning_effort": "none" }</code></td>
+            <td>标准 OpenAI 兼容参数。值可以设为 "none", "low", "medium", "high" 来调节思考深度。</td>
+          </tr>
+          <tr>
+            <td>通义千问 / 阿里云百炼</td>
+            <td><code>{ "enable_thinking": false }</code></td>
+            <td>直接使用布尔值开关。</td>
+          </tr>
+          <tr>
+            <td>Ollama (本地部署)</td>
+            <td><code>{ "think": false }</code></td>
+            <td>针对部分支持 Ollama 的推理模型控制。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3. 通过 AI 助手获取配置方案</h2>
+    <p>如果您使用了一个尚未列出的全新推理模型（或者服务商的 API 发生了更新），不确定该如何关闭深度思考，您可以直接将以下提示词发送给 AI（如 ChatGPT / Claude），让它查阅最新的官方文档并为您提供准确的配置参数：</p>
+
+    <div class="code-wrapper">
+      <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+      <pre><code>我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+
+我现在接入了【在此填入服务商和模型名称，例如：硅基流动的 DeepSeek-R1】。
+该插件允许向大模型服务端注入自定义的 JSON 请求体（Extra Body）来控制高级参数。请查阅其最新的官方 API 文档，告诉我如果要强制关闭或最小化该模型的“深度思考/思维链（Reasoning）”功能以加快响应速度，我应该在发出的 JSON 请求体中添加什么参数？
+
+请注意：不要泛泛而谈，请直接给出一个准确的 JSON 对象代码示例。例如，如果该模型兼容 OpenAI 的 reasoning_effort，你应当输出：
+```json
+{
+  "reasoning_effort": "none"
+}
+```
+
+同时，请附上你参考的官方文档链接以供核查。</code></pre>
+    </div>
+  </div>
+
+    <footer class="footer">
+      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
+    </footer>
+  </div>
+</div>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+function setTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  themeToggle.classList.toggle('light', theme === 'light');
+  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
+}
+themeToggle.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+try {
+  const saved = localStorage.getItem('ai-translate-theme');
+  if (saved) setTheme(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
+} catch(e) {}
+
+function copyPrompt(btn) {
+  const pre = btn.nextElementSibling;
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const originalText = btn.innerText;
+    btn.innerText = '已复制!';
+    btn.classList.add('success');
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.classList.remove('success');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

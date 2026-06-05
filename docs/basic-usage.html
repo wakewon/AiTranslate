@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基础使用教程 - AiTranslate</title>
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<script>
+  (function() {
+    try {
+      const saved = localStorage.getItem('ai-translate-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* CSS Variables */
+:root {
+  --bg-primary: #F5F5F7;
+  --bg-nav: rgba(245, 245, 247, 0.8);
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --border-color: #E5E5EA;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --accent-1: #007AFF;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-nav: rgba(0, 0, 0, 0.8);
+  --bg-secondary: #1C1C1E;
+  --bg-card: #1C1C1E;
+  --border-color: #38383A;
+  --text-primary: #F5F5F7;
+  --text-secondary: #A1A1A6;
+  --accent-1: #0A84FF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
+body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
+
+.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
+
+/* Navbar */
+.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
+.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* Theme Toggle */
+.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
+.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
+.theme-toggle.light::after { transform: translateX(22px); }
+.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
+
+/* Content */
+.header { text-align: center; margin-bottom: 40px; }
+.header h1 { font-size: 2rem; margin-bottom: 8px; }
+.header p { color: var(--text-secondary); }
+
+.card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); line-height: 1.6; }
+.card h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-1); }
+.card h3 { font-size: 1.1rem; margin: 16px 0 8px; }
+.card p { margin-bottom: 12px; }
+.card ul { margin-left: 20px; margin-bottom: 16px; }
+.card li { margin-bottom: 8px; }
+code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
+pre code { padding: 0; background: transparent; }
+.code-wrapper { position: relative; margin-top: 12px; }
+.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
+.copy-btn.success { color: #34C759; border-color: #34C759; background: rgba(52, 199, 89, 0.1); }
+a { color: var(--accent-1); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.footer { text-align: center; margin-top: 40px; color: var(--text-secondary); font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="navbar">
+    <a href="../index.html" class="logo">
+      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
+    </a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="./index.html">文档中心</a>
+      <a href="../tools/param-builder.html">参数构建器</a>
+      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" title="切换主题">
+        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <header class="header">
+      <h1>基础使用教程</h1>
+    <p>从零开始，教你如何接入任意 AI 翻译服务</p>
+  </header>
+
+  <div class="card">
+    <h2>快速安装与启用</h2>
+    <ol style="padding-left: 20px; line-height: 1.8; margin-top: 12px;">
+      <li>在 <a href="https://github.com/wakewon/AiTranslate/releases" target="_blank">GitHub Releases</a> 下载最新的 <code>.bobplugin</code> 文件并双击安装。</li>
+      <li>在 Bob 的设置 -> 服务 -> 文本翻译中，点击左下角 <code>+</code> 号，添加 <strong>Ai 翻译</strong>。</li>
+      <li>根据您的服务商，在插件设置中选择对应的 <strong>请求格式</strong>（通常默认的 OpenAI Chat 就能通吃 90% 的服务商）。</li>
+      <li>填入您的 <strong>Base URL</strong> 和 <strong>API Key</strong>。注意：此插件的请求格式默认自带了版本和端点信息（如 <code>/v1/chat/completions</code>）。除非有特殊需求需要手动指定 Endpoint，一般 Base URL 填写根地址即可。</li>
+      <li>填入您要调用的 <strong>模型名称 (Model)</strong>。注意：这几乎是必填项，且必须填入服务商 API 文档中规定的具体模型参数名（例如 <code>deepseek-chat</code>、<code>glm-4-flash</code> 等）。</li>
+      <li>(可选) 您可以打开<a href="../tools/param-builder.html">高级参数构建工具</a>生成个性化参数（如关闭思考等）并粘贴到插件底部的“额外请求体”中。更多进阶玩法请访问<a href="./index.html">文档中心</a>阅读。</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>1. 请求格式怎么选？</h2>
+    <p>本插件支持 7 种细分的 API 请求格式选项，它们决定了插件如何与大模型通信：</p>
+    <ul>
+      <li><strong>OpenAI Chat Completions（通用兼容）:</strong> 最通用的格式，绝大多数国产模型（DeepSeek、Kimi、豆包、智谱等）和第三方中转站（硅基流动、OpenRouter）都兼容此格式。</li>
+      <li><strong>OpenAI Responses API:</strong> OpenAI 新一代的非对话文本生成端点（如 o1 等部分模型适用）。</li>
+      <li><strong>OpenAI Legacy Completions:</strong> 老旧模型或部分遗留系统的单轮对话格式。</li>
+      <li><strong>Anthropic Claude Messages:</strong> Claude 官方原生端点专用。</li>
+      <li><strong>Anthropic OpenAI 兼容:</strong> 部分基于 Anthropic 但提供 OpenAI 兼容接口的服务。</li>
+      <li><strong>Gemini generateContent:</strong> 谷歌 Gemini 官方原生端点专用。</li>
+      <li><strong>Gemini OpenAI 兼容:</strong> 部分基于 Gemini 但提供 OpenAI 兼容接口的服务。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>2. Base URL 和端点（Endpoint）填写指南</h2>
+    <p><strong>Base URL (基础网址)</strong> 是服务商的根地址。<strong>端点 (Endpoint)</strong> 则是具体的接口路径。根据不同的 API 格式，插件会自动拼接路径，但有时你需要自己手动调整端点：</p>
+
+    <h3>案例 A：DeepSeek 官方 API</h3>
+    <p>参考文档：<a href="https://api-docs.deepseek.com/zh-cn/" target="_blank">DeepSeek 官方文档</a></p>
+    <ul>
+      <li><strong>请求格式：</strong> OpenAI Chat Completions</li>
+      <li><strong>Base URL：</strong> <code>https://api.deepseek.com</code> （不要带 /v1）</li>
+      <li><strong>自定义端点：</strong> 留空 （插件默认使用的请求格式会自动补充 <code>/v1/chat/completions</code>）</li>
+    </ul>
+
+    <h3>案例 B：Google Gemini 官方 API（非标准路径）</h3>
+    <p>参考文档：<a href="https://ai.google.dev/api?hl=zh-cn" target="_blank">Gemini 官方文档</a></p>
+    <ul>
+      <li><strong>请求格式：</strong> Gemini 官方 generateContent</li>
+      <li><strong>Base URL：</strong> <code>https://generativelanguage.googleapis.com</code></li>
+      <li><strong>自定义端点：</strong> <code>/v1beta/models/{model}:generateContent</code> （注意保留大括号里的 <code>{model}</code>，插件会自动将其替换为你在下方填写的模型名称）</li>
+    </ul>
+    
+    <h3>案例 C：智谱 GLM 官方 API（特殊后缀）</h3>
+    <p>如果你遇到类似于智谱这样不规则的 API 路径：<a href="https://docs.bigmodel.cn/cn/api/introduction" target="_blank">智谱官方文档</a></p>
+    <ul>
+      <li><strong>请求格式：</strong> OpenAI Chat Completions</li>
+      <li><strong>Base URL：</strong> <code>https://open.bigmodel.cn</code></li>
+      <li><strong>自定义端点：</strong> <code>/api/paas/v4/chat/completions</code>（填写后，插件将不再自动补充路径，而是完全使用你填写的端点）</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>3. 通过 AI 助手获取配置方案</h2>
+    <p>如果您想接入某个尚未列出的服务商（例如小米的大模型、百度千帆等），您可以直接将以下提示词复制并发送给 ChatGPT、Claude 或 DeepSeek，让 AI 助手为您提供准确的配置参数：</p>
+
+    <div class="code-wrapper">
+      <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
+      <pre><code>我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+
+请查阅【在此填入服务商和模型名称，如：小米大模型】的最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这四个配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
+1. 请求格式（必须从这 7 种中选择：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容）
+2. Base URL（服务商 API 的根地址，例如 https://api.example.com。注意：不得拼接任何具体的后续路由路径）
+3. 自定义端点（如果该 API 路径不符合标准格式，请给出具体的路由路径，如 `/api/paas/v4/chat/completions` 以覆盖默认值；如果是标准的 `/v1/chat/completions` 等格式，请直接告诉我留空）
+4. 模型名称（用于 API 请求的精准 `model` 参数值，例如 `deepseek-chat`）</code></pre>
+    </div>
+  </div>
+
+    <footer class="footer">
+      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
+    </footer>
+  </div>
+</div>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+function setTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  themeToggle.classList.toggle('light', theme === 'light');
+  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
+}
+themeToggle.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+try {
+  const saved = localStorage.getItem('ai-translate-theme');
+  if (saved) setTheme(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
+} catch(e) {}
+
+function copyPrompt(btn) {
+  const pre = btn.nextElementSibling;
+  navigator.clipboard.writeText(pre.innerText).then(() => {
+    const originalText = btn.innerText;
+    btn.innerText = '已复制!';
+    btn.classList.add('success');
+    setTimeout(() => {
+      btn.innerText = originalText;
+      btn.classList.remove('success');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

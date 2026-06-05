@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文档中心 - AiTranslate</title>
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<script>
+  (function() {
+    try {
+      const saved = localStorage.getItem('ai-translate-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* CSS Variables */
+:root {
+  --bg-primary: #F5F5F7;
+  --bg-nav: rgba(245, 245, 247, 0.8);
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F2F2F7;
+  --border-color: #E5E5EA;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --accent-1: #007AFF;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-nav: rgba(0, 0, 0, 0.8);
+  --bg-secondary: #1C1C1E;
+  --bg-card: #1C1C1E;
+  --bg-card-hover: #2C2C2E;
+  --border-color: #38383A;
+  --text-primary: #F5F5F7;
+  --text-secondary: #A1A1A6;
+  --accent-1: #0A84FF;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
+body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
+
+.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
+.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
+
+/* Navbar */
+.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
+.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
+.nav-links { display: flex; gap: 24px; align-items: center; }
+.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
+.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
+.nav-right { display: flex; align-items: center; gap: 16px; }
+
+/* Theme Toggle */
+.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
+.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
+.theme-toggle.light::after { transform: translateX(22px); }
+.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
+
+/* Content */
+.header { text-align: center; margin-bottom: 40px; }
+.header h1 { font-size: 2rem; margin-bottom: 8px; }
+.header p { color: var(--text-secondary); }
+
+.doc-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+@media (min-width: 640px) { .doc-grid { grid-template-columns: 1fr 1fr; } }
+
+.doc-card { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm); transition: transform 0.2s, background 0.2s, box-shadow 0.2s; }
+.doc-card:hover { transform: translateY(-2px); background: var(--bg-card-hover); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.doc-card-icon { font-size: 2rem; margin-bottom: 16px; }
+.doc-card h2 { font-size: 1.25rem; margin-bottom: 8px; color: var(--text-primary); }
+.doc-card p { color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem; }
+
+.footer { text-align: center; margin-top: 60px; color: var(--text-secondary); font-size: 0.85rem; }
+
+@media (max-width: 640px) {
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <nav class="navbar">
+    <a href="../index.html" class="logo">
+      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
+    </a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="./index.html" class="active">文档中心</a>
+      <a href="../tools/param-builder.html">参数构建器</a>
+      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" title="切换主题">
+        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <header class="header">
+      <h1>文档中心</h1>
+      <p>探索 AiTranslate 的全部潜能，从入门到进阶精通</p>
+    </header>
+
+    <div class="doc-grid">
+      <a href="./basic-usage.html" class="doc-card">
+        <div class="doc-card-icon">📖</div>
+        <h2>基础使用教程</h2>
+        <p>从零开始了解请求格式的选择，学习如何为不同的第三方服务商配置 Base URL 与端点。</p>
+      </a>
+
+      <a href="./disable-thinking.html" class="doc-card">
+        <div class="doc-card-icon">🧠</div>
+        <h2>进阶：关闭深度思考</h2>
+        <p>针对 DeepSeek、千问、豆包等推理模型，学习如何通过注入 JSON 参数来强制关闭思考过程。</p>
+      </a>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
+    </footer>
+  </div>
+</div>
+
+<script>
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+function setTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  themeToggle.classList.toggle('light', theme === 'light');
+  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
+}
+themeToggle.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+try {
+  const saved = localStorage.getItem('ai-translate-theme');
+  if (saved) setTheme(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
+} catch(e) {}
+</script>
+</body>
+</html>

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ai 翻译 — 参数构建工具</title>
+<link rel="icon" href="../favicon.ico" type="image/x-icon">
+<script>
+  (function() {
+    try {
+      const saved = localStorage.getItem('ai-translate-theme');
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+</script>
+<style>
+/* ===== CSS Variables / Theming ===== */
+:root {
+  --bg-primary: #F5F5F7;
+  --bg-nav: rgba(245, 245, 247, 0.8);
+  --bg-secondary: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-solid: #FFFFFF;
+  --bg-input: #F5F5F7;
+  --bg-hover: #E5E5EA;
+  --border-color: #E5E5EA;
+  --border-focus: #007AFF;
+  --text-primary: #1D1D1F;
+  --text-secondary: #86868B;
+  --text-muted: #86868B;
+  --accent-1: #007AFF;
+  --accent-2: #5E5CE6;
+  --accent-gradient: #007AFF; /* No gradient, solid blue */
+  --accent-glow: rgba(0, 122, 255, 0.15);
+  --danger: #FF3B30;
+  --danger-hover: #D70015;
+  --success: #34C759;
+  --success-bg: rgba(52, 199, 89, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --shadow-glow: none;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(229, 229, 234, 0.5);
+  --glass-blur: 24px;
+  --json-key: #BF5AF2;
+  --json-string: #34C759;
+  --json-number: #FF9500;
+  --json-bool: #007AFF;
+  --json-null: #86868B;
+  --json-bracket: #86868B;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #000000;
+  --bg-nav: rgba(0, 0, 0, 0.8);
+  --bg-secondary: #1C1C1E;
+  --bg-card: #1C1C1E;
+  --bg-card-solid: #1C1C1E;
+  --bg-input: #2C2C2E;
+  --bg-hover: #3A3A3C;
+  --border-color: #38383A;
+  --border-focus: #0A84FF;
+  --text-primary: #F5F5F7;
+  --text-secondary: #A1A1A6;
+  --text-muted: #86868B;
+  --accent-1: #0A84FF;
+  --accent-2: #5E5CE6;
+  --accent-gradient: #0A84FF;
+  --accent-glow: rgba(10, 132, 255, 0.15);
+  --danger: #FF453A;
+  --danger-hover: #FF6961;
+  --success: #32D74B;
+  --success-bg: rgba(50, 215, 75, 0.1);
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.2);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.3);
+  --shadow-glow: none;
+  --glass-bg: rgba(28, 28, 30, 0.85);
+  --glass-border: rgba(56, 56, 58, 0.5);
+  --json-key: #D57FF5;
+  --json-string: #32D74B;
+  --json-number: #FF9F0A;
+  --json-bool: #64D2FF;
+  --json-null: #8E8E93;
+  --json-bracket: #8E8E93;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+/* ===== Navbar ===== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  margin: 0 -24px;
+  background: var(--bg-nav);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--text-primary);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ===== Layout ===== */
+.app {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.main-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 0 80px;
+}
+
+/* ===== Header ===== */
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h1 {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.header p {
+  color: var(--text-secondary);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.theme-toggle.light::after {
+  transform: translateX(22px);
+}
+
+.theme-toggle-icons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* ===== Tabs ===== */
+.tabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  background: rgba(118, 118, 128, 0.12); /* Apple Segmented Control Background */
+  border-radius: 9px;
+  margin-bottom: 24px;
+}
+
+[data-theme="dark"] .tabs {
+  background: rgba(118, 118, 128, 0.24);
+}
+
+[data-theme="dark"] .tab-btn.active {
+  background: #636366;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.tab-btn:hover {
+  opacity: 0.8;
+}
+
+.tab-btn.active {
+  background: var(--bg-secondary);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.12), 0 3px 1px rgba(0,0,0,0.04);
+  opacity: 1;
+  font-weight: 600;
+}
+
+/* ===== Section Panel ===== */
+.section-panel {
+  display: none;
+}
+
+.section-panel.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ===== Card ===== */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-title-icon {
+  display: none; /* Removed emojis for cleaner look */
+}
+
+/* ===== Key-Value Rows ===== */
+.kv-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.kv-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.kv-row.removing {
+  display: none;
+}
+
+.kv-row input,
+.kv-row select {
+  padding: 8px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.kv-row input:focus,
+.kv-row select:focus {
+  border-color: var(--border-focus);
+  background: var(--bg-secondary);
+}
+
+.kv-row input::placeholder {
+  color: var(--text-muted);
+}
+
+.kv-row .key-input   { flex: 2; min-width: 0; }
+.kv-row .value-input  { flex: 3; min-width: 0; }
+.kv-row .type-select  { flex: 0 0 100px; }
+
+.kv-row select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2386868B' stroke-width='2' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+  cursor: pointer;
+}
+
+/* Delete button */
+.btn-delete {
+  flex: 0 0 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+  line-height: 1;
+}
+
+.btn-delete:hover {
+  color: var(--danger);
+  background: var(--bg-hover);
+}
+
+/* Add button */
+.btn-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--accent-1);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add:hover {
+  background: var(--bg-primary);
+}
+
+.btn-add-icon {
+  font-weight: 600;
+}
+
+/* ===== Empty State ===== */
+.empty-state {
+  text-align: center;
+  padding: 24px 16px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.empty-state-icon {
+  display: none;
+}
+
+/* ===== JSON Preview ===== */
+.json-preview-wrap {
+  position: relative;
+}
+
+.json-preview {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  font-family: 'SF Mono', ui-monospace, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre;
+  min-height: 48px;
+  tab-size: 2;
+}
+
+/* Syntax highlighting */
+.json-key     { color: var(--json-key); }
+.json-string  { color: var(--json-string); }
+.json-number  { color: var(--json-number); }
+.json-bool    { color: var(--json-bool); }
+.json-null    { color: var(--json-null); font-style: italic; }
+.json-bracket { color: var(--json-bracket); }
+
+/* Copy button */
+.btn-copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-copy:hover {
+  border-color: var(--text-muted);
+}
+
+.btn-copy.copied {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+/* ===== Quick Templates ===== */
+.templates-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.btn-template {
+  position: relative;
+  padding: 6px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ===== Tooltip (JS driven) ===== */
+.js-tooltip {
+  position: fixed;
+  transform: translate(-50%, calc(-100% - 8px));
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 9999;
+  box-shadow: var(--shadow-sm);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.js-tooltip.show {
+  opacity: 1;
+  visibility: visible;
+  animation: tooltipPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes tooltipPop {
+  0% { transform: translate(-50%, calc(-100% - 2px)); }
+  100% { transform: translate(-50%, calc(-100% - 8px)); }
+}
+
+.js-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--text-primary);
+}
+
+.template-type {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ===== Nested Editor (for extraBody) ===== */
+.nested-indicator {
+  display: none;
+}
+
+.nested-value-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ===== Toast ===== */
+.toast {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  padding: 12px 24px;
+  background: var(--text-primary);
+  color: var(--bg-secondary);
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.toast-icon {
+  display: none;
+}
+
+/* ===== Footer ===== */
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 640px) {
+  .app { padding: 24px 16px 60px; }
+  .header h1 { font-size: 1.5rem; }
+  .kv-row { flex-wrap: wrap; }
+  .kv-row .key-input   { flex: 1 1 40%; }
+  .kv-row .value-input  { flex: 1 1 55%; }
+  .kv-row .type-select  { flex: 1 1 auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="../index.html" class="logo">
+      <img src="../icon-large.png" alt="AiTranslate Icon" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
+    </a>
+    <div class="nav-links">
+      <a href="../index.html">首页</a>
+      <a href="../docs/index.html">文档中心</a>
+      <a href="./param-builder.html" class="active">参数构建器</a>
+      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+    </div>
+    <div class="nav-right">
+      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换明暗主题">
+        <span class="theme-toggle-icons">
+          <span>🌙</span>
+          <span>☀️</span>
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <h1>通用 JSON 参数构建器</h1>
+      <p>图形化构建 JSON 参数，复制粘贴到 Bob 插件配置中</p>
+    </header>
+
+    <div class="section-panel active" id="panel-main">
+      <!-- Quick Templates -->
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">⚡</span>快捷模板</div>
+        <div class="templates-grid">
+          <button class="btn-template" onclick="addTemplate('reasoning_effort', 'none', 'string')" data-tooltip="适用于 OpenAI 兼容端点 (gpt-5.5 / o1 / o3 等)">
+            推理参数 (reasoning_effort) <span class="template-type">"none"</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('thinking', '{&quot;type&quot;:&quot;disabled&quot;}', 'object')" data-tooltip="适用于 DeepSeek 官方 / GLM / 豆包 / 腾讯 等嵌套对象格式">
+            推理参数 (thinking) <span class="template-type">对象</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('enable_thinking', 'false', 'boolean')" data-tooltip="适用于 通义千问 / 阿里云百炼 等">
+            推理参数 (enable_thinking) <span class="template-type">false</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('think', 'false', 'boolean')" data-tooltip="适用于 Ollama 本地模型">
+            推理参数 (Ollama) <span class="template-type">false</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('top_p', '0.9', 'number')">
+            top_p <span class="template-type">数字</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('top_k', '40', 'number')">
+            top_k <span class="template-type">数字</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('response_format', '{&quot;type&quot;:&quot;text&quot;}', 'object')">
+            response_format <span class="template-type">对象</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">📋</span>键值对编辑器</div>
+        <div class="kv-rows" id="rows-main"></div>
+        <div class="empty-state" id="empty-main">
+          <div class="empty-state-icon">📭</div>
+          尚未添加参数，点击上方模板或下方按钮开始
+        </div>
+        <button class="btn-add" onclick="addRow('main')"><span class="btn-add-icon">+</span> 添加参数</button>
+      </div>
+      <div class="card">
+        <div class="card-title"><span class="card-title-icon">✨</span>JSON 预览</div>
+        <div class="json-preview-wrap">
+          <div class="json-preview" id="preview-main"><span class="json-bracket">{}</span></div>
+          <button class="btn-copy" onclick="copyJSON('main')">📋 复制 JSON</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
+  </footer>
+</div>
+
+<!-- Tooltip -->
+<div id="js-tooltip" class="js-tooltip"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== State =====
+const state = {
+  main: []
+};
+
+let rowCounter = 0;
+
+// ===== Theme toggling logic
+const themeToggle = document.getElementById('themeToggle');
+const root = document.documentElement;
+
+function setTheme(theme) {
+  root.setAttribute('data-theme', theme);
+  themeToggle.classList.toggle('light', theme === 'light');
+  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
+}
+
+themeToggle.addEventListener('click', () => {
+  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+});
+
+// Initialization (also handled by blocking script in head, this is just to sync UI state)
+try {
+  const saved = localStorage.getItem('ai-translate-theme');
+  if (saved) setTheme(saved);
+  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
+} catch(e) {}
+
+// ===== Type options =====
+function getTypeOptions() {
+  return [
+    { value: 'string',  label: '字符串' },
+    { value: 'number',  label: '数字' },
+    { value: 'boolean', label: '布尔值' },
+    { value: 'null',    label: 'null' },
+    { value: 'object',  label: '对象' },
+    { value: 'array',   label: '数组' }
+  ];
+}
+
+// ===== Add Row =====
+function addRow(section, key = '', value = '', type = 'string') {
+  const id = ++rowCounter;
+  state[section].push({ id, key, value, type });
+  renderRows(section);
+  updatePreview(section);
+  // Focus the new key input
+  setTimeout(() => {
+    const row = document.querySelector(`[data-row-id="${id}"] .key-input`);
+    if (row && !key) row.focus();
+  }, 50);
+}
+
+// ===== Remove Row =====
+function removeRow(section, id) {
+  state[section] = state[section].filter(r => r.id !== id);
+  renderRows(section);
+  updatePreview(section);
+}
+
+// ===== Render Rows =====
+function renderRows(section) {
+  const container = document.getElementById('rows-' + section);
+  const emptyEl = document.getElementById('empty-' + section);
+  const rows = state[section];
+
+  if (rows.length === 0) {
+    container.innerHTML = '';
+    emptyEl.style.display = '';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+
+  container.innerHTML = rows.map(row => {
+    const types = getTypeOptions(section);
+    const typeOpts = types.map(t =>
+      `<option value="${t.value}"${row.type === t.value ? ' selected' : ''}>${t.label}</option>`
+    ).join('');
+
+    const isComplex = row.type === 'object' || row.type === 'array';
+    const placeholder = isComplex
+      ? (row.type === 'object' ? '例: {"type":"text"}' : '例: ["\\n","stop"]')
+      : (row.type === 'boolean' ? 'true 或 false' : (row.type === 'null' ? '(无需输入)' : '值'));
+
+    return `
+      <div class="kv-row" data-row-id="${row.id}">
+        <input class="key-input" type="text" placeholder="键名" value="${escapeAttr(row.key)}"
+               oninput="updateRowField('${section}', ${row.id}, 'key', this.value)">
+        <input class="value-input" type="text" placeholder="${placeholder}" value="${escapeAttr(row.value)}"
+               oninput="updateRowField('${section}', ${row.id}, 'value', this.value)"
+               ${row.type === 'null' ? 'disabled' : ''}>
+        <select class="type-select" onchange="updateRowField('${section}', ${row.id}, 'type', this.value)">
+          ${typeOpts}
+        </select>
+        <button class="btn-delete" onclick="removeRow('${section}', ${row.id})" title="删除" aria-label="删除此参数">✕</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeAttr(str) {
+  return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ===== Update Field =====
+function updateRowField(section, id, field, value) {
+  const row = state[section].find(r => r.id === id);
+  if (!row) return;
+  row[field] = value;
+
+  // If type changed, re-render (to update placeholder, disabled state)
+  if (field === 'type') {
+    if (value === 'null') row.value = '';
+    if (value === 'boolean' && row.value !== 'true' && row.value !== 'false') row.value = 'true';
+    renderRows(section);
+  }
+
+  updatePreview(section);
+}
+
+// ===== Build JSON Object =====
+function buildObject(section) {
+  const obj = {};
+  for (const row of state[section]) {
+    if (!row.key.trim()) continue;
+    obj[row.key] = parseValue(row);
+  }
+  return obj;
+}
+
+function parseValue(row) {
+  switch (row.type) {
+    case 'string':
+      return row.value;
+    case 'number': {
+      const n = Number(row.value);
+      return isNaN(n) ? 0 : n;
+    }
+    case 'boolean':
+      return row.value === 'true';
+    case 'null':
+      return null;
+    case 'object':
+    case 'array':
+      try { return JSON.parse(row.value); }
+      catch { return row.type === 'object' ? {} : []; }
+  }
+}
+
+// ===== Syntax Highlight =====
+function highlightJSON(json) {
+  // Escape HTML first
+  let str = json
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Highlight parts
+  str = str.replace(
+    /("(?:\\.|[^"\\])*")\s*:/g,
+    '<span class="json-key">$1</span>:'
+  );
+  str = str.replace(
+    /:\s*("(?:\\.|[^"\\])*")/g,
+    (m, val) => ': <span class="json-string">' + val + '</span>'
+  );
+  // Strings in arrays (not preceded by colon)
+  str = str.replace(
+    /(?<=[\[,]\s*)("(?:\\.|[^"\\])*")/g,
+    '<span class="json-string">$1</span>'
+  );
+  str = str.replace(
+    /\b(-?\d+\.?\d*(?:[eE][+-]?\d+)?)\b/g,
+    '<span class="json-number">$1</span>'
+  );
+  str = str.replace(
+    /\b(true|false)\b/g,
+    '<span class="json-bool">$1</span>'
+  );
+  str = str.replace(
+    /\bnull\b/g,
+    '<span class="json-null">null</span>'
+  );
+
+  return str;
+}
+
+// ===== Update Preview =====
+function updatePreview(section) {
+  const previewEl = document.getElementById('preview-' + section);
+  const obj = buildObject(section);
+  const json = JSON.stringify(obj, null, 2);
+  previewEl.innerHTML = highlightJSON(json);
+}
+
+// ===== Copy JSON =====
+async function copyJSON(section) {
+  const obj = buildObject(section);
+  const json = JSON.stringify(obj, null, 2);
+
+  try {
+    await navigator.clipboard.writeText(json);
+  } catch {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = json;
+    ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+
+  // Button feedback
+  const btn = document.querySelector(`#panel-${section} .btn-copy`);
+  btn.classList.add('copied');
+  btn.innerHTML = '✓ 已复制';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '📋 复制 JSON';
+  }, 1800);
+
+  showToast('✅', 'JSON 已复制到剪贴板');
+}
+
+// ===== Toast =====
+function showToast(icon, msg) {
+  const toast = document.getElementById('toast');
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${msg}`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ===== Templates =====
+function addTemplate(key, value, type) {
+  // Check if key already exists
+  const existing = state.main.find(r => r.key === key);
+  if (existing) {
+    showToast('⚠️', `参数 "${key}" 已存在`);
+    // Focus existing row
+    const el = document.querySelector(`[data-row-id="${existing.id}"] .value-input`);
+    if (el) { el.focus(); el.select(); }
+    return;
+  }
+  addRow('main', key, value, type);
+  showToast('✅', `已添加 "${key}" 参数`);
+}
+
+// ===== Tooltip Logic =====
+const jsTooltip = document.getElementById('js-tooltip');
+let tooltipTimeout;
+
+document.querySelectorAll('.btn-template[data-tooltip]').forEach(btn => {
+  btn.addEventListener('mouseenter', () => {
+    const text = btn.getAttribute('data-tooltip');
+    if (!text) return;
+    
+    jsTooltip.textContent = text;
+    jsTooltip.classList.add('show');
+    
+    // Position it
+    const rect = btn.getBoundingClientRect();
+    jsTooltip.style.left = (rect.left + rect.width / 2) + 'px';
+    jsTooltip.style.top = rect.top + 'px';
+    
+    // Auto hide after 3 seconds
+    clearTimeout(tooltipTimeout);
+    tooltipTimeout = setTimeout(() => {
+      jsTooltip.classList.remove('show');
+    }, 3000);
+  });
+  
+  btn.addEventListener('mouseleave', () => {
+    jsTooltip.classList.remove('show');
+    clearTimeout(tooltipTimeout);
+  });
+  
+  // Hide on click as well so it doesn't stay if user clicks and moves
+  btn.addEventListener('click', () => {
+    jsTooltip.classList.remove('show');
+    clearTimeout(tooltipTimeout);
+  });
+});
+
+// ===== Initialize =====
+['main'].forEach(section => {
+  renderRows(section);
+  updatePreview(section);
+});
+</script>
+
+</body>
+</html>
