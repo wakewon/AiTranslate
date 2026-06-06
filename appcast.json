@@ -4,10 +4,10 @@
     {
       "version": "1.0.0",
       "desc": "AiTranslate 1.0.0 首发正式版\n- 支持主流大模型标准格式\n- 自由配置 Base URL 与端点\n- 支持额外高级参数注入",
-      "sha256": "1e87d7f740186f08a03e7cb126b8ac8a69250d124f3b3ad59bdc0af6a77adb1c",
+      "sha256": "64b7fc06bba940d2d18d80ddb8f57fe966d06d330fc88c2d20edc2f4a841ce47",
       "url": "https://github.com/wakewon/AiTranslate/releases/download/v1.0.0/AiTranslate-v1.0.0.bobplugin",
       "minBobVersion": "1.8.0",
-      "timestamp": 1780731176000
+      "timestamp": 1780732540000
     }
   ]
 }

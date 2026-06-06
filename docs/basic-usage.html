@@ -80,7 +80,23 @@ body { background: var(--bg-primary); color: var(--text-primary); min-height: 10
 .card li { margin-bottom: 8px; }
 code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
 pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
-pre code { padding: 0; background: transparent; }
+.code-wrapper pre { margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; line-height: 1.5; overflow-x: auto; }
+.code-wrapper code { padding: 0; background: transparent; }
+
+/* Prompt Generator */
+.pg-form { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+.pg-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+.pg-field label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+.pg-field input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; }
+.pg-field input:focus { outline: none; border-color: var(--accent-1); }
+.pg-btn { padding: 10px 20px; background: var(--accent-1); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; height: 41px; white-space: nowrap; }
+.pg-btn:hover { opacity: 0.9; }
+
+@media (max-width: 600px) {
+  .pg-form { flex-direction: column; align-items: stretch; }
+  .pg-btn { height: 44px; }
+}
+
 .code-wrapper { position: relative; margin-top: 12px; }
 .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
 .copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
@@ -128,7 +144,7 @@ a:hover { text-decoration: underline; }
       <li>在 Bob 的设置 -> 服务 -> 文本翻译中，点击左下角 <code>+</code> 号，添加 <strong>Ai 翻译</strong>。</li>
       <li>根据您的服务商，在插件设置中选择对应的 <strong>请求格式</strong>（通常默认的 OpenAI Chat 就能通吃 90% 的服务商）。</li>
       <li>填入您的 <strong>Base URL</strong> 和 <strong>API Key</strong>。注意：此插件的请求格式默认自带了版本和端点信息（如 <code>/v1/chat/completions</code>）。除非有特殊需求需要手动指定 Endpoint，一般 Base URL 填写根地址即可。</li>
-      <li>填入您要调用的 <strong>模型名称 (Model)</strong>。注意：这几乎是必填项，且必须填入服务商 API 文档中规定的具体模型参数名（例如 <code>deepseek-chat</code>、<code>glm-4-flash</code> 等）。</li>
+      <li>填入您要调用的 <strong>模型名称 (Model)</strong>。注意：这几乎是必填项，且必须填入服务商 API 文档中规定的具体模型参数名（例如 <code>deepseek-v4-flash</code>、<code>glm-4-flash</code> 等）。</li>
       <li>(可选) 您可以打开<a href="../tools/param-builder.html">高级参数构建工具</a>生成个性化参数（如关闭思考等）并粘贴到插件底部的“额外请求体”中。更多进阶玩法请访问<a href="./index.html">文档中心</a>阅读。</li>
     </ol>
   </div>
@@ -180,15 +196,22 @@ a:hover { text-decoration: underline; }
     <h2>3. 通过 AI 助手获取配置方案</h2>
     <p>如果您想接入某个尚未列出的服务商（例如小米的大模型、百度千帆等），您可以直接将以下提示词复制并发送给 ChatGPT、Claude 或 DeepSeek，让 AI 助手为您提供准确的配置参数：</p>
 
-    <div class="code-wrapper">
-      <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
-      <pre><code>我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+    <div class="pg-form">
+      <div class="pg-field">
+        <label>服务商名称</label>
+        <input type="text" id="basicProvider" placeholder="例如：小米、百度千帆">
+      </div>
+      <div class="pg-field">
+        <label>模型名称</label>
+        <input type="text" id="basicModel" placeholder="例如：小米大模型、ERNIE-4.0">
+      </div>
+      <button class="pg-btn" onclick="generateBasicPrompt()">生成提示词</button>
+    </div>
 
-请查阅【在此填入服务商和模型名称，如：小米大模型】的最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这四个配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
-1. 请求格式（必须从这 7 种中选择：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容）
-2. Base URL（服务商 API 的根地址，例如 https://api.example.com。注意：不得拼接任何具体的后续路由路径）
-3. 自定义端点（如果该 API 路径不符合标准格式，请给出具体的路由路径，如 `/api/paas/v4/chat/completions` 以覆盖默认值；如果是标准的 `/v1/chat/completions` 等格式，请直接告诉我留空）
-4. 模型名称（用于 API 请求的精准 `model` 参数值，例如 `deepseek-chat`）</code></pre>
+    <div class="code-wrapper">
+      <button class="copy-btn" id="basicCopyBtn" style="display: none;" onclick="copyPrompt(this)">复制提示词</button>
+      <pre><code id="basicPromptOutput" style="color: var(--text-secondary);">请在上方输入服务商和模型名称，然后点击“生成提示词”。</code></pre>
+
     </div>
   </div>
 
@@ -214,6 +237,29 @@ try {
   if (saved) setTheme(saved);
   else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
 } catch(e) {}
+
+function generateBasicPrompt() {
+  const provider = document.getElementById('basicProvider').value.trim();
+  const model = document.getElementById('basicModel').value.trim();
+  const output = document.getElementById('basicPromptOutput');
+  const copyBtn = document.getElementById('basicCopyBtn');
+  
+  if (!provider || !model) {
+    alert('请填写服务商名称和模型名称！');
+    return;
+  }
+  
+  output.style.color = '';
+  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+
+请查阅【${provider}】的【${model}】最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这四个配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
+1. 请求格式（必须从这 7 种中选择：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容）
+2. Base URL（服务商 API 的根地址，例如 https://api.example.com。注意：不得拼接任何具体的后续路由路径）
+3. 自定义端点（如果该 API 路径不符合标准格式，请给出具体的路由路径，如 \`/api/paas/v4/chat/completions\` 以覆盖默认值；如果是标准的 \`/v1/chat/completions\` 等格式，请直接告诉我留空）
+4. 模型名称（用于 API 请求的精准 \`model\` 参数值，例如 \`deepseek-v4-flash\`）`;
+
+  copyBtn.style.display = 'block';
+}
 
 function copyPrompt(btn) {
   const pre = btn.nextElementSibling;

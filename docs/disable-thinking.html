@@ -73,15 +73,29 @@ body { background: var(--bg-primary); color: var(--text-primary); min-height: 10
 .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); line-height: 1.6; }
 .card h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-1); }
 .card p { margin-bottom: 12px; }
-code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
 pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
-pre code { padding: 0; background: transparent; }
+.code-wrapper pre { margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; line-height: 1.5; overflow-x: auto; }
+.code-wrapper code { padding: 0; background: transparent; }
 .code-wrapper { position: relative; margin-top: 12px; }
 .copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
 .copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
 .copy-btn.success { color: #34C759; border-color: #34C759; background: rgba(52, 199, 89, 0.1); }
 a { color: var(--accent-1); text-decoration: none; }
 a:hover { text-decoration: underline; }
+
+/* Prompt Generator */
+.pg-form { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
+.pg-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+.pg-field label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
+.pg-field input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; }
+.pg-field input:focus { outline: none; border-color: var(--accent-1); }
+.pg-btn { padding: 10px 20px; background: var(--accent-1); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; height: 41px; white-space: nowrap; }
+.pg-btn:hover { opacity: 0.9; }
+
+@media (max-width: 600px) {
+  .pg-form { flex-direction: column; align-items: stretch; }
+  .pg-btn { height: 44px; }
+}
 
 .table-container { overflow-x: auto; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
 table { width: 100%; border-collapse: collapse; text-align: left; }
@@ -170,21 +184,21 @@ tr:last-child td { border-bottom: none; }
     <h2>3. 通过 AI 助手获取配置方案</h2>
     <p>如果您使用了一个尚未列出的全新推理模型（或者服务商的 API 发生了更新），不确定该如何关闭深度思考，您可以直接将以下提示词发送给 AI（如 ChatGPT / Claude），让它查阅最新的官方文档并为您提供准确的配置参数：</p>
 
+    <div class="pg-form">
+      <div class="pg-field">
+        <label>服务商名称</label>
+        <input type="text" id="dtProvider" placeholder="例如：硅基流动、火山引擎">
+      </div>
+      <div class="pg-field">
+        <label>模型名称</label>
+        <input type="text" id="dtModel" placeholder="例如：DeepSeek-R1、ep-12345">
+      </div>
+      <button class="pg-btn" onclick="generateDtPrompt()">生成提示词</button>
+    </div>
+
     <div class="code-wrapper">
-      <button class="copy-btn" onclick="copyPrompt(this)">复制提示词</button>
-      <pre><code>我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
-
-我现在接入了【在此填入服务商和模型名称，例如：硅基流动的 DeepSeek-R1】。
-该插件允许向大模型服务端注入自定义的 JSON 请求体（Extra Body）来控制高级参数。请查阅其最新的官方 API 文档，告诉我如果要强制关闭或最小化该模型的“深度思考/思维链（Reasoning）”功能以加快响应速度，我应该在发出的 JSON 请求体中添加什么参数？
-
-请注意：不要泛泛而谈，请直接给出一个准确的 JSON 对象代码示例。例如，如果该模型兼容 OpenAI 的 reasoning_effort，你应当输出：
-```json
-{
-  "reasoning_effort": "none"
-}
-```
-
-同时，请附上你参考的官方文档链接以供核查。</code></pre>
+      <button class="copy-btn" id="dtCopyBtn" style="display: none;" onclick="copyPrompt(this)">复制提示词</button>
+      <pre><code id="dtPromptOutput" style="color: var(--text-secondary);">请在上方输入服务商和模型名称，然后点击“生成提示词”。</code></pre>
     </div>
   </div>
 
@@ -210,6 +224,35 @@ try {
   if (saved) setTheme(saved);
   else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
 } catch(e) {}
+
+function generateDtPrompt() {
+  const provider = document.getElementById('dtProvider').value.trim();
+  const model = document.getElementById('dtModel').value.trim();
+  const output = document.getElementById('dtPromptOutput');
+  const copyBtn = document.getElementById('dtCopyBtn');
+  
+  if (!provider || !model) {
+    alert('请填写服务商名称和模型名称！');
+    return;
+  }
+  
+  output.style.color = '';
+  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+
+我现在接入了【${provider}】的【${model}】。
+该插件允许向大模型服务端注入自定义的 JSON 请求体（Extra Body）来控制高级参数。请查阅其最新的官方 API 文档，告诉我如果要强制关闭或最小化该模型的“深度思考/思维链（Reasoning）”功能以加快响应速度，我应该在发出的 JSON 请求体中添加什么参数？
+
+请注意：不要泛泛而谈，请直接给出一个准确的 JSON 对象代码示例。例如，如果该模型兼容 OpenAI 的 reasoning_effort，你应当输出：
+\`\`\`json
+{
+  "reasoning_effort": "none"
+}
+\`\`\`
+
+同时，请附上你参考的官方文档链接以供核查。`;
+
+  copyBtn.style.display = 'block';
+}
 
 function copyPrompt(btn) {
   const pre = btn.nextElementSibling;

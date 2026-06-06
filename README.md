@@ -20,16 +20,26 @@
 2. 双击安装到 Bob
 3. 在 Bob 偏好设置中配置插件
 
+## 📚 文档中心
+
+我们提供了详尽的官方文档，包含基础配置教程、如何关闭推理模型深度思考等进阶玩法。文档内还内置了**交互式 AI 提示词生成器**，只需输入你的服务商和模型名称，即可一键生成给大模型（如 ChatGPT / Claude）的提示词，让 AI 直接为你写好配置参数，彻底告别配错参数的烦恼！
+
+👉 **[在线访问文档中心](https://wakewon.github.io/AiTranslate/docs/index.html)**
+
 ## ⚙️ 配置示例
 
 ### OpenAI / ChatGPT
 
 | 选项 | 值 |
 |---|---|
-| 请求格式 | OpenAI Chat Completions（通用兼容） |
+| 请求格式 | OpenAI Responses API |
 | Base URL | `https://api.openai.com` |
 | API Key | `sk-xxxx` |
-| 模型 | `gpt-4o` |
+| 模型 | `gpt-5.5` |
+
+*注：推荐使用 Responses API 格式，便于在“额外请求体”中注入 `{"reasoning_effort": "none"}` 等高级参数来调节或关闭思考强度。*
+
+
 
 ### Anthropic Claude
 
@@ -38,7 +48,7 @@
 | 请求格式 | Anthropic Claude Messages |
 | Base URL | `https://api.anthropic.com` |
 | API Key | `sk-ant-xxxx` |
-| 模型 | `claude-sonnet-4-5` |
+| 模型 | `claude-opus-4-8` |
 
 ### Google Gemini
 
@@ -47,7 +57,7 @@
 | 请求格式 | Gemini generateContent |
 | Base URL | `https://generativelanguage.googleapis.com` |
 | API Key | `AIzaSyxxxx` |
-| 模型 | `gemini-2.5-flash` |
+| 模型 | `gemini-3.5-flash` |
 
 ### DeepSeek
 
@@ -56,7 +66,7 @@
 | 请求格式 | OpenAI Chat Completions（通用兼容） |
 | Base URL | `https://api.deepseek.com` |
 | API Key | `sk-xxxx` |
-| 模型 | `deepseek-chat` |
+| 模型 | `deepseek-v4-flash` |
 
 ### SiliconFlow
 
@@ -65,7 +75,19 @@
 | 请求格式 | OpenAI Chat Completions（通用兼容） |
 | Base URL | `https://api.siliconflow.cn` |
 | API Key | `sk-xxxx` |
-| 模型 | `Qwen/Qwen2.5-72B-Instruct` |
+| 模型 | `deepseek-ai/deepseek-v4-flash` |
+
+### 智谱 GLM
+
+| 选项 | 值 |
+|---|---|
+| 请求格式 | OpenAI Chat Completions（通用兼容） |
+| Base URL | `https://open.bigmodel.cn` |
+| 自定义端点 | `/api/paas/v4/chat/completions` |
+| API Key | `您的智谱 API Key` |
+| 模型 | `glm-4-flash` |
+
+*注：智谱的 API 路径比较特殊，必须填写“自定义端点”进行覆盖。*
 
 ### Ollama（本地）
 
