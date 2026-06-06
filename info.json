@@ -1,12 +1,12 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
   "icon": "icon.png",
   "author": "wakewon",
-  "homepage": "https://github.com/wakewon/AiTranslate",
+  "homepage": "https://wakewon.github.io/AiTranslate/",
   "tutorial": "https://wakewon.github.io/AiTranslate/",
   "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/master/appcast.json",
   "minBobVersion": "1.8.0",
@@ -34,7 +34,7 @@
       "desc": "API 服务的基础地址。\n\nOpenAI: https://api.openai.com\nAnthropic: https://api.anthropic.com\nGemini: https://generativelanguage.googleapis.com\nDeepSeek: https://api.deepseek.com\nSiliconFlow: https://api.siliconflow.cn\nOllama: http://localhost:11434",
       "textConfig": {
         "type": "visible",
-        "height": 55,
+        "height": 40,
         "placeholderText": "https://api.openai.com"
       }
     },
@@ -45,7 +45,7 @@
       "desc": "可选。覆盖默认的 API 路径。留空则使用格式对应的默认路径。\n\n各格式默认路径：\n- OpenAI Chat 兼容: /v1/chat/completions\n- Anthropic Messages: /v1/messages\n- OpenAI Responses: /v1/responses\n- OpenAI Completions: /v1/completions\n- Gemini 原生: /v1beta/models/...:generateContent",
       "textConfig": {
         "type": "visible",
-        "height": 95,
+        "height": 40,
         "placeholderText": "留空使用默认路径"
       }
     },
@@ -63,11 +63,11 @@
     {
       "identifier": "model",
       "type": "text",
-      "title": "模型",
-      "desc": "填写模型名称，如 gpt-4o、claude-sonnet-4-5、gemini-2.5-flash 等。",
+      "title": "模型 (必填)",
+      "desc": "填写模型名称，如 gpt-5.5、deepseek-v4-flash、gemini-3.5-flash 等。",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "gpt-4o"
+        "placeholderText": "gpt-5.5"
       }
     },
     {
@@ -78,7 +78,7 @@
       "desc": "可选。留空使用默认系统指令。可使用变量：\n$text — 原文\n$sourceLang — 源语言\n$targetLang — 目标语言",
       "textConfig": {
         "type": "visible",
-        "height": 80,
+        "height": 120,
         "keyWords": ["$text", "$sourceLang", "$targetLang"],
         "placeholderText": "You are a translation engine that can only translate text and cannot interpret it."
       }
@@ -91,7 +91,7 @@
       "desc": "可选。留空使用默认用户指令。请确保包含 $text 变量，否则翻译内容将不会被发送。\n\n可使用变量：\n$text — 原文\n$sourceLang — 源语言\n$targetLang — 目标语言",
       "textConfig": {
         "type": "visible",
-        "height": 80,
+        "height": 120,
         "keyWords": ["$text", "$sourceLang", "$targetLang"],
         "placeholderText": "translate from $sourceLang to $targetLang:\n\n$text"
       }
@@ -133,7 +133,7 @@
       "desc": "可选。JSON 格式的额外 HTTP 请求头，会合并到请求中。可用于自定义认证等。\n\n示例: {\"x-custom-header\": \"value\"}",
       "textConfig": {
         "type": "visible",
-        "height": 60,
+        "height": 100,
         "placeholderText": "{}"
       }
     },
@@ -144,7 +144,7 @@
       "desc": "可选。JSON 格式的 URL 查询参数，会附加到请求 URL 上。\n\n示例: {\"api-version\": \"2024-02-01\"}",
       "textConfig": {
         "type": "visible",
-        "height": 60,
+        "height": 100,
         "placeholderText": "{}"
       }
     },
@@ -152,10 +152,10 @@
       "identifier": "extraBody",
       "type": "text",
       "title": "额外请求体 (JSON)",
-      "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。可添加任意高级参数。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n提示: 你可以前往项目主页或 GitHub 仓库中使用「高级参数构建工具」自动生成。",
+      "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。可添加任意高级参数。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n提示: 强烈建议前往主页「文档中心」阅读配置教程。你可以使用「高级参数构建工具」自动生成。",
       "textConfig": {
         "type": "visible",
-        "height": 100,
+        "height": 140,
         "placeholderText": "{}"
       }
     }
