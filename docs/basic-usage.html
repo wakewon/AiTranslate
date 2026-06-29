@@ -250,21 +250,35 @@ function generateBasicPrompt() {
   }
   
   output.style.color = '';
-  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.wwang.de/AiTranslate/）。
 
-请查阅【${provider}】的【${model}】最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这些配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
-1. 请求格式（必须从这 7 种中选择：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容）
-2. Base URL（服务商 API 的根地址，例如 https://api.example.com。注意：不得拼接任何具体的后续路由路径）
-3. 自定义端点（如果该 API 路径不符合标准格式，请给出具体的路由路径，如 \`/api/paas/v4/chat/completions\` 以覆盖默认值；如果是标准的 \`/v1/chat/completions\` 等格式，请直接告诉我留空）
-4. 模型名称（用于 API 请求的精准 \`model\` 参数值，例如 \`deepseek-v4-flash\`）
-5. [进阶] 关闭深度思考（可选）：如果该模型支持（或默认开启了）深度思考/推理功能，请查阅其最新的官方 API 文档，并直接给出一个准确的 JSON 对象代码示例，告诉我如果要强制关闭或最小化该模型的思考过程以加快翻译速度，我应该在发出的 JSON 请求体（Extra Body）中添加什么参数？
+请查阅【${provider}】的【${model}】最新 API 开发者文档，并严格按照以下插件的配置约定，告诉我这 4 项基本配置分别应当填什么：
+
+【插件的核心配置约定】
+1. 请求格式：必须从以下 7 种中严格选择其一：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容。
+2. Base URL：服务商 API 的根地址，例如 \`https://api.example.com\`。注意：不得拼接任何具体的后续路由路径（如 /v1 或 /v1/chat/completions）。
+3. 自定义端点：
+   - 插件默认会在 Base URL 后自动拼接各请求格式的标准路径，常见默认值如下：
+     * OpenAI Chat Completions 默认拼接 \`/v1/chat/completions\`
+     * Anthropic Claude Messages 默认拼接 \`/v1/messages\`
+     * Gemini generateContent 默认拼接 \`/v1beta/models/{model}:generateContent\`
+   - 因此，如果该 API 的官方路径与所选格式的默认拼接结果完全一致，此处【可以留空】。
+   - 只有当该 API 路径极其特殊，不符合默认拼接规则时，才需要给出具体的完整路由路径（例如 \`/api/paas/v4/chat/completions\`）来覆盖默认值。请你结合你给出的 Base URL，明确告诉我它与默认端点拼接后是否正确；如果不正确，请提供正确的自定义端点。
+4. 模型名称：用于 API 请求的精准 \`model\` 参数值，例如 \`deepseek-v4-flash\`。
+
+5. [进阶] 关闭深度思考（可选）：如果该模型支持（或默认开启了）深度思考/推理功能，请直接给出一个准确的 JSON 对象代码示例，告诉我如果要强制关闭或最小化思考过程以加快翻译速度，我应该在发出的 JSON 请求体（Extra Body）中添加什么参数？
 例如，如果该模型兼容 OpenAI 的 reasoning_effort，你需要直接提供如下格式的 JSON 示例：
 \`\`\`json
 {
   "reasoning_effort": "none"
 }
 \`\`\`
-关于其他类型的参数格式要求也可参考此文档：https://wakewon.github.io/AiTranslate/docs/disable-thinking.html`;
+（提醒：部分新模型（如 gpt-5.5）可能在传统的 Chat Completions API 下不支持该参数，必须切换到新版有状态的 Responses API。如果你发现类似限制，请务必在回答中特别强调说明。）
+关于进阶参数格式的详细要求，可参考此文档：https://wakewon.wwang.de/AiTranslate/docs/disable-thinking.html
+
+【最终输出要求】
+1. 请详细解释你的判断依据，并附上你所参考的官方文档链接以供核查。
+2. 请使用纯文本和代码块（如 \`\`\`json 等）来组织你的回答，**绝对不要使用 Markdown 表格**来呈现任何配置结果或参数说明，这会导致我复制时代码格式错乱。`;
 
   copyBtn.style.display = 'block';
 }

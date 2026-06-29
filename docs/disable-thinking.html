@@ -163,7 +163,7 @@ tr:last-child td { border-bottom: none; }
           <tr>
             <td>OpenAI (gpt-5.5 / o1 / o3 等)</td>
             <td><code>{ "reasoning_effort": "none" }</code></td>
-            <td>标准 OpenAI 兼容参数。值可以设为 "none", "low", "medium", "high" 来调节思考深度。</td>
+            <td>OpenAI 官方新参数。值可以设为 "none", "low", "medium", "high" 来调节思考深度。<br><b>注意：</b>对于 gpt-5.5，必须使用新版 <b>Responses API</b>（/v1/responses）才能使该参数生效，使用传统的 Chat Completions API（/v1/chat/completions）调用会报错。</td>
           </tr>
           <tr>
             <td>通义千问 / 阿里云百炼</td>
@@ -237,7 +237,7 @@ function generateDtPrompt() {
   }
   
   output.style.color = '';
-  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
+  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.wwang.de/AiTranslate/）。
 
 我现在接入了【${provider}】的【${model}】。
 该插件允许向大模型服务端注入自定义的 JSON 请求体（Extra Body）来控制高级参数。请查阅其最新的官方 API 文档，告诉我如果要强制关闭或最小化该模型的“深度思考/思维链（Reasoning）”功能以加快响应速度，我应该在发出的 JSON 请求体中添加什么参数？
@@ -248,8 +248,11 @@ function generateDtPrompt() {
   "reasoning_effort": "none"
 }
 \`\`\`
+（提醒：部分新模型（如 gpt-5.5）可能在传统的 Chat Completions API 下不支持该参数，必须切换到新版有状态的 Responses API。如果你发现类似限制，请务必在回答中特别强调说明。）
 
-同时，请附上你参考的官方文档链接以供核查。`;
+【输出要求】
+1. 必须附上你参考的官方文档链接以供核查。
+2. 请使用纯文本和代码块来组织你的回答，**绝对不要使用 Markdown 表格**来呈现 JSON 示例或参数说明，这会导致我复制时代码格式错乱。`;
 
   copyBtn.style.display = 'block';
 }

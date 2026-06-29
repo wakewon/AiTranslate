@@ -24,7 +24,7 @@
 
 我们提供了详尽的官方文档，包含基础配置教程、如何关闭推理模型深度思考等进阶玩法。文档内还内置了**交互式 AI 提示词生成器**，只需输入你的服务商和模型名称，即可一键生成给大模型（如 ChatGPT / Claude）的提示词，让 AI 直接为你写好配置参数，彻底告别配错参数的烦恼！
 
-👉 **[在线访问文档中心](https://wakewon.github.io/AiTranslate/docs/index.html)**
+👉 **[在线访问文档中心](https://wakewon.wwang.de/AiTranslate/docs/index.html)**
 
 ## ⚙️ 配置示例
 
@@ -145,7 +145,7 @@ $text
 
 我们提供了一个图形化的参数构建工具，帮助你可视化地添加参数并一键生成 JSON 配置，免去手动拼接的烦恼。
 
-👉 **[在线访问参数构建工具](https://wakewon.github.io/AiTranslate/tools/param-builder.html)**
+👉 **[在线访问参数构建工具](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html)**
 
 ## 🚀 打包部署
 
