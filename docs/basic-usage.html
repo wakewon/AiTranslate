@@ -194,7 +194,7 @@ a:hover { text-decoration: underline; }
 
   <div class="card">
     <h2>3. 通过 AI 助手获取配置方案</h2>
-    <p>如果您想接入某个尚未列出的服务商（例如小米的大模型、百度千帆等），您可以直接将以下提示词复制并发送给 ChatGPT、Claude 或 DeepSeek，让 AI 助手为您提供准确的配置参数：</p>
+    <p>如果您想接入某个尚未列出的服务商（例如小米的大模型、百度千帆等），您可以直接将以下提示词复制并发送给 ChatGPT、Claude 或 DeepSeek，让 AI 助手为您提供准确的配置参数（作为进阶内容，还会顺便告诉您如何<a href="./disable-thinking.html">关闭深度思考</a>）：</p>
 
     <div class="pg-form">
       <div class="pg-field">
@@ -252,11 +252,19 @@ function generateBasicPrompt() {
   output.style.color = '';
   output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.github.io/AiTranslate/）。
 
-请查阅【${provider}】的【${model}】最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这四个配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
+请查阅【${provider}】的【${model}】最新 API 开发者文档，并严格按照以下插件参数定义，告诉我这些配置项分别应当填什么，并附上你所参考的官方文档链接以供核查：
 1. 请求格式（必须从这 7 种中选择：OpenAI Chat Completions（通用兼容） / OpenAI Responses API / OpenAI Legacy Completions / Anthropic Claude Messages / Anthropic OpenAI 兼容 / Gemini generateContent / Gemini OpenAI 兼容）
 2. Base URL（服务商 API 的根地址，例如 https://api.example.com。注意：不得拼接任何具体的后续路由路径）
 3. 自定义端点（如果该 API 路径不符合标准格式，请给出具体的路由路径，如 \`/api/paas/v4/chat/completions\` 以覆盖默认值；如果是标准的 \`/v1/chat/completions\` 等格式，请直接告诉我留空）
-4. 模型名称（用于 API 请求的精准 \`model\` 参数值，例如 \`deepseek-v4-flash\`）`;
+4. 模型名称（用于 API 请求的精准 \`model\` 参数值，例如 \`deepseek-v4-flash\`）
+5. [进阶] 关闭深度思考（可选）：如果该模型支持（或默认开启了）深度思考/推理功能，请查阅其最新的官方 API 文档，并直接给出一个准确的 JSON 对象代码示例，告诉我如果要强制关闭或最小化该模型的思考过程以加快翻译速度，我应该在发出的 JSON 请求体（Extra Body）中添加什么参数？
+例如，如果该模型兼容 OpenAI 的 reasoning_effort，你需要直接提供如下格式的 JSON 示例：
+\`\`\`json
+{
+  "reasoning_effort": "none"
+}
+\`\`\`
+关于其他类型的参数格式要求也可参考此文档：https://wakewon.github.io/AiTranslate/docs/disable-thinking.html`;
 
   copyBtn.style.display = 'block';
 }
