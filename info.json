@@ -1,15 +1,14 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
-  "icon": "icon.png",
   "author": "wakewon",
   "homepage": "https://wakewon.wwang.de/AiTranslate/",
   "tutorial": "https://wakewon.wwang.de/AiTranslate/",
   "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/master/appcast.json",
-  "minBobVersion": "1.8.0",
+  "minBobVersion": "1.15.3",
   "options": [
     {
       "identifier": "format",
@@ -18,34 +17,13 @@
       "defaultValue": "openai_chat",
       "desc": "选择 AI 服务的 API 请求格式。认证方式将根据格式自动设置。",
       "menuValues": [
-        {
-          "title": "OpenAI Chat Completions（通用兼容）",
-          "value": "openai_chat"
-        },
-        {
-          "title": "OpenAI Responses API",
-          "value": "openai_responses"
-        },
-        {
-          "title": "OpenAI Legacy Completions",
-          "value": "openai_completions"
-        },
-        {
-          "title": "Anthropic Claude Messages",
-          "value": "anthropic_messages"
-        },
-        {
-          "title": "Anthropic OpenAI 兼容",
-          "value": "anthropic_openai_chat"
-        },
-        {
-          "title": "Gemini generateContent",
-          "value": "gemini_generate_content"
-        },
-        {
-          "title": "Gemini OpenAI 兼容",
-          "value": "gemini_openai_chat"
-        }
+        { "title": "OpenAI Chat Completions（通用兼容）", "value": "openai_chat" },
+        { "title": "OpenAI Responses API", "value": "openai_responses" },
+        { "title": "OpenAI Legacy Completions", "value": "openai_completions" },
+        { "title": "Anthropic Claude Messages", "value": "anthropic_messages" },
+        { "title": "Anthropic OpenAI 兼容", "value": "anthropic_openai_chat" },
+        { "title": "Gemini generateContent", "value": "gemini_generate_content" },
+        { "title": "Gemini OpenAI 兼容", "value": "gemini_openai_chat" }
       ]
     },
     {
@@ -56,126 +34,30 @@
       "defaultValue": "default",
       "isKeyOption": true,
       "menuValues": [
-        {
-          "title": "默认图标",
-          "value": "default",
-          "defaultPluginIconIdentifier": "default"
-        },
-        {
-          "title": "OpenAI",
-          "value": "openai",
-          "defaultPluginIconIdentifier": "openai"
-        },
-        {
-          "title": "Gemini",
-          "value": "gemini",
-          "defaultPluginIconIdentifier": "gemini"
-        },
-        {
-          "title": "Claude",
-          "value": "claude",
-          "defaultPluginIconIdentifier": "claude"
-        },
-        {
-          "title": "Ollama",
-          "value": "ollama",
-          "defaultPluginIconIdentifier": "ollama"
-        },
-        {
-          "title": "通义千问",
-          "value": "qwen",
-          "defaultPluginIconIdentifier": "qwen"
-        },
-        {
-          "title": "文心一言",
-          "value": "ernie",
-          "defaultPluginIconIdentifier": "ernie"
-        },
-        {
-          "title": "豆包",
-          "value": "doubao",
-          "defaultPluginIconIdentifier": "doubao"
-        },
-        {
-          "title": "智谱 GLM",
-          "value": "zhipu",
-          "defaultPluginIconIdentifier": "zhipu"
-        },
-        {
-          "title": "DeepSeek",
-          "value": "deepseek",
-          "defaultPluginIconIdentifier": "deepseek"
-        },
-        {
-          "title": "混元",
-          "value": "hunyuan",
-          "defaultPluginIconIdentifier": "hunyuan"
-        },
-        {
-          "title": "零一万物",
-          "value": "01ai",
-          "defaultPluginIconIdentifier": "01ai"
-        },
-        {
-          "title": "硅基流动",
-          "value": "siliconflow",
-          "defaultPluginIconIdentifier": "siliconflow"
-        },
-        {
-          "title": "Groq",
-          "value": "groq",
-          "defaultPluginIconIdentifier": "groq"
-        },
-        {
-          "title": "Kimi",
-          "value": "kimi",
-          "defaultPluginIconIdentifier": "kimi"
-        },
-        {
-          "title": "Moonshot",
-          "value": "moonshot",
-          "defaultPluginIconIdentifier": "moonshot"
-        },
-        {
-          "title": "Grok",
-          "value": "grok",
-          "defaultPluginIconIdentifier": "grok"
-        },
-        {
-          "title": "xAI",
-          "value": "xai",
-          "defaultPluginIconIdentifier": "xai"
-        },
-        {
-          "title": "AIHubMix",
-          "value": "aihubmix",
-          "defaultPluginIconIdentifier": "aihubmix"
-        },
-        {
-          "title": "模力方舟",
-          "value": "modelark",
-          "defaultPluginIconIdentifier": "modelark"
-        },
-        {
-          "title": "OpenRouter",
-          "value": "openrouter",
-          "defaultPluginIconIdentifier": "openrouter"
-        },
-        {
-          "title": "LM Studio",
-          "value": "lmstudio",
-          "defaultPluginIconIdentifier": "lmstudio"
-        },
-        {
-          "title": "302.AI",
-          "value": "302ai",
-          "defaultPluginIconIdentifier": "302ai"
-        },
-        {
-          "title": "SophNet",
-          "value": "sophnet",
-          "defaultPluginIconIdentifier": "sophnet"
-        }
+        { "title": "默认图标", "value": "default", "defaultPluginIconIdentifier": "default" },
+        { "title": "OpenAI", "value": "openai", "defaultPluginIconIdentifier": "openai" },
+        { "title": "Gemini", "value": "gemini", "defaultPluginIconIdentifier": "gemini" },
+        { "title": "Claude", "value": "claude", "defaultPluginIconIdentifier": "claude" },
+        { "title": "Ollama", "value": "ollama", "defaultPluginIconIdentifier": "ollama" },
+        { "title": "通义千问", "value": "qwen", "defaultPluginIconIdentifier": "qwen" },
+        { "title": "文心一言", "value": "ernie", "defaultPluginIconIdentifier": "ernie" },
+        { "title": "豆包", "value": "doubao", "defaultPluginIconIdentifier": "doubao" },
+        { "title": "智谱 GLM", "value": "zhipu", "defaultPluginIconIdentifier": "zhipu" },
+        { "title": "DeepSeek", "value": "deepseek", "defaultPluginIconIdentifier": "deepseek" },
+        { "title": "混元", "value": "hunyuan", "defaultPluginIconIdentifier": "hunyuan" },
+        { "title": "零一万物", "value": "01ai", "defaultPluginIconIdentifier": "01ai" },
+        { "title": "硅基流动", "value": "siliconflow", "defaultPluginIconIdentifier": "siliconflow" },
+        { "title": "Groq", "value": "groq", "defaultPluginIconIdentifier": "groq" },
+        { "title": "Kimi", "value": "kimi", "defaultPluginIconIdentifier": "kimi" },
+        { "title": "Moonshot", "value": "moonshot", "defaultPluginIconIdentifier": "moonshot" },
+        { "title": "Grok", "value": "grok", "defaultPluginIconIdentifier": "grok" },
+        { "title": "xAI", "value": "xai", "defaultPluginIconIdentifier": "xai" },
+        { "title": "AIHubMix", "value": "aihubmix", "defaultPluginIconIdentifier": "aihubmix" },
+        { "title": "模力方舟", "value": "modelark", "defaultPluginIconIdentifier": "modelark" },
+        { "title": "OpenRouter", "value": "openrouter", "defaultPluginIconIdentifier": "openrouter" },
+        { "title": "LM Studio", "value": "lmstudio", "defaultPluginIconIdentifier": "lmstudio" },
+        { "title": "302.AI", "value": "302ai", "defaultPluginIconIdentifier": "302ai" },
+        { "title": "SophNet", "value": "sophnet", "defaultPluginIconIdentifier": "sophnet" }
       ]
     },
     {
@@ -183,43 +65,28 @@
       "type": "text",
       "title": "Base URL",
       "desc": "API 服务的基础地址。\n\nOpenAI: https://api.openai.com\nAnthropic: https://api.anthropic.com\nGemini: https://generativelanguage.googleapis.com\nDeepSeek: https://api.deepseek.com\nSiliconFlow: https://api.siliconflow.cn\nOllama: http://localhost:11434",
-      "textConfig": {
-        "type": "visible",
-        "height": 40,
-        "placeholderText": "https://api.openai.com"
-      }
+      "textConfig": { "type": "visible", "height": 40, "placeholderText": "https://api.openai.com" }
     },
     {
       "identifier": "endpointOverride",
       "type": "text",
       "title": "端点路径覆盖",
       "desc": "可选。覆盖默认的 API 路径。留空则使用格式对应的默认路径。\n\n各格式默认路径：\n- OpenAI Chat 兼容: /v1/chat/completions\n- Anthropic Messages: /v1/messages\n- OpenAI Responses: /v1/responses\n- OpenAI Completions: /v1/completions\n- Gemini 原生: /v1beta/models/...:generateContent",
-      "textConfig": {
-        "type": "visible",
-        "height": 40,
-        "placeholderText": "留空使用默认路径"
-      }
+      "textConfig": { "type": "visible", "height": 40, "placeholderText": "留空使用默认路径" }
     },
     {
       "identifier": "apiKey",
       "type": "text",
       "title": "API Key",
       "desc": "必填项。支持英文逗号分隔多个 Key 实现负载均衡。",
-      "textConfig": {
-        "type": "secure",
-        "height": 40,
-        "placeholderText": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-      }
+      "textConfig": { "type": "secure", "height": 40, "placeholderText": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" }
     },
     {
       "identifier": "model",
       "type": "text",
       "title": "模型 (必填)",
       "desc": "填写模型名称，如 gpt-5.5、deepseek-v4-flash、gemini-3.5-flash 等。",
-      "textConfig": {
-        "type": "visible",
-        "placeholderText": "gpt-5.5"
-      }
+      "textConfig": { "type": "visible", "placeholderText": "gpt-5.5" }
     },
     {
       "identifier": "customSystemPrompt",
@@ -230,11 +97,7 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": [
-          "$text",
-          "$sourceLang",
-          "$targetLang"
-        ],
+        "keyWords": ["$text", "$sourceLang", "$targetLang"],
         "placeholderText": "You are a translation engine that can only translate text and cannot interpret it."
       }
     },
@@ -247,11 +110,7 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": [
-          "$text",
-          "$sourceLang",
-          "$targetLang"
-        ],
+        "keyWords": ["$text", "$sourceLang", "$targetLang"],
         "placeholderText": "translate from $sourceLang to $targetLang:\n\n$text"
       }
     },
@@ -261,14 +120,8 @@
       "title": "流式输出",
       "defaultValue": "enable",
       "menuValues": [
-        {
-          "title": "开启",
-          "value": "enable"
-        },
-        {
-          "title": "关闭",
-          "value": "disable"
-        }
+        { "title": "开启", "value": "enable" },
+        { "title": "关闭", "value": "disable" }
       ]
     },
     {
@@ -276,175 +129,61 @@
       "type": "text",
       "title": "最大输出 Token",
       "desc": "可选。限制输出长度，留空则使用模型默认值。",
-      "textConfig": {
-        "type": "visible",
-        "placeholderText": "留空使用默认值"
-      }
+      "textConfig": { "type": "visible", "placeholderText": "留空使用默认值" }
     },
     {
       "identifier": "temperature",
       "type": "text",
       "title": "温度",
       "desc": "可选。控制输出的随机性，值越低翻译越稳定。留空则不发送此参数。",
-      "textConfig": {
-        "type": "visible",
-        "placeholderText": "例如 0.2"
-      }
+      "textConfig": { "type": "visible", "placeholderText": "例如 0.2" }
     },
     {
       "identifier": "extraHeaders",
       "type": "text",
       "title": "额外请求头 (JSON)",
       "desc": "可选。JSON 格式的额外 HTTP 请求头，会合并到请求中。可用于自定义认证等。\n\n示例: {\"x-custom-header\": \"value\"}",
-      "textConfig": {
-        "type": "visible",
-        "height": 100,
-        "placeholderText": "{}"
-      }
+      "textConfig": { "type": "visible", "height": 100, "placeholderText": "{}" }
     },
     {
       "identifier": "extraQuery",
       "type": "text",
       "title": "额外查询参数 (JSON)",
       "desc": "可选。JSON 格式的 URL 查询参数，会附加到请求 URL 上。\n\n示例: {\"api-version\": \"2024-02-01\"}",
-      "textConfig": {
-        "type": "visible",
-        "height": 100,
-        "placeholderText": "{}"
-      }
+      "textConfig": { "type": "visible", "height": 100, "placeholderText": "{}" }
     },
     {
       "identifier": "extraBody",
       "type": "text",
       "title": "额外请求体 (JSON)",
       "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。可添加任意高级参数。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n提示: 强烈建议前往主页「文档中心」阅读配置教程。你可以使用「高级参数构建工具」自动生成。",
-      "textConfig": {
-        "type": "visible",
-        "height": 140,
-        "placeholderText": "{}"
-      }
+      "textConfig": { "type": "visible", "height": 140, "placeholderText": "{}" }
     }
   ],
   "icons": [
-    {
-      "identifier": "default",
-      "type": "file",
-      "filePath": "icon.png"
-    },
-    {
-      "identifier": "openai",
-      "type": "builtIn",
-      "builtInId": "124"
-    },
-    {
-      "identifier": "gemini",
-      "type": "builtIn",
-      "builtInId": "127"
-    },
-    {
-      "identifier": "claude",
-      "type": "builtIn",
-      "builtInId": "128"
-    },
-    {
-      "identifier": "ollama",
-      "type": "builtIn",
-      "builtInId": "129"
-    },
-    {
-      "identifier": "qwen",
-      "type": "builtIn",
-      "builtInId": "130"
-    },
-    {
-      "identifier": "ernie",
-      "type": "builtIn",
-      "builtInId": "131"
-    },
-    {
-      "identifier": "doubao",
-      "type": "builtIn",
-      "builtInId": "132"
-    },
-    {
-      "identifier": "zhipu",
-      "type": "builtIn",
-      "builtInId": "133"
-    },
-    {
-      "identifier": "deepseek",
-      "type": "builtIn",
-      "builtInId": "134"
-    },
-    {
-      "identifier": "hunyuan",
-      "type": "builtIn",
-      "builtInId": "135"
-    },
-    {
-      "identifier": "01ai",
-      "type": "builtIn",
-      "builtInId": "136"
-    },
-    {
-      "identifier": "siliconflow",
-      "type": "builtIn",
-      "builtInId": "137"
-    },
-    {
-      "identifier": "groq",
-      "type": "builtIn",
-      "builtInId": "138"
-    },
-    {
-      "identifier": "kimi",
-      "type": "builtIn",
-      "builtInId": "139"
-    },
-    {
-      "identifier": "moonshot",
-      "type": "builtIn",
-      "builtInId": "140"
-    },
-    {
-      "identifier": "grok",
-      "type": "builtIn",
-      "builtInId": "141"
-    },
-    {
-      "identifier": "xai",
-      "type": "builtIn",
-      "builtInId": "142"
-    },
-    {
-      "identifier": "aihubmix",
-      "type": "builtIn",
-      "builtInId": "143"
-    },
-    {
-      "identifier": "modelark",
-      "type": "builtIn",
-      "builtInId": "144"
-    },
-    {
-      "identifier": "openrouter",
-      "type": "builtIn",
-      "builtInId": "145"
-    },
-    {
-      "identifier": "lmstudio",
-      "type": "builtIn",
-      "builtInId": "146"
-    },
-    {
-      "identifier": "302ai",
-      "type": "builtIn",
-      "builtInId": "148"
-    },
-    {
-      "identifier": "sophnet",
-      "type": "builtIn",
-      "builtInId": "149"
-    }
+    { "identifier": "default", "type": "file", "filePath": "default-icon.png" },
+    { "identifier": "openai", "type": "builtIn", "builtInId": "124" },
+    { "identifier": "gemini", "type": "builtIn", "builtInId": "127" },
+    { "identifier": "claude", "type": "builtIn", "builtInId": "128" },
+    { "identifier": "ollama", "type": "builtIn", "builtInId": "129" },
+    { "identifier": "qwen", "type": "builtIn", "builtInId": "130" },
+    { "identifier": "ernie", "type": "builtIn", "builtInId": "131" },
+    { "identifier": "doubao", "type": "builtIn", "builtInId": "132" },
+    { "identifier": "zhipu", "type": "builtIn", "builtInId": "133" },
+    { "identifier": "deepseek", "type": "builtIn", "builtInId": "134" },
+    { "identifier": "hunyuan", "type": "builtIn", "builtInId": "135" },
+    { "identifier": "01ai", "type": "builtIn", "builtInId": "136" },
+    { "identifier": "siliconflow", "type": "builtIn", "builtInId": "137" },
+    { "identifier": "groq", "type": "builtIn", "builtInId": "138" },
+    { "identifier": "kimi", "type": "builtIn", "builtInId": "139" },
+    { "identifier": "moonshot", "type": "builtIn", "builtInId": "140" },
+    { "identifier": "grok", "type": "builtIn", "builtInId": "141" },
+    { "identifier": "xai", "type": "builtIn", "builtInId": "142" },
+    { "identifier": "aihubmix", "type": "builtIn", "builtInId": "143" },
+    { "identifier": "modelark", "type": "builtIn", "builtInId": "144" },
+    { "identifier": "openrouter", "type": "builtIn", "builtInId": "145" },
+    { "identifier": "lmstudio", "type": "builtIn", "builtInId": "146" },
+    { "identifier": "302ai", "type": "builtIn", "builtInId": "148" },
+    { "identifier": "sophnet", "type": "builtIn", "builtInId": "149" }
   ]
 }
