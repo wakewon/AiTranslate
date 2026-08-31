@@ -1,0 +1,70 @@
+name: Refresh v1.0.2 release notes
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/refresh-v102-release-notes.yml
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+
+      - name: Update v1.0.2 release description
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          notes="$RUNNER_TEMP/v1.0.2-release-notes.md"
+          cat > "$notes" <<'EOF'
+          AiTranslate 是一个面向 Bob 的通用 AI 翻译插件，基于请求格式而不是服务商名称建模。无论你使用 OpenAI、Anthropic、Gemini 原生接口，还是 DeepSeek、智谱、硅基流动、Ollama 等兼容服务，都可以通过同一个插件完成配置。
+
+          #### ✨ 核心能力
+          - **多种请求格式**：支持 OpenAI Chat Completions、Responses API、Legacy Completions、Anthropic Messages、Anthropic OpenAI 兼容、Gemini generateContent 与 Gemini OpenAI 兼容格式。
+          - **高度可配置**：可自由设置 Base URL、端点路径，并注入额外请求头、查询参数和请求体，适配不同服务商及高级参数。
+          - **流式输出**：支持 SSE 流式响应，与 Bob 的实时翻译体验保持一致。
+          - **配置辅助工具**：提供在线文档和高级参数构建工具，便于生成复杂 JSON 配置。
+
+          #### 🚀 本次更新（v1.0.2）
+          - **修复自动更新通道**：插件内置的 appcast 地址由错误的 `master/appcast.json` 修正为正式维护的 `main/appcast.json`。
+          - **兼容已有安装**：新增一次性的 `master` 更新跳板，使仍使用旧 appcast 地址的 v1.0.0 / v1.0.1 用户可以先升级到 v1.0.2；完成升级后，后续版本将直接跟随 `main` 更新通道。
+          - **不改变翻译行为**：本版本仅用于修复和迁移自动更新机制，不包含翻译引擎逻辑变更。
+
+          #### 📦 安装方法
+          1. 在下方 **Assets** 中下载 `AiTranslate-v1.0.2.bobplugin`。
+          2. 双击 `.bobplugin` 文件，Bob 会自动完成插件安装或升级。
+          3. 在 Bob 的服务设置中填写 API 地址、API Key 和模型名称即可使用。
+
+          #### 📖 文档与反馈
+          - 使用文档与配置教程：https://wakewon.wwang.de/AiTranslate/
+          - 如果遇到兼容性问题或希望支持新的接口格式，欢迎在 GitHub Issues 中反馈。
+          EOF
+
+          sed -i 's/^          //' "$notes"
+          gh release edit v1.0.2 --repo "$GITHUB_REPOSITORY" \
+            --title 'Ai 翻译 v1.0.2 - 一个插件搞定所有大模型翻译！🚀' \
+            --notes-file "$notes"
+
+          body=$(gh release view v1.0.2 --repo "$GITHUB_REPOSITORY" --json body --jq '.body')
+          printf '%s' "$body" | grep -Fq '#### ✨ 核心能力'
+          printf '%s' "$body" | grep -Fq '#### 🚀 本次更新（v1.0.2）'
+          printf '%s' "$body" | grep -Fq '#### 📦 安装方法'
+
+      - name: Retire one-time release-note refresh
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/refresh-v102-release-notes.yml
+          git commit -m 'chore: retire v1.0.2 release-note refresh'
+          git push origin HEAD:main
