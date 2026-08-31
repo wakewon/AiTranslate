@@ -1,6 +1,6 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
@@ -18,13 +18,164 @@
       "defaultValue": "openai_chat",
       "desc": "选择 AI 服务的 API 请求格式。认证方式将根据格式自动设置。",
       "menuValues": [
-        { "title": "OpenAI Chat Completions（通用兼容）", "value": "openai_chat" },
-        { "title": "OpenAI Responses API", "value": "openai_responses" },
-        { "title": "OpenAI Legacy Completions", "value": "openai_completions" },
-        { "title": "Anthropic Claude Messages", "value": "anthropic_messages" },
-        { "title": "Anthropic OpenAI 兼容", "value": "anthropic_openai_chat" },
-        { "title": "Gemini generateContent", "value": "gemini_generate_content" },
-        { "title": "Gemini OpenAI 兼容", "value": "gemini_openai_chat" }
+        {
+          "title": "OpenAI Chat Completions（通用兼容）",
+          "value": "openai_chat"
+        },
+        {
+          "title": "OpenAI Responses API",
+          "value": "openai_responses"
+        },
+        {
+          "title": "OpenAI Legacy Completions",
+          "value": "openai_completions"
+        },
+        {
+          "title": "Anthropic Claude Messages",
+          "value": "anthropic_messages"
+        },
+        {
+          "title": "Anthropic OpenAI 兼容",
+          "value": "anthropic_openai_chat"
+        },
+        {
+          "title": "Gemini generateContent",
+          "value": "gemini_generate_content"
+        },
+        {
+          "title": "Gemini OpenAI 兼容",
+          "value": "gemini_openai_chat"
+        }
+      ]
+    },
+    {
+      "identifier": "serviceIcon",
+      "type": "menu",
+      "title": "插件图标",
+      "desc": "可选。切换插件在列表中显示的图标。",
+      "defaultValue": "default",
+      "isKeyOption": true,
+      "menuValues": [
+        {
+          "title": "默认图标",
+          "value": "default",
+          "defaultPluginIconIdentifier": "default"
+        },
+        {
+          "title": "OpenAI",
+          "value": "openai",
+          "defaultPluginIconIdentifier": "openai"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini",
+          "defaultPluginIconIdentifier": "gemini"
+        },
+        {
+          "title": "Claude",
+          "value": "claude",
+          "defaultPluginIconIdentifier": "claude"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama",
+          "defaultPluginIconIdentifier": "ollama"
+        },
+        {
+          "title": "通义千问",
+          "value": "qwen",
+          "defaultPluginIconIdentifier": "qwen"
+        },
+        {
+          "title": "文心一言",
+          "value": "ernie",
+          "defaultPluginIconIdentifier": "ernie"
+        },
+        {
+          "title": "豆包",
+          "value": "doubao",
+          "defaultPluginIconIdentifier": "doubao"
+        },
+        {
+          "title": "智谱 GLM",
+          "value": "zhipu",
+          "defaultPluginIconIdentifier": "zhipu"
+        },
+        {
+          "title": "DeepSeek",
+          "value": "deepseek",
+          "defaultPluginIconIdentifier": "deepseek"
+        },
+        {
+          "title": "混元",
+          "value": "hunyuan",
+          "defaultPluginIconIdentifier": "hunyuan"
+        },
+        {
+          "title": "零一万物",
+          "value": "01ai",
+          "defaultPluginIconIdentifier": "01ai"
+        },
+        {
+          "title": "硅基流动",
+          "value": "siliconflow",
+          "defaultPluginIconIdentifier": "siliconflow"
+        },
+        {
+          "title": "Groq",
+          "value": "groq",
+          "defaultPluginIconIdentifier": "groq"
+        },
+        {
+          "title": "Kimi",
+          "value": "kimi",
+          "defaultPluginIconIdentifier": "kimi"
+        },
+        {
+          "title": "Moonshot",
+          "value": "moonshot",
+          "defaultPluginIconIdentifier": "moonshot"
+        },
+        {
+          "title": "Grok",
+          "value": "grok",
+          "defaultPluginIconIdentifier": "grok"
+        },
+        {
+          "title": "xAI",
+          "value": "xai",
+          "defaultPluginIconIdentifier": "xai"
+        },
+        {
+          "title": "AIHubMix",
+          "value": "aihubmix",
+          "defaultPluginIconIdentifier": "aihubmix"
+        },
+        {
+          "title": "模力方舟",
+          "value": "modelark",
+          "defaultPluginIconIdentifier": "modelark"
+        },
+        {
+          "title": "OpenRouter",
+          "value": "openrouter",
+          "defaultPluginIconIdentifier": "openrouter"
+        },
+        {
+          "title": "LM Studio",
+          "value": "lmstudio",
+          "defaultPluginIconIdentifier": "lmstudio"
+        },
+        {
+          "title": "302.AI",
+          "value": "302ai",
+          "defaultPluginIconIdentifier": "302ai"
+        },
+        {
+          "title": "SophNet",
+          "value": "sophnet",
+          "defaultPluginIconIdentifier": "sophnet"
+        }
       ]
     },
     {
@@ -79,7 +230,11 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": ["$text", "$sourceLang", "$targetLang"],
+        "keyWords": [
+          "$text",
+          "$sourceLang",
+          "$targetLang"
+        ],
         "placeholderText": "You are a translation engine that can only translate text and cannot interpret it."
       }
     },
@@ -92,7 +247,11 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": ["$text", "$sourceLang", "$targetLang"],
+        "keyWords": [
+          "$text",
+          "$sourceLang",
+          "$targetLang"
+        ],
         "placeholderText": "translate from $sourceLang to $targetLang:\n\n$text"
       }
     },
@@ -102,8 +261,14 @@
       "title": "流式输出",
       "defaultValue": "enable",
       "menuValues": [
-        { "title": "开启", "value": "enable" },
-        { "title": "关闭", "value": "disable" }
+        {
+          "title": "开启",
+          "value": "enable"
+        },
+        {
+          "title": "关闭",
+          "value": "disable"
+        }
       ]
     },
     {
@@ -158,6 +323,128 @@
         "height": 140,
         "placeholderText": "{}"
       }
+    }
+  ],
+  "icons": [
+    {
+      "identifier": "default",
+      "type": "file",
+      "filePath": "icon.png"
+    },
+    {
+      "identifier": "openai",
+      "type": "builtIn",
+      "builtInId": "124"
+    },
+    {
+      "identifier": "gemini",
+      "type": "builtIn",
+      "builtInId": "127"
+    },
+    {
+      "identifier": "claude",
+      "type": "builtIn",
+      "builtInId": "128"
+    },
+    {
+      "identifier": "ollama",
+      "type": "builtIn",
+      "builtInId": "129"
+    },
+    {
+      "identifier": "qwen",
+      "type": "builtIn",
+      "builtInId": "130"
+    },
+    {
+      "identifier": "ernie",
+      "type": "builtIn",
+      "builtInId": "131"
+    },
+    {
+      "identifier": "doubao",
+      "type": "builtIn",
+      "builtInId": "132"
+    },
+    {
+      "identifier": "zhipu",
+      "type": "builtIn",
+      "builtInId": "133"
+    },
+    {
+      "identifier": "deepseek",
+      "type": "builtIn",
+      "builtInId": "134"
+    },
+    {
+      "identifier": "hunyuan",
+      "type": "builtIn",
+      "builtInId": "135"
+    },
+    {
+      "identifier": "01ai",
+      "type": "builtIn",
+      "builtInId": "136"
+    },
+    {
+      "identifier": "siliconflow",
+      "type": "builtIn",
+      "builtInId": "137"
+    },
+    {
+      "identifier": "groq",
+      "type": "builtIn",
+      "builtInId": "138"
+    },
+    {
+      "identifier": "kimi",
+      "type": "builtIn",
+      "builtInId": "139"
+    },
+    {
+      "identifier": "moonshot",
+      "type": "builtIn",
+      "builtInId": "140"
+    },
+    {
+      "identifier": "grok",
+      "type": "builtIn",
+      "builtInId": "141"
+    },
+    {
+      "identifier": "xai",
+      "type": "builtIn",
+      "builtInId": "142"
+    },
+    {
+      "identifier": "aihubmix",
+      "type": "builtIn",
+      "builtInId": "143"
+    },
+    {
+      "identifier": "modelark",
+      "type": "builtIn",
+      "builtInId": "144"
+    },
+    {
+      "identifier": "openrouter",
+      "type": "builtIn",
+      "builtInId": "145"
+    },
+    {
+      "identifier": "lmstudio",
+      "type": "builtIn",
+      "builtInId": "146"
+    },
+    {
+      "identifier": "302ai",
+      "type": "builtIn",
+      "builtInId": "148"
+    },
+    {
+      "identifier": "sophnet",
+      "type": "builtIn",
+      "builtInId": "149"
     }
   ]
 }
