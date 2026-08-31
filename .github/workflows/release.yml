@@ -32,7 +32,7 @@ jobs:
       release_tag: ${{ steps.identity.outputs.release_tag }}
       build_commit: ${{ steps.identity.outputs.build_commit }}
       package_name: ${{ steps.package.outputs.package_name }}
-      plugin_sha: ${{ steps.package.outputs.plugin_sha }}
+      candidate_sha: ${{ steps.package.outputs.candidate_sha }}
     defaults:
       run:
         working-directory: source
@@ -64,7 +64,6 @@ jobs:
           test "$appcast" = 'https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json'
           test -n "$min_bob_version" && test "$min_bob_version" != null
 
-          # Official releases must come from code that has already reached main.
           git fetch --no-tags origin main:refs/remotes/origin/main
           git merge-base --is-ancestor "$build_commit" refs/remotes/origin/main || {
             echo "error: release tag must point to a commit already merged into main" >&2
@@ -105,7 +104,8 @@ jobs:
           trap 'rm -rf "$unpacked"' EXIT
           unzip -q "$package" -d "$unpacked"
           jq -e --arg version "$version" '
-            .identifier == "com.github.wakewon.ai.translate" and .version == $version
+            .identifier == "com.github.wakewon.ai.translate" and .version == $version and
+            .appcast == "https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json"
           ' "$unpacked/info.json" >/dev/null
           test -f "$unpacked/main.js"
           test -f "$unpacked/README.md"
@@ -113,8 +113,8 @@ jobs:
           default_icon=$(jq -r '.icons[] | select(.identifier == "default" and .type == "file") | .filePath' "$unpacked/info.json")
           test -f "$unpacked/$default_icon"
 
-          plugin_sha=$(shasum -a 256 "$package" | awk '{print $1}')
-          printf 'package_name=%s\nplugin_sha=%s\n' "$package_name" "$plugin_sha" >> "$GITHUB_OUTPUT"
+          candidate_sha=$(shasum -a 256 "$package" | awk '{print $1}')
+          printf 'package_name=%s\ncandidate_sha=%s\n' "$package_name" "$candidate_sha" >> "$GITHUB_OUTPUT"
 
       - name: Transfer plugin candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
@@ -133,6 +133,7 @@ jobs:
       contents: write
     outputs:
       published_at: ${{ steps.release.outputs.published_at }}
+      plugin_sha: ${{ steps.release.outputs.plugin_sha }}
     steps:
       - name: Receive plugin candidate
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -143,12 +144,12 @@ jobs:
       - name: Verify transferred candidate
         env:
           PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
-          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+          CANDIDATE_SHA: ${{ needs['validate-build'].outputs.candidate_sha }}
         run: |
           set -euo pipefail
           test -f "release/$PACKAGE_NAME"
           actual=$(shasum -a 256 "release/$PACKAGE_NAME" | awk '{print $1}')
-          test "$actual" = "$PLUGIN_SHA"
+          test "$actual" = "$CANDIDATE_SHA"
 
       - name: Publish or safely resume GitHub Release
         id: release
@@ -157,44 +158,55 @@ jobs:
           VERSION: ${{ needs['validate-build'].outputs.version }}
           RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
           PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
-          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
         run: |
           set -euo pipefail
           set +x
-          mode=create
+          public_dir=$(mktemp -d)
+          candidate_dir=$(mktemp -d)
+          trap 'rm -rf "$public_dir" "$candidate_dir"' EXIT
+          unzip -q "release/$PACKAGE_NAME" -d "$candidate_dir"
+
           if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             draft=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')
             if [ "$draft" = true ]; then
-              # Draft releases are unpublished and can be recreated from the verified candidate.
               gh release delete "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --yes
+              gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
+                --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
+                --title "AiTranslate v$VERSION" --generate-notes
+              gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
             else
-              mode=resume
+              gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+                --pattern "$PACKAGE_NAME" --dir "$public_dir"
+              public_unpacked=$(mktemp -d)
+              unzip -q "$public_dir/$PACKAGE_NAME" -d "$public_unpacked"
+              diff -qr "$candidate_dir" "$public_unpacked" >/dev/null || {
+                echo "error: existing public Release asset contents differ from the tagged build" >&2
+                exit 1
+              }
+              rm -rf "$public_unpacked"
             fi
-          fi
-
-          if [ "$mode" = create ]; then
+          else
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              echo "error: recovery dispatch cannot create a missing public Release" >&2
+              exit 1
+            fi
             gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
               --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
               --title "AiTranslate v$VERSION" --generate-notes
             gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
-          else
-            existing=$(mktemp -d)
-            trap 'rm -rf "$existing"' EXIT
-            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
-              --pattern "$PACKAGE_NAME" --dir "$existing"
-            existing_sha=$(shasum -a 256 "$existing/$PACKAGE_NAME" | awk '{print $1}')
-            test "$existing_sha" = "$PLUGIN_SHA" || {
-              echo "error: existing public Release asset differs from the tagged build; refusing replacement" >&2
-              exit 1
-            }
           fi
 
+          rm -rf "$public_dir"
+          mkdir -p "$public_dir"
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$PACKAGE_NAME" --dir "$public_dir"
+          plugin_sha=$(shasum -a 256 "$public_dir/$PACKAGE_NAME" | awk '{print $1}')
           published_at=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json publishedAt --jq '.publishedAt')
           test -n "$published_at" && test "$published_at" != null
-          printf 'published_at=%s\n' "$published_at" >> "$GITHUB_OUTPUT"
+          printf 'plugin_sha=%s\npublished_at=%s\n' "$plugin_sha" "$published_at" >> "$GITHUB_OUTPUT"
 
   update-appcast:
-    name: Update appcast metadata
+    name: Update canonical main appcast
     needs: [validate-build, publish-release]
     runs-on: macos-latest
     timeout-minutes: 10
@@ -218,7 +230,7 @@ jobs:
           MIN_BOB_VERSION: ${{ needs['validate-build'].outputs.min_bob_version }}
           RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
           PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
-          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+          PLUGIN_SHA: ${{ needs.publish-release.outputs.plugin_sha }}
           PUBLISHED_AT: ${{ needs.publish-release.outputs.published_at }}
         run: |
           set -euo pipefail
@@ -244,7 +256,7 @@ jobs:
               commit -m "Update appcast for v$VERSION"
           fi
 
-      - name: Push appcast and maintain legacy master appcast URL
+      - name: Push canonical main appcast
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -268,32 +280,21 @@ jobs:
           done
           test "$pushed" = 1
 
-          # Older published AiTranslate packages reference master/appcast.json.
-          # Keep a compatibility ref so those installations can discover the next release.
-          git fetch origin master:refs/remotes/origin/master 2>/dev/null || true
-          if git show-ref --verify --quiet refs/remotes/origin/master; then
-            git merge-base --is-ancestor refs/remotes/origin/master HEAD || {
-              echo "error: existing master branch has diverged; refusing to overwrite it" >&2
-              exit 1
-            }
-          fi
-          git push origin HEAD:master
-
   verify-distribution:
     name: Verify public plugin distribution
-    needs: [validate-build, update-appcast]
+    needs: [validate-build, publish-release, update-appcast]
     runs-on: macos-latest
     timeout-minutes: 10
     permissions:
       contents: read
     steps:
-      - name: Verify Release asset and appcast endpoints
+      - name: Verify Release asset and main appcast
         env:
           VERSION: ${{ needs['validate-build'].outputs.version }}
           MIN_BOB_VERSION: ${{ needs['validate-build'].outputs.min_bob_version }}
           RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
           PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
-          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+          PLUGIN_SHA: ${{ needs.publish-release.outputs.plugin_sha }}
         run: |
           set -euo pipefail
           release_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME"
@@ -302,23 +303,21 @@ jobs:
           test "$actual" = "$PLUGIN_SHA"
 
           expected_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME"
-          for branch in main master; do
-            appcast_url="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$branch/appcast.json"
-            matched=0
-            for _ in $(seq 1 30); do
-              remote=$(curl -fsSL "$appcast_url" 2>/dev/null || true)
-              if printf '%s' "$remote" | jq -e \
-                --arg version "$VERSION" --arg sha "$PLUGIN_SHA" \
-                --arg url "$expected_url" --arg minBob "$MIN_BOB_VERSION" \
-                '.versions[0].version==$version and .versions[0].sha256==$sha and .versions[0].url==$url and .versions[0].minBobVersion==$minBob' \
-                >/dev/null 2>&1; then
-                matched=1
-                break
-              fi
-              sleep 2
-            done
-            test "$matched" = 1 || {
-              echo "error: $branch appcast did not converge to v$VERSION" >&2
-              exit 1
-            }
+          appcast_url="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/main/appcast.json"
+          matched=0
+          for _ in $(seq 1 30); do
+            remote=$(curl -fsSL "$appcast_url" 2>/dev/null || true)
+            if printf '%s' "$remote" | jq -e \
+              --arg version "$VERSION" --arg sha "$PLUGIN_SHA" \
+              --arg url "$expected_url" --arg minBob "$MIN_BOB_VERSION" \
+              '.versions[0].version==$version and .versions[0].sha256==$sha and .versions[0].url==$url and .versions[0].minBobVersion==$minBob' \
+              >/dev/null 2>&1; then
+              matched=1
+              break
+            fi
+            sleep 2
           done
+          test "$matched" = 1 || {
+            echo "error: main appcast did not converge to v$VERSION" >&2
+            exit 1
+          }
