@@ -1,6 +1,6 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
@@ -8,7 +8,7 @@
   "author": "wakewon",
   "homepage": "https://wakewon.wwang.de/AiTranslate/",
   "tutorial": "https://wakewon.wwang.de/AiTranslate/",
-  "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/master/appcast.json",
+  "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json",
   "minBobVersion": "1.8.0",
   "options": [
     {
@@ -18,13 +18,34 @@
       "defaultValue": "openai_chat",
       "desc": "选择 AI 服务的 API 请求格式。认证方式将根据格式自动设置。",
       "menuValues": [
-        { "title": "OpenAI Chat Completions（通用兼容）", "value": "openai_chat" },
-        { "title": "OpenAI Responses API", "value": "openai_responses" },
-        { "title": "OpenAI Legacy Completions", "value": "openai_completions" },
-        { "title": "Anthropic Claude Messages", "value": "anthropic_messages" },
-        { "title": "Anthropic OpenAI 兼容", "value": "anthropic_openai_chat" },
-        { "title": "Gemini generateContent", "value": "gemini_generate_content" },
-        { "title": "Gemini OpenAI 兼容", "value": "gemini_openai_chat" }
+        {
+          "title": "OpenAI Chat Completions（通用兼容）",
+          "value": "openai_chat"
+        },
+        {
+          "title": "OpenAI Responses API",
+          "value": "openai_responses"
+        },
+        {
+          "title": "OpenAI Legacy Completions",
+          "value": "openai_completions"
+        },
+        {
+          "title": "Anthropic Claude Messages",
+          "value": "anthropic_messages"
+        },
+        {
+          "title": "Anthropic OpenAI 兼容",
+          "value": "anthropic_openai_chat"
+        },
+        {
+          "title": "Gemini generateContent",
+          "value": "gemini_generate_content"
+        },
+        {
+          "title": "Gemini OpenAI 兼容",
+          "value": "gemini_openai_chat"
+        }
       ]
     },
     {
@@ -79,7 +100,11 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": ["$text", "$sourceLang", "$targetLang"],
+        "keyWords": [
+          "$text",
+          "$sourceLang",
+          "$targetLang"
+        ],
         "placeholderText": "You are a translation engine that can only translate text and cannot interpret it."
       }
     },
@@ -92,7 +117,11 @@
       "textConfig": {
         "type": "visible",
         "height": 120,
-        "keyWords": ["$text", "$sourceLang", "$targetLang"],
+        "keyWords": [
+          "$text",
+          "$sourceLang",
+          "$targetLang"
+        ],
         "placeholderText": "translate from $sourceLang to $targetLang:\n\n$text"
       }
     },
@@ -102,8 +131,14 @@
       "title": "流式输出",
       "defaultValue": "enable",
       "menuValues": [
-        { "title": "开启", "value": "enable" },
-        { "title": "关闭", "value": "disable" }
+        {
+          "title": "开启",
+          "value": "enable"
+        },
+        {
+          "title": "关闭",
+          "value": "disable"
+        }
       ]
     },
     {
