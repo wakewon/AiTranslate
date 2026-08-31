@@ -1,10 +1,11 @@
 #!/bin/bash
 
-# Ai 翻译插件一键打包脚本
+# AiTranslate Bob 插件打包脚本。
+# 只负责生成可发布的 .bobplugin，不修改源码或 appcast 发布元数据。
 
-set -e
+set -euo pipefail
 
-if ! command -v jq &> /dev/null; then
+if ! command -v jq >/dev/null 2>&1; then
     echo "错误: 未找到 jq 命令，请先安装 jq (例如: brew install jq)"
     exit 1
 fi
@@ -22,6 +23,11 @@ if [ -z "$VERSION" ] || [ "$VERSION" = "null" ]; then
     exit 1
 fi
 
+if [ -z "$IDENTIFIER" ] || [ "$IDENTIFIER" = "null" ]; then
+    echo "错误: 未在 info.json 中找到 identifier 值"
+    exit 1
+fi
+
 DEFAULT_ICON=$(jq -r '.icons[] | select(.identifier == "default" and .type == "file") | .filePath' info.json)
 if [ -z "$DEFAULT_ICON" ] || [ "$DEFAULT_ICON" = "null" ] || [ ! -f "$DEFAULT_ICON" ]; then
     echo "错误: 默认插件图标文件不存在: $DEFAULT_ICON"
@@ -34,12 +40,12 @@ if [ -f "icon.png" ]; then
     exit 1
 fi
 
-echo "正在打包 $IDENTIFIER 版本: $VERSION..."
-
-if [ -f "index.html" ]; then
-    sed -i '' "s/<div class=\"hero-badge\">Bob Plugin v.*<\/div>/<div class=\"hero-badge\">Bob Plugin v$VERSION<\/div>/g" index.html
-    echo "index.html 版本号已更新为 v$VERSION"
+if [ ! -f "main.js" ] || [ ! -f "README.md" ] || [ ! -f "tools/param-builder.html" ]; then
+    echo "错误: 插件打包所需文件不完整"
+    exit 1
 fi
+
+echo "正在打包 $IDENTIFIER 版本: $VERSION..."
 
 OUT_DIR="release"
 mkdir -p "$OUT_DIR"
@@ -53,22 +59,7 @@ echo "✅ 打包成功!"
 echo "📦 产物路径: $PACKAGE_NAME"
 echo "========================================="
 
-if command -v shasum &> /dev/null; then
+if command -v shasum >/dev/null 2>&1; then
     SHA256=$(shasum -a 256 "$PACKAGE_NAME" | awk '{print $1}')
     echo "SHA256: $SHA256"
-
-    TIMESTAMP=$(($(date +%s)*1000))
-    MIN_BOB_VERSION=$(jq -r '.minBobVersion // "1.15.3"' info.json)
-
-    if [ -f "appcast.json" ]; then
-        echo "正在更新 appcast.json..."
-        jq --arg version "$VERSION" --arg sha256 "$SHA256" --arg minBob "$MIN_BOB_VERSION" --argjson timestamp "$TIMESTAMP" '
-            if (.versions | map(.version) | index($version)) then
-                .versions |= map(if .version == $version then .sha256 = $sha256 | .timestamp = $timestamp | .minBobVersion = $minBob else . end)
-            else
-                .versions = [{"version": $version, "desc": "AiTranslate \($version) 更新", "sha256": $sha256, "url": "https://github.com/wakewon/AiTranslate/releases/download/v\($version)/AiTranslate-v\($version).bobplugin", "minBobVersion": $minBob, "timestamp": $timestamp}] + .versions
-            end
-        ' appcast.json > tmp.json && mv tmp.json appcast.json
-        echo "appcast.json 更新完成"
-    fi
 fi

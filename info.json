@@ -7,7 +7,7 @@
   "author": "wakewon",
   "homepage": "https://wakewon.wwang.de/AiTranslate/",
   "tutorial": "https://wakewon.wwang.de/AiTranslate/",
-  "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/master/appcast.json",
+  "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json",
   "minBobVersion": "1.15.3",
   "options": [
     {

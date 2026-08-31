@@ -1,0 +1,324 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing public tag whose distribution steps should be resumed
+        required: true
+        type: string
+
+permissions: {}
+
+concurrency:
+  group: release-${{ inputs.release_tag || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-build:
+    name: Validate and build plugin candidate
+    runs-on: macos-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      RELEASE_TAG: ${{ inputs.release_tag || github.ref_name }}
+    outputs:
+      version: ${{ steps.identity.outputs.version }}
+      min_bob_version: ${{ steps.identity.outputs.min_bob_version }}
+      release_tag: ${{ steps.identity.outputs.release_tag }}
+      build_commit: ${{ steps.identity.outputs.build_commit }}
+      package_name: ${{ steps.package.outputs.package_name }}
+      plugin_sha: ${{ steps.package.outputs.plugin_sha }}
+    defaults:
+      run:
+        working-directory: source
+    steps:
+      - name: Checkout immutable release source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ inputs.release_tag || github.ref }}
+          path: source
+
+      - name: Validate tag and plugin identity
+        id: identity
+        run: |
+          set -euo pipefail
+          printf '%s' "$RELEASE_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+          git show-ref --verify --quiet "refs/tags/$RELEASE_TAG"
+
+          version=$(jq -r '.version' info.json)
+          min_bob_version=$(jq -r '.minBobVersion' info.json)
+          identifier=$(jq -r '.identifier' info.json)
+          appcast=$(jq -r '.appcast' info.json)
+          build_commit=$(git rev-list -n 1 "$RELEASE_TAG")
+
+          test "$RELEASE_TAG" = "v$version"
+          test "$build_commit" = "$(git rev-parse HEAD)"
+          test "$identifier" = 'com.github.wakewon.ai.translate'
+          test "$appcast" = 'https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json'
+          test -n "$min_bob_version" && test "$min_bob_version" != null
+
+          # Official releases must come from code that has already reached main.
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          git merge-base --is-ancestor "$build_commit" refs/remotes/origin/main || {
+            echo "error: release tag must point to a commit already merged into main" >&2
+            exit 1
+          }
+
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          printf 'min_bob_version=%s\n' "$min_bob_version" >> "$GITHUB_OUTPUT"
+          printf 'release_tag=%s\n' "$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          printf 'build_commit=%s\n' "$build_commit" >> "$GITHUB_OUTPUT"
+
+      - name: Validate source metadata and JavaScript
+        run: |
+          set -euo pipefail
+          jq -e . info.json >/dev/null
+          node --check main.js
+          test ! -e icon.png
+          default_icon=$(jq -r '.icons[] | select(.identifier == "default" and .type == "file") | .filePath' info.json)
+          test -n "$default_icon" && test "$default_icon" != null && test -f "$default_icon"
+          jq -e '
+            ([.icons[].identifier] | unique) as $icons |
+            [.options[] | select(.identifier == "serviceIcon") | .menuValues[].defaultPluginIconIdentifier] |
+            all(. as $id | $icons | index($id) != null)
+          ' info.json >/dev/null
+
+      - name: Build and verify plugin package
+        id: package
+        run: |
+          set -euo pipefail
+          ./build.sh
+          version='${{ steps.identity.outputs.version }}'
+          package_name="AiTranslate-v$version.bobplugin"
+          package="release/$package_name"
+          test -f "$package"
+          unzip -tq "$package"
+
+          unpacked=$(mktemp -d)
+          trap 'rm -rf "$unpacked"' EXIT
+          unzip -q "$package" -d "$unpacked"
+          jq -e --arg version "$version" '
+            .identifier == "com.github.wakewon.ai.translate" and .version == $version
+          ' "$unpacked/info.json" >/dev/null
+          test -f "$unpacked/main.js"
+          test -f "$unpacked/README.md"
+          test -f "$unpacked/tools/param-builder.html"
+          default_icon=$(jq -r '.icons[] | select(.identifier == "default" and .type == "file") | .filePath' "$unpacked/info.json")
+          test -f "$unpacked/$default_icon"
+
+          plugin_sha=$(shasum -a 256 "$package" | awk '{print $1}')
+          printf 'package_name=%s\nplugin_sha=%s\n' "$package_name" "$plugin_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Transfer plugin candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-candidate-${{ github.run_id }}
+          path: source/release/${{ steps.package.outputs.package_name }}
+          if-no-files-found: error
+          retention-days: 7
+
+  publish-release:
+    name: Publish GitHub Release
+    needs: validate-build
+    runs-on: macos-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    outputs:
+      published_at: ${{ steps.release.outputs.published_at }}
+    steps:
+      - name: Receive plugin candidate
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-candidate-${{ github.run_id }}
+          path: release
+
+      - name: Verify transferred candidate
+        env:
+          PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
+          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+        run: |
+          set -euo pipefail
+          test -f "release/$PACKAGE_NAME"
+          actual=$(shasum -a 256 "release/$PACKAGE_NAME" | awk '{print $1}')
+          test "$actual" = "$PLUGIN_SHA"
+
+      - name: Publish or safely resume GitHub Release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs['validate-build'].outputs.version }}
+          RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
+          PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
+          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+        run: |
+          set -euo pipefail
+          set +x
+          mode=create
+          if gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            draft=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json isDraft --jq '.isDraft')
+            if [ "$draft" = true ]; then
+              # Draft releases are unpublished and can be recreated from the verified candidate.
+              gh release delete "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --yes
+            else
+              mode=resume
+            fi
+          fi
+
+          if [ "$mode" = create ]; then
+            gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
+              --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
+              --title "AiTranslate v$VERSION" --generate-notes
+            gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
+          else
+            existing=$(mktemp -d)
+            trap 'rm -rf "$existing"' EXIT
+            gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \
+              --pattern "$PACKAGE_NAME" --dir "$existing"
+            existing_sha=$(shasum -a 256 "$existing/$PACKAGE_NAME" | awk '{print $1}')
+            test "$existing_sha" = "$PLUGIN_SHA" || {
+              echo "error: existing public Release asset differs from the tagged build; refusing replacement" >&2
+              exit 1
+            }
+          fi
+
+          published_at=$(gh release view "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json publishedAt --jq '.publishedAt')
+          test -n "$published_at" && test "$published_at" != null
+          printf 'published_at=%s\n' "$published_at" >> "$GITHUB_OUTPUT"
+
+  update-appcast:
+    name: Update appcast metadata
+    needs: [validate-build, publish-release]
+    runs-on: macos-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: main
+    steps:
+      - name: Checkout main release metadata
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: main
+          path: main
+
+      - name: Verify public asset and prepare appcast commit
+        env:
+          VERSION: ${{ needs['validate-build'].outputs.version }}
+          MIN_BOB_VERSION: ${{ needs['validate-build'].outputs.min_bob_version }}
+          RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
+          PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
+          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+          PUBLISHED_AT: ${{ needs.publish-release.outputs.published_at }}
+        run: |
+          set -euo pipefail
+          release_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME"
+          public="$RUNNER_TEMP/$PACKAGE_NAME"
+          curl -fL --retry 5 "$release_url" -o "$public"
+          actual=$(shasum -a 256 "$public" | awk '{print $1}')
+          test "$actual" = "$PLUGIN_SHA"
+
+          timestamp=$(jq -nr --arg published_at "$PUBLISHED_AT" '$published_at | fromdateiso8601 * 1000 | floor')
+          case "$timestamp" in
+            ''|*[!0-9]*)
+              echo "error: invalid Release published_at: $PUBLISHED_AT" >&2
+              exit 1
+              ;;
+          esac
+
+          scripts/update-appcast.sh "$VERSION" "$PLUGIN_SHA" "$timestamp" "$MIN_BOB_VERSION"
+          git add appcast.json
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "Update appcast for v$VERSION"
+          fi
+
+      - name: Push appcast and maintain legacy master appcast URL
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          set +x
+          askpass="$RUNNER_TEMP/git-askpass.sh"
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'case "$1" in' \
+            '  *Username*) printf "%s\\n" "x-access-token" ;;' \
+            '  *Password*) printf "%s\\n" "$GH_TOKEN" ;;' \
+            'esac' > "$askpass"
+          chmod 0700 "$askpass"
+          trap 'rm -f "$askpass"' EXIT
+          export GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0
+
+          pushed=0
+          for _ in 1 2 3; do
+            if git push origin HEAD:main; then pushed=1; break; fi
+            git pull --rebase origin main
+          done
+          test "$pushed" = 1
+
+          # Older published AiTranslate packages reference master/appcast.json.
+          # Keep a compatibility ref so those installations can discover the next release.
+          git fetch origin master:refs/remotes/origin/master 2>/dev/null || true
+          if git show-ref --verify --quiet refs/remotes/origin/master; then
+            git merge-base --is-ancestor refs/remotes/origin/master HEAD || {
+              echo "error: existing master branch has diverged; refusing to overwrite it" >&2
+              exit 1
+            }
+          fi
+          git push origin HEAD:master
+
+  verify-distribution:
+    name: Verify public plugin distribution
+    needs: [validate-build, update-appcast]
+    runs-on: macos-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Verify Release asset and appcast endpoints
+        env:
+          VERSION: ${{ needs['validate-build'].outputs.version }}
+          MIN_BOB_VERSION: ${{ needs['validate-build'].outputs.min_bob_version }}
+          RELEASE_TAG: ${{ needs['validate-build'].outputs.release_tag }}
+          PACKAGE_NAME: ${{ needs['validate-build'].outputs.package_name }}
+          PLUGIN_SHA: ${{ needs['validate-build'].outputs.plugin_sha }}
+        run: |
+          set -euo pipefail
+          release_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME"
+          curl -fL --retry 5 "$release_url" -o "$RUNNER_TEMP/$PACKAGE_NAME"
+          actual=$(shasum -a 256 "$RUNNER_TEMP/$PACKAGE_NAME" | awk '{print $1}')
+          test "$actual" = "$PLUGIN_SHA"
+
+          expected_url="https://github.com/$GITHUB_REPOSITORY/releases/download/$RELEASE_TAG/$PACKAGE_NAME"
+          for branch in main master; do
+            appcast_url="https://raw.githubusercontent.com/$GITHUB_REPOSITORY/$branch/appcast.json"
+            matched=0
+            for _ in $(seq 1 30); do
+              remote=$(curl -fsSL "$appcast_url" 2>/dev/null || true)
+              if printf '%s' "$remote" | jq -e \
+                --arg version "$VERSION" --arg sha "$PLUGIN_SHA" \
+                --arg url "$expected_url" --arg minBob "$MIN_BOB_VERSION" \
+                '.versions[0].version==$version and .versions[0].sha256==$sha and .versions[0].url==$url and .versions[0].minBobVersion==$minBob' \
+                >/dev/null 2>&1; then
+                matched=1
+                break
+              fi
+              sleep 2
+            done
+            test "$matched" = 1 || {
+              echo "error: $branch appcast did not converge to v$VERSION" >&2
+              exit 1
+            }
+          done
