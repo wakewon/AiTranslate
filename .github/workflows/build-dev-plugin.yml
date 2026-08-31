@@ -1,0 +1,35 @@
+name: Build dev Bob plugin
+
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build plugin
+        run: ./build.sh
+
+      - name: Validate package
+        run: |
+          PACKAGE="release/AiTranslate-v$(jq -r '.version' info.json).bobplugin"
+          test -f "$PACKAGE"
+          unzip -l "$PACKAGE"
+          shasum -a 256 "$PACKAGE"
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: AiTranslate-dev-bobplugin
+          path: release/*.bobplugin
+          if-no-files-found: error
+          retention-days: 7
