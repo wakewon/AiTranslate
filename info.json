@@ -1,6 +1,6 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
