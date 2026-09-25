@@ -465,7 +465,7 @@ td code {
       <div class="card">
         <div class="card-icon">🚀</div>
         <h3>原生沉浸体验</h3>
-        <p>完美契合 Bob 1.8.0+ 的流式输出（SSE）架构。不仅响应极快，错误提示与重试机制也十分完善。</p>
+        <p>完美契合 Bob 1.8.0+ 的流式输出（SSE）架构，响应极快，错误提示也十分完善。在 Bob 1.21.0+ 上还支持 Markdown 渲染，标题、列表、代码块、表格一目了然。</p>
       </div>
     </div>
   </section>
@@ -523,6 +523,43 @@ td code {
           </tr>
         </tbody>
       </table>
+    </div>
+  </section>
+
+  <!-- Compatibility -->
+  <section class="section">
+    <div class="section-header">
+      <h2>Bob 版本兼容</h2>
+      <p>最低支持 Bob 1.8.0，各版本均支持流式输出。Markdown 渲染是 Bob 1.21.0 新增的能力，新旧版本均可正常使用</p>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>运行环境</th>
+            <th>译文显示</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Bob 1.8.0 ~ 1.20.x</strong></td>
+            <td>纯文本。插件里的「Markdown 渲染」选项不起作用。</td>
+          </tr>
+          <tr>
+            <td><strong>Bob 1.21.0+</strong> · macOS 13+</td>
+            <td>按插件里的「Markdown 渲染」选项显示，<strong>默认开启</strong>；关闭则为纯文本。</td>
+          </tr>
+          <tr>
+            <td><strong>Bob 1.21.0+</strong> · macOS 12</td>
+            <td>纯文本。Markdown 渲染需要 macOS 13 及以上。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card" style="margin-top: 24px;">
+      <h3>低版本 Bob 会出问题吗？</h3>
+      <p>不会报错，也不影响翻译。Bob 1.21.0 之前不识别新的译文结构，插件同时回传了旧版结构，低版本的显示效果和更新前一致。唯一的区别是：如果模型输出了 Markdown 语法，<code>#</code>、<code>**</code>、<code>|</code> 之类的标记会原样显示，可以在「自定义系统指令」中要求模型只输出纯文本。</p>
+      <p style="margin-top: 12px;">高版本中若遇到误渲染（例如翻译源码、公式或含有大量特殊符号的文本），可在插件选项中关闭「Markdown 渲染」，或在 Bob「偏好设置 - 翻译 - Markdown」中全局关闭。</p>
     </div>
   </section>
 

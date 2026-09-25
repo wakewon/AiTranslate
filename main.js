@@ -239,6 +239,24 @@ function parseNumberOption(key) {
     return isNaN(num) ? undefined : num;
 }
 
+/**
+ * 构造 Bob 翻译结果。
+ *
+ * Bob 1.21.0+ 通过 content 声明译文格式：开启「Markdown 渲染」时模型输出原样透传即可渲染，
+ * 关闭时按纯文本整篇原样显示；流式输出时 text 为累计全文。
+ * 更早版本不认识 content，会读取 toParagraphs（不渲染 Markdown，译文按纯文本显示），
+ * 因此两者同时传，以兼容 Bob 1.8.0+。
+ */
+function buildResult(query, text, paragraphs) {
+    var format = getOption('markdown', 'enable') === 'enable' ? 'markdown' : 'plain';
+    return {
+        from: query.detectFrom,
+        to: query.detectTo,
+        content: { format: format, text: text },
+        toParagraphs: paragraphs
+    };
+}
+
 // ============================================================================
 // 第三段：格式适配器
 // ============================================================================
@@ -625,11 +643,7 @@ function makeNonStreamRequest(query, adapter) {
                 return;
             }
             query.onCompletion({
-                result: {
-                    from: query.detectFrom,
-                    to: query.detectTo,
-                    toParagraphs: text.split(/\n+/)
-                }
+                result: buildResult(query, text, text.split(/\n+/))
             });
         }
     });
@@ -695,11 +709,7 @@ function makeStreamRequest(query, adapter) {
                     if (delta) {
                         targetText += delta;
                         query.onStream({
-                            result: {
-                                from: query.detectFrom,
-                                to: query.detectTo,
-                                toParagraphs: [targetText]
-                            }
+                            result: buildResult(query, targetText, [targetText])
                         });
                     }
                 } catch (e) {
@@ -730,11 +740,7 @@ function makeStreamRequest(query, adapter) {
             // 流结束，发送最终结果
             if (targetText) {
                 query.onCompletion({
-                    result: {
-                        from: query.detectFrom,
-                        to: query.detectTo,
-                        toParagraphs: [targetText]
-                    }
+                    result: buildResult(query, targetText, [targetText])
                 });
             } else {
                 // 流式没有拿到数据，尝试从完整响应解析
@@ -744,11 +750,7 @@ function makeStreamRequest(query, adapter) {
                         var text = adapter.parseResponse(fullData);
                         if (text) {
                             query.onCompletion({
-                                result: {
-                                    from: query.detectFrom,
-                                    to: query.detectTo,
-                                    toParagraphs: text.split(/\n+/)
-                                }
+                                result: buildResult(query, text, text.split(/\n+/))
                             });
                             return;
                         }

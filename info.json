@@ -142,6 +142,23 @@
       ]
     },
     {
+      "identifier": "markdown",
+      "type": "menu",
+      "title": "Markdown 渲染",
+      "defaultValue": "enable",
+      "desc": "开启后，译文按 Markdown 渲染（标题、列表、代码块、表格等）；关闭则按纯文本原样显示。\n\n仅 Bob 1.21.0+ 且 macOS 13+ 支持渲染；更低版本无论开关，译文都按纯文本显示，模型输出的 Markdown 标记会原样保留。\n\n若翻译内容包含 * _ # | 等符号被误渲染，可关闭此项。也可在 Bob「偏好设置 - 翻译 - Markdown」中全局关闭。",
+      "menuValues": [
+        {
+          "title": "开启",
+          "value": "enable"
+        },
+        {
+          "title": "关闭",
+          "value": "disable"
+        }
+      ]
+    },
+    {
       "identifier": "maxOutputTokens",
       "type": "text",
       "title": "最大输出 Token",
