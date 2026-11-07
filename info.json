@@ -1,6 +1,6 @@
 {
   "identifier": "com.github.wakewon.ai.translate",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "category": "translate",
   "name": "Ai 翻译",
   "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
@@ -16,7 +16,7 @@
       "type": "menu",
       "title": "请求格式",
       "defaultValue": "openai_chat",
-      "desc": "选择 AI 服务的 API 请求格式。认证方式将根据格式自动设置。",
+      "desc": "选择 AI 服务的 API 请求格式。「鉴权方式」设为自动时，插件会按所选格式发送 API Key。",
       "menuValues": [
         {
           "title": "OpenAI Chat Completions（通用兼容）",
@@ -63,7 +63,7 @@
       "identifier": "endpointOverride",
       "type": "text",
       "title": "端点路径覆盖",
-      "desc": "可选。覆盖默认的 API 路径。留空则使用格式对应的默认路径。\n\n各格式默认路径：\n- OpenAI Chat 兼容: /v1/chat/completions\n- Anthropic Messages: /v1/messages\n- OpenAI Responses: /v1/responses\n- OpenAI Completions: /v1/completions\n- Gemini 原生: /v1beta/models/...:generateContent",
+      "desc": "留空使用请求格式的默认路径。填写后按原样使用。手动覆盖 Gemini 原生端点时，请写出实际模型 ID，插件不会替换 {model}。\n\n各格式默认路径：\n- OpenAI Chat / Anthropic OpenAI 兼容: /v1/chat/completions\n- Anthropic Messages: /v1/messages\n- OpenAI Responses: /v1/responses\n- OpenAI Completions: /v1/completions\n- Gemini 原生: /v1beta/models/...:generateContent（默认从「模型」字段拼入 ID，流式使用 streamGenerateContent）\n- Gemini OpenAI 兼容: /v1beta/openai/chat/completions",
       "textConfig": {
         "type": "visible",
         "height": 40,
@@ -74,21 +74,58 @@
       "identifier": "apiKey",
       "type": "text",
       "title": "API Key",
-      "desc": "必填项。支持英文逗号分隔多个 Key 实现负载均衡。",
+      "desc": "需要鉴权的服务请填写有效密钥或令牌。未开启鉴权的本地服务（如默认的 Ollama、LM Studio）可留空，无需占位值。留空时只发送你在「额外请求头」或「额外查询参数」中配置的凭据。支持用英文逗号分隔多个 Key。",
       "textConfig": {
         "type": "secure",
         "height": 40,
-        "placeholderText": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        "placeholderText": "按服务要求填写"
       }
+    },
+    {
+      "identifier": "authMode",
+      "type": "menu",
+      "title": "鉴权方式",
+      "defaultValue": "auto",
+      "desc": "自动模式按请求格式发送 API Key。Gemini 原生使用 x-goog-api-key，其余格式使用 Bearer。也可以手动指定密钥的发送方式。自动模式优先使用已配置的标准鉴权头或 key 查询参数。选择「手动或无需鉴权」时，只发送你自行添加的鉴权信息。",
+      "menuValues": [
+        {
+          "title": "自动（按请求格式）",
+          "value": "auto"
+        },
+        {
+          "title": "Authorization: Bearer",
+          "value": "authorization"
+        },
+        {
+          "title": "x-api-key",
+          "value": "x-api-key"
+        },
+        {
+          "title": "x-goog-api-key",
+          "value": "x-goog-api-key"
+        },
+        {
+          "title": "api-key",
+          "value": "api-key"
+        },
+        {
+          "title": "URL 查询参数 key",
+          "value": "query-key"
+        },
+        {
+          "title": "手动或无需鉴权",
+          "value": "none"
+        }
+      ]
     },
     {
       "identifier": "model",
       "type": "text",
-      "title": "模型 (必填)",
-      "desc": "填写模型名称，如 gpt-5.5、deepseek-v4-flash、gemini-3.5-flash 等。",
+      "title": "模型",
+      "desc": "填写当前端点支持的模型 ID，例如 gpt-6-luna、claude-haiku-5-5、gemini-3.8-flash、deepseek-flash 或 glm-5.3。Azure OpenAI 填部署名，自托管服务填服务器列出的 ID。Gemini 原生使用默认路径时可留空，插件会使用内置模型 ID。覆盖 Gemini 原生端点时以路径里的模型 ID 为准。",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "gpt-5.5"
+        "placeholderText": "例如 gpt-6-luna"
       }
     },
     {
@@ -182,7 +219,7 @@
       "identifier": "extraHeaders",
       "type": "text",
       "title": "额外请求头 (JSON)",
-      "desc": "可选。JSON 格式的额外 HTTP 请求头，会合并到请求中。可用于自定义认证等。\n\n示例: {\"x-custom-header\": \"value\"}",
+      "desc": "可选。JSON 格式的额外 HTTP 请求头。与默认头同名时，以此处设置为准，名称不区分大小写。可用于自定义鉴权。\n\n示例：{\"Authorization\": \"Bearer YOUR_TOKEN\"}",
       "textConfig": {
         "type": "visible",
         "height": 100,

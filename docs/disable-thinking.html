@@ -133,7 +133,7 @@ tr:last-child td { border-bottom: none; }
   <div class="main-content">
     <header class="header">
       <h1>进阶：如何为模型“关闭思考”？</h1>
-    <p>通过自定义额外参数，强制让满血版的推理模型直接输出结果</p>
+    <p>按模型和请求端点选择参数，关闭思考或降低推理强度</p>
   </header>
 
   <div class="card">
@@ -141,6 +141,7 @@ tr:last-child td { border-bottom: none; }
     <p>AiTranslate 插件支持在 Bob 配置界面的高级设置中注入 <strong>额外请求头 (Headers)</strong>、<strong>额外查询参数 (Query)</strong> 和 <strong>额外请求体 (Body)</strong>。它们都接收合法的 JSON 格式字符串。</p>
     <p>对于关闭深度思考（思维链）这种操作，<strong>几乎都是通过修改“请求体 (Body)”来实现的</strong>，因为这属于修改发给模型的具体指令参数。</p>
     <p>你可以使用我们提供的 <a href="../tools/param-builder.html">参数构建工具</a>，快速生成所需的 JSON 字符串，然后复制粘贴到 Bob 的「额外请求体」输入框中即可。</p>
+    <p>服务密钥和鉴权应按实际端点单独配置。<a href="./basic-usage.html#authentication">查看各服务的鉴权方式</a></p>
   </div>
 
   <div class="card">
@@ -156,24 +157,34 @@ tr:last-child td { border-bottom: none; }
         </thead>
         <tbody>
           <tr>
-            <td>DeepSeek 官方 API / 智谱 GLM / 豆包 / 腾讯</td>
+            <td>DeepSeek 官方 Chat Completions</td>
             <td><code>{ "thinking": { "type": "disabled" } }</code></td>
-            <td>DeepSeek 官方 API 及多数国产大厂通用。</td>
+            <td>适用于官方文档列出的模型和端点。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></td>
           </tr>
           <tr>
-            <td>OpenAI (gpt-5.5 / o1 / o3 等)</td>
+            <td>OpenAI Chat Completions</td>
             <td><code>{ "reasoning_effort": "none" }</code></td>
-            <td>OpenAI 官方新参数。值可以设为 "none", "low", "medium", "high" 来调节思考深度。<br><b>注意：</b>对于 gpt-5.5，必须使用新版 <b>Responses API</b>（/v1/responses）才能使该参数生效，使用传统的 Chat Completions API（/v1/chat/completions）调用会报错。</td>
+            <td>使用顶层 <code>reasoning_effort</code>。只有支持 <code>none</code> 的模型才可用这个值。<a href="https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create">Chat Completions 参数</a></td>
+          </tr>
+          <tr>
+            <td>OpenAI Responses</td>
+            <td><code>{ "reasoning": { "effort": "none" } }</code></td>
+            <td><code>gpt-6-luna</code> 支持 <code>none</code>。<code>gpt-6-astra</code> 和 <code>gpt-6.1-sol</code> 的最低档位为 <code>low</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></td>
+          </tr>
+          <tr>
+            <td>智谱 GLM-5.3 Chat Completions</td>
+            <td><code>{ "thinking": { "type": "enabled" }, "reasoning_effort": "low" }</code></td>
+            <td>思考始终开启，<code>low</code> 是最低档位。<a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">GLM-5.3 模型文档</a></td>
           </tr>
           <tr>
             <td>通义千问 / 阿里云百炼</td>
             <td><code>{ "enable_thinking": false }</code></td>
-            <td>直接使用布尔值开关。</td>
+            <td>适用于支持关闭思考的混合思考模型。<a href="https://help.aliyun.com/zh/model-studio/deep-thinking">百炼思考模式</a></td>
           </tr>
           <tr>
-            <td>Ollama (本地部署)</td>
-            <td><code>{ "think": false }</code></td>
-            <td>针对部分支持 Ollama 的推理模型控制。</td>
+            <td>Ollama OpenAI 兼容 Chat Completions</td>
+            <td><code>{ "reasoning_effort": "none" }</code></td>
+            <td>实际效果取决于模型支持的档位。原生 <code>/api/chat</code> 的参数需单独核对。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></td>
           </tr>
         </tbody>
       </table>
@@ -186,12 +197,12 @@ tr:last-child td { border-bottom: none; }
 
     <div class="pg-form">
       <div class="pg-field">
-        <label>服务商名称</label>
-        <input type="text" id="dtProvider" placeholder="例如：硅基流动、火山引擎">
+        <label for="dtProvider">服务商或实际端点</label>
+        <input type="text" id="dtProvider" placeholder="例如 Ollama /v1/chat/completions">
       </div>
       <div class="pg-field">
-        <label>模型名称</label>
-        <input type="text" id="dtModel" placeholder="例如：DeepSeek-R1、ep-12345">
+        <label for="dtModel">模型名称</label>
+        <input type="text" id="dtModel" placeholder="例如 deepseek-flash、glm-5.3">
       </div>
       <button class="pg-btn" onclick="generateDtPrompt()">生成提示词</button>
     </div>
@@ -239,20 +250,11 @@ function generateDtPrompt() {
   output.style.color = '';
   output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.wwang.de/AiTranslate/）。
 
-我现在接入了【${provider}】的【${model}】。
-该插件允许向大模型服务端注入自定义的 JSON 请求体（Extra Body）来控制高级参数。请查阅其最新的官方 API 文档，告诉我如果要强制关闭或最小化该模型的“深度思考/思维链（Reasoning）”功能以加快响应速度，我应该在发出的 JSON 请求体中添加什么参数？
+请查阅【${provider}】上【${model}】的官方 API 文档，确认实际请求端点和模型是否支持关闭思考或降低推理强度。若服务同时提供多个端点，请按端点分别说明。
 
-请注意：不要泛泛而谈，请直接给出一个准确的 JSON 对象代码示例。例如，如果该模型兼容 OpenAI 的 reasoning_effort，你应当输出：
-\`\`\`json
-{
-  "reasoning_effort": "none"
-}
-\`\`\`
-（提醒：部分新模型（如 gpt-5.5）可能在传统的 Chat Completions API 下不支持该参数，必须切换到新版有状态的 Responses API。如果你发现类似限制，请务必在回答中特别强调说明。）
+请给出可直接粘贴到插件「额外请求体」的 JSON 对象。插件会把它合并到实际 HTTP 请求体。SDK 的 extra_body 包装层无需填写。OpenAI Chat Completions 使用顶层 reasoning_effort，Responses 使用嵌套的 reasoning.effort。Ollama 等服务的原生和兼容端点也应分开核对。
 
-【输出要求】
-1. 必须附上你参考的官方文档链接以供核查。
-2. 请使用纯文本和代码块来组织你的回答，**绝对不要使用 Markdown 表格**来呈现 JSON 示例或参数说明，这会导致我复制时代码格式错乱。`;
+只有模型和端点都支持时才给出关闭思考的示例。如果只能降低推理强度，说明最低支持档位。如果官方文档未确认支持，请明确说明。请用纯文本和独立 JSON 代码块回答，并附上官方文档链接。`;
 
   copyBtn.style.display = 'block';
 }

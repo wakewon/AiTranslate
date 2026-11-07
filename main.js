@@ -147,7 +147,7 @@ function parseJSON(str) {
     try {
         return JSON.parse(str);
     } catch (e) {
-        $log.error('JSON 解析失败: ' + str);
+        $log.error('JSON 解析失败');
         return {};
     }
 }
@@ -167,6 +167,18 @@ function getApiKey(apiKeys) {
     var keys = trimmed.split(',').map(function (k) { return k.trim(); }).filter(function (k) { return k; });
     if (keys.length === 0) return '';
     return keys[Math.floor(Math.random() * keys.length)];
+}
+
+var authHeaderNames = ['authorization', 'x-api-key', 'x-goog-api-key', 'api-key'];
+
+function mergeRequestHeaders(headers, extraHeaders) {
+    Object.keys(extraHeaders).forEach(function (name) {
+        var normalized = name.toLowerCase();
+        var existing = Object.keys(headers).find(function (header) {
+            return header.toLowerCase() === normalized;
+        });
+        headers[existing || name] = extraHeaders[name];
+    });
 }
 
 function deepMerge(target, source) {
@@ -266,18 +278,6 @@ var adapters = {};
 // --- OpenAI Chat Completions ---
 adapters.openai_chat = {
     defaultPath: '/v1/chat/completions',
-    buildUrl: function (base, model, endpoint, extraQuery) {
-        var path = endpoint || this.defaultPath;
-        var url = ensureUrl(base) + path;
-        return buildUrlWithQuery(url, extraQuery);
-    },
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-        };
-        return deepMerge(headers, extraHeaders);
-    },
     buildBody: function (query, isStream, extraBody) {
         var prompts = buildPrompts(query);
         var model = getOption('model', 'gpt-4o');
@@ -313,18 +313,6 @@ adapters.openai_chat = {
 // --- OpenAI Responses API ---
 adapters.openai_responses = {
     defaultPath: '/v1/responses',
-    buildUrl: function (base, model, endpoint, extraQuery) {
-        var path = endpoint || this.defaultPath;
-        var url = ensureUrl(base) + path;
-        return buildUrlWithQuery(url, extraQuery);
-    },
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-        };
-        return deepMerge(headers, extraHeaders);
-    },
     buildBody: function (query, isStream, extraBody) {
         var prompts = buildPrompts(query);
         var model = getOption('model', 'gpt-4o');
@@ -370,18 +358,6 @@ adapters.openai_responses = {
 // --- OpenAI Legacy Completions ---
 adapters.openai_completions = {
     defaultPath: '/v1/completions',
-    buildUrl: function (base, model, endpoint, extraQuery) {
-        var path = endpoint || this.defaultPath;
-        var url = ensureUrl(base) + path;
-        return buildUrlWithQuery(url, extraQuery);
-    },
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-        };
-        return deepMerge(headers, extraHeaders);
-    },
     buildBody: function (query, isStream, extraBody) {
         var prompts = buildPrompts(query);
         var model = getOption('model', 'gpt-3.5-turbo-instruct');
@@ -414,19 +390,7 @@ adapters.openai_completions = {
 // --- Anthropic Claude Messages ---
 adapters.anthropic_messages = {
     defaultPath: '/v1/messages',
-    buildUrl: function (base, model, endpoint, extraQuery) {
-        var path = endpoint || this.defaultPath;
-        var url = ensureUrl(base) + path;
-        return buildUrlWithQuery(url, extraQuery);
-    },
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01'
-        };
-        return deepMerge(headers, extraHeaders);
-    },
+    defaultHeaders: { 'anthropic-version': '2023-06-01' },
     buildBody: function (query, isStream, extraBody) {
         var prompts = buildPrompts(query);
         var model = getOption('model', 'claude-sonnet-4-5');
@@ -469,14 +433,6 @@ adapters.anthropic_messages = {
 // --- Anthropic OpenAI 兼容 ---
 adapters.anthropic_openai_chat = {
     defaultPath: '/v1/chat/completions',
-    buildUrl: adapters.openai_chat.buildUrl,
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': apiKey
-        };
-        return deepMerge(headers, extraHeaders);
-    },
     buildBody: adapters.openai_chat.buildBody,
     parseResponse: adapters.openai_chat.parseResponse,
     parseStreamDelta: adapters.openai_chat.parseStreamDelta,
@@ -485,28 +441,11 @@ adapters.anthropic_openai_chat = {
 
 // --- Gemini generateContent ---
 adapters.gemini_generate_content = {
-    defaultPath: '/v1beta/models/',
-    buildUrl: function (base, model, endpoint, extraQuery) {
-        var modelName = getOption('model', 'gemini-2.5-flash');
-        var apiKey = getApiKey(getOption('apiKey', ''));
-        var isStream = getOption('stream', 'enable') === 'enable';
+    defaultAuth: 'x-goog-api-key',
+    buildPath: function (model, isStream) {
+        var modelName = model || 'gemini-2.5-flash';
         var action = isStream ? ':streamGenerateContent?alt=sse' : ':generateContent';
-
-        if (endpoint) {
-            // 用户自定义路径
-            var url = ensureUrl(base) + endpoint;
-            var q = deepMerge({ key: apiKey }, extraQuery || {});
-            return buildUrlWithQuery(url, q);
-        }
-        var url = ensureUrl(base) + this.defaultPath + modelName + action;
-        var q = deepMerge({ key: apiKey }, extraQuery || {});
-        return buildUrlWithQuery(url, q);
-    },
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json'
-        };
-        return deepMerge(headers, extraHeaders);
+        return '/v1beta/models/' + modelName + action;
     },
     buildBody: function (query, isStream, extraBody) {
         var prompts = buildPrompts(query);
@@ -556,14 +495,6 @@ adapters.gemini_generate_content = {
 // --- Gemini OpenAI 兼容 ---
 adapters.gemini_openai_chat = {
     defaultPath: '/v1beta/openai/chat/completions',
-    buildUrl: adapters.openai_chat.buildUrl,
-    buildHeaders: function (apiKey, extraHeaders) {
-        var headers = {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + apiKey
-        };
-        return deepMerge(headers, extraHeaders);
-    },
     buildBody: adapters.openai_chat.buildBody,
     parseResponse: adapters.openai_chat.parseResponse,
     parseStreamDelta: adapters.openai_chat.parseStreamDelta,
@@ -594,28 +525,56 @@ function parseSSELine(line) {
     return null;
 }
 
-function makeNonStreamRequest(query, adapter) {
-    var format = getOption('format', 'openai_chat');
+function buildRequest(query, adapter, isStream) {
     var apiKey = getApiKey(getOption('apiKey', ''));
     var base = getOption('baseURL', '');
     var endpoint = getOption('endpointOverride', '');
-    var extraHeaders = parseJSON(getOption('extraHeaders', ''));
-    var extraQuery = parseJSON(getOption('extraQuery', ''));
+    var extraHeaders = parseJSON(getOption('extraHeaders', '')) || {};
+    var extraQuery = parseJSON(getOption('extraQuery', '')) || {};
     var extraBody = parseJSON(getOption('extraBody', ''));
     var model = getOption('model', '');
+    var path = endpoint || (adapter.buildPath ? adapter.buildPath(model, isStream) : adapter.defaultPath);
+    var url = ensureUrl(base) + path;
+    var headers = Object.assign({ 'Content-Type': 'application/json' }, adapter.defaultHeaders);
+    var authMode = getOption('authMode', '');
 
-    var url = adapter.buildUrl(base, model, endpoint, extraQuery);
-    var headers = adapter.buildHeaders(apiKey, extraHeaders);
-    var body = adapter.buildBody(query, false, extraBody);
-
-    $log.info('请求 URL: ' + url);
-    $log.info('请求体: ' + JSON.stringify(body));
-
-    $http.request({
+    if (apiKey) {
+        var queryStart = url.indexOf('?');
+        var hasQueryKey = Object.prototype.hasOwnProperty.call(extraQuery, 'key')
+            || (queryStart >= 0 && /(^|&)key(?:=|&|$)/.test(url.slice(queryStart + 1)));
+        if (!authMode || authMode === 'auto') {
+            var customAuth = hasQueryKey || Object.keys(extraHeaders).some(function (name) {
+                return authHeaderNames.indexOf(name.toLowerCase()) >= 0;
+            });
+            // 兼容旧测试版保存的 Claude 选项。显式选择自动时采用格式默认值。
+            var legacyClaudeKey = !authMode && getOption('anthropicAuth') === 'x-api-key'
+                && (adapter === adapters.anthropic_messages || adapter === adapters.anthropic_openai_chat);
+            authMode = legacyClaudeKey ? 'x-api-key' : (adapter.defaultAuth || 'authorization');
+            if (customAuth) authMode = 'none';
+        }
+        if (authMode === 'query-key' && !hasQueryKey) {
+            extraQuery = Object.assign({ key: apiKey }, extraQuery);
+        } else if (authMode === 'authorization') {
+            headers.Authorization = 'Bearer ' + apiKey;
+        } else if (authHeaderNames.indexOf(authMode) >= 0) {
+            headers[authMode] = apiKey;
+        }
+    }
+    mergeRequestHeaders(headers, extraHeaders);
+    return {
         method: 'POST',
-        url: url,
+        url: buildUrlWithQuery(url, extraQuery),
         header: headers,
-        body: body,
+        body: adapter.buildBody(query, isStream, extraBody)
+    };
+}
+
+function makeNonStreamRequest(query, adapter) {
+    var request = buildRequest(query, adapter, false);
+    $log.info('请求 URL: ' + request.url.split('?')[0]);
+    $log.info('请求体: ' + JSON.stringify(request.body));
+
+    $http.request(Object.assign(request, {
         handler: function (resp) {
             if (resp.error || !resp.data) {
                 handleError(query, {
@@ -646,33 +605,17 @@ function makeNonStreamRequest(query, adapter) {
                 result: buildResult(query, text, text.split(/\n+/))
             });
         }
-    });
+    }));
 }
 
 function makeStreamRequest(query, adapter) {
-    var format = getOption('format', 'openai_chat');
-    var apiKey = getApiKey(getOption('apiKey', ''));
-    var base = getOption('baseURL', '');
-    var endpoint = getOption('endpointOverride', '');
-    var extraHeaders = parseJSON(getOption('extraHeaders', ''));
-    var extraQuery = parseJSON(getOption('extraQuery', ''));
-    var extraBody = parseJSON(getOption('extraBody', ''));
-    var model = getOption('model', '');
-
-    var url = adapter.buildUrl(base, model, endpoint, extraQuery);
-    var headers = adapter.buildHeaders(apiKey, extraHeaders);
-    var body = adapter.buildBody(query, true, extraBody);
-
-    $log.info('[Stream] 请求 URL: ' + url);
+    var request = buildRequest(query, adapter, true);
+    $log.info('[Stream] 请求 URL: ' + request.url.split('?')[0]);
 
     var targetText = '';
     var hasError = false;
 
-    $http.streamRequest({
-        method: 'POST',
-        url: url,
-        header: headers,
-        body: body,
+    $http.streamRequest(Object.assign(request, {
         cancelSignal: query.cancelSignal,
         streamHandler: function (streamData) {
             if (hasError) return;
@@ -763,7 +706,7 @@ function makeStreamRequest(query, adapter) {
                 });
             }
         }
-    });
+    }));
 }
 
 // ============================================================================
@@ -772,19 +715,9 @@ function makeStreamRequest(query, adapter) {
 
 function translate(query, completion) {
     // 验证配置
-    var apiKey = getOption('apiKey', '');
     var baseURL = getOption('baseURL', '');
     var model = getOption('model', '');
     var format = getOption('format', 'openai_chat');
-
-    if (!apiKey && format !== 'gemini_generate_content') {
-        handleError(query, {
-            type: 'secretKey',
-            message: '请填写 API Key',
-            addition: '请在插件配置中填写有效的 API Key'
-        });
-        return;
-    }
 
     if (!baseURL) {
         handleError(query, {
@@ -815,17 +748,9 @@ function translate(query, completion) {
 }
 
 function pluginValidate(completion) {
-    var apiKey = getOption('apiKey', '');
     var baseURL = getOption('baseURL', '');
     var format = getOption('format', 'openai_chat');
 
-    if (!apiKey) {
-        completion({
-            result: false,
-            error: { type: 'secretKey', message: '请填写 API Key' }
-        });
-        return;
-    }
     if (!baseURL) {
         completion({
             result: false,

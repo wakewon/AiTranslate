@@ -12,7 +12,7 @@ AiTranslate 是一个面向 Bob 的通用 AI 翻译插件，基于请求格式�
 #### 📦 安装方法
 1. 在下方 **Assets** 中下载 `{{PACKAGE_NAME}}`。
 2. 双击 `.bobplugin` 文件，Bob 会自动完成插件安装或升级。
-3. 在 Bob 的服务设置中填写 API 地址、API Key 和模型名称即可使用。
+3. 在 Bob 的服务设置中填写 API 地址和模型 ID。需要鉴权的端点请提供有效凭据。
 
 #### 📖 文档与反馈
 - 使用文档与配置教程：https://wakewon.wwang.de/AiTranslate/

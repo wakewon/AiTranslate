@@ -432,7 +432,7 @@ td code {
 
   <!-- Hero -->
   <header class="hero">
-    <div class="hero-badge">Bob Plugin v1.1.0</div>
+    <div class="hero-badge">Bob Plugin v1.2.0</div>
     <h1>一个插件，搞定所有大模型。</h1>
     <p>基于「请求格式」建模，支持动态参数注入。彻底解决 Bob 翻译插件一服务商一插件、参数写死的痛点。</p>
     <div class="hero-actions">
@@ -455,7 +455,7 @@ td code {
       <div class="card">
         <div class="card-icon">🎯</div>
         <h3>按格式建模，而不是服务商</h3>
-        <p>主流服务商底层无非是 OpenAI 或 Claude 格式的变体。我们只提供格式模板，让你通过 Base URL 和密钥无缝接入任意服务商。</p>
+        <p>选择目标端点支持的请求格式，再配置 Base URL、模型和鉴权方式。直连默认的本地 Ollama 和 LM Studio 时，API Key 可以留空。<a href="./docs/basic-usage.html#authentication">查看服务鉴权对照</a></p>
       </div>
       <div class="card">
         <div class="card-icon">🎛️</div>
@@ -489,12 +489,12 @@ td code {
           <tr>
             <td><strong>OpenAI Chat Completions（通用兼容）</strong></td>
             <td><code>/v1/chat/completions</code></td>
-            <td>最通用的格式。适用于几乎所有兼容 OpenAI 的端点：DeepSeek, 硅基流动, OpenRouter, 智谱 GLM, 豆包, 阿里百炼, Ollama 等。</td>
+            <td>适用于提供 OpenAI 兼容 Chat Completions 的服务，包括 DeepSeek、硅基流动、OpenRouter、智谱 GLM、火山方舟、阿里云百炼和 Ollama。</td>
           </tr>
           <tr>
             <td><strong>OpenAI Responses API</strong></td>
             <td><code>/v1/responses</code></td>
-            <td>OpenAI 新一代非对话标准，适合部分支持的较新模型。</td>
+            <td>适用于 OpenAI GPT-6 系列等支持 Responses 的模型。</td>
           </tr>
           <tr>
             <td><strong>OpenAI Legacy Completions</strong></td>
@@ -504,7 +504,7 @@ td code {
           <tr>
             <td><strong>Anthropic Claude Messages</strong></td>
             <td><code>/v1/messages</code></td>
-            <td>Claude 官方原生端点专用，支持 <code>anthropic-version</code> 等高级鉴权头。</td>
+            <td>适用于 Claude 原生 Messages 接口，自动发送 <code>anthropic-version</code> 版本头。</td>
           </tr>
           <tr>
             <td><strong>Anthropic OpenAI 兼容</strong></td>
@@ -514,12 +514,12 @@ td code {
           <tr>
             <td><strong>Gemini generateContent</strong></td>
             <td><code>/v1beta/models/{model}:generateContent</code></td>
-            <td>Gemini 官方原生格式。注意：模型名会自动拼接到 URL 路径中。</td>
+            <td>默认端点会从「模型」字段读取实际 ID 并拼入路径。手动覆盖时，请把 <code>{model}</code> 换成实际 ID。</td>
           </tr>
           <tr>
             <td><strong>Gemini OpenAI 兼容</strong></td>
-            <td><code>/v1/chat/completions</code></td>
-            <td>部分基于 Gemini 但提供 OpenAI 兼容接口的服务。</td>
+            <td><code>/v1beta/openai/chat/completions</code></td>
+            <td>Gemini 官方 OpenAI 兼容接口，使用 Bearer 鉴权。</td>
           </tr>
         </tbody>
       </table>
@@ -573,9 +573,9 @@ td code {
       <ol style="padding-left: 20px; line-height: 1.8;">
         <li>在 <a href="https://github.com/wakewon/AiTranslate/releases" target="_blank" style="color: var(--accent-color); text-decoration: none;">GitHub Releases</a> 下载最新的 <code>.bobplugin</code> 文件并双击安装。</li>
         <li>在 Bob 的设置 -> 服务 -> 文本翻译中，点击左下角 <code>+</code> 号，添加 <strong>Ai 翻译</strong>。</li>
-        <li>根据您的服务商，在插件设置中选择对应的 <strong>请求格式</strong>（通常默认的 OpenAI Chat 就能通吃 90% 的服务商）。</li>
-        <li>填入您的 <strong>Base URL</strong> 和 <strong>API Key</strong>。注意：此插件的请求格式默认自带了版本和端点信息（如 <code>/v1/chat/completions</code>）。除非有特殊需求需要手动指定 Endpoint，一般 Base URL 填写根地址即可。</li>
-        <li>填入您要调用的 <strong>模型名称 (Model)</strong>。注意：这几乎是必填项，且必须填入服务商 API 文档中规定的具体模型参数名（例如 <code>deepseek-v4-flash</code>、<code>glm-4-flash</code> 等）。</li>
+        <li>根据实际调用的端点，在插件设置中选择对应的 <strong>请求格式</strong>。</li>
+        <li>在 <strong>Base URL</strong> 中填写服务根地址。插件会按请求格式添加端点，例如 <code>/v1/chat/completions</code>。需要鉴权的端点请提供有效凭据，未开启鉴权的本地端点可留空。<a href="./docs/basic-usage.html#authentication">按服务核对 API Key 和鉴权方式</a></li>
+        <li>在 <strong>模型</strong> 中填写当前端点支持的模型 ID，例如 <code>gpt-6-luna</code> 或 <code>deepseek-flash</code>。<a href="./docs/basic-usage.html#model-ids">按服务查询模型 ID</a></li>
         <li>(可选) 您可以打开<a href="./tools/param-builder.html" style="color: var(--accent-color); text-decoration: none;">高级参数构建工具</a>生成个性化参数（如关闭思考等）并粘贴到插件底部的“额外请求体”中。更多进阶玩法请访问<a href="./docs/index.html" style="color: var(--accent-color); text-decoration: none;">文档中心</a>阅读。</li>
       </ol>
     </div>

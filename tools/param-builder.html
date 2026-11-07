@@ -653,17 +653,17 @@ body {
       <div class="card">
         <div class="card-title"><span class="card-title-icon">⚡</span>快捷模板</div>
         <div class="templates-grid">
-          <button class="btn-template" onclick="addTemplate('reasoning_effort', 'none', 'string')" data-tooltip="适用于 OpenAI 官方新接口 (gpt-5.5 需使用 Responses API / o1 等)">
-            推理参数 (reasoning_effort) <span class="template-type">"none"</span>
+          <button class="btn-template" onclick="addTemplate('reasoning_effort', 'none', 'string')" data-tooltip="用于支持 none 的 Chat Completions 模型，请按服务和模型文档核对">
+            Chat Completions 推理强度 <span class="template-type">"none"</span>
           </button>
-          <button class="btn-template" onclick="addTemplate('thinking', '{&quot;type&quot;:&quot;disabled&quot;}', 'object')" data-tooltip="适用于 DeepSeek 官方 / GLM / 豆包 / 腾讯 等嵌套对象格式">
+          <button class="btn-template" onclick="addTemplate('reasoning', '{&quot;effort&quot;:&quot;none&quot;}', 'object')" data-tooltip="用于支持 none 的 Responses API 模型">
+            Responses 推理强度 <span class="template-type">对象</span>
+          </button>
+          <button class="btn-template" onclick="addTemplate('thinking', '{&quot;type&quot;:&quot;disabled&quot;}', 'object')" data-tooltip="适用于支持此参数的 DeepSeek 官方 Chat Completions 模型">
             推理参数 (thinking) <span class="template-type">对象</span>
           </button>
           <button class="btn-template" onclick="addTemplate('enable_thinking', 'false', 'boolean')" data-tooltip="适用于 通义千问 / 阿里云百炼 等">
             推理参数 (enable_thinking) <span class="template-type">false</span>
-          </button>
-          <button class="btn-template" onclick="addTemplate('think', 'false', 'boolean')" data-tooltip="适用于 Ollama 本地模型">
-            推理参数 (Ollama) <span class="template-type">false</span>
           </button>
           <button class="btn-template" onclick="addTemplate('top_p', '0.9', 'number')">
             top_p <span class="template-type">数字</span>
