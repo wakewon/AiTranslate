@@ -2,6 +2,14 @@
   "identifier": "com.github.wakewon.ai.translate",
   "versions": [
     {
+      "version": "1.2.0",
+      "desc": "AiTranslate 1.2.0 更新",
+      "sha256": "e480cacffb0b7daa2855ab2aa223e5443379d68eca9c61ac03b28c3350147ce6",
+      "url": "https://github.com/wakewon/AiTranslate/releases/download/v1.2.0/AiTranslate-v1.2.0.bobplugin",
+      "minBobVersion": "1.8.0",
+      "timestamp": 1794041012000
+    },
+    {
       "version": "1.1.0",
       "desc": "AiTranslate 1.1.0 更新",
       "sha256": "3d246b4513fe3b56b90cc51d555bfbc2e4dd6651478e4faf9f5f81ce78394cde",
