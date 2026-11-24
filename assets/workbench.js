@@ -4,7 +4,7 @@
   const modelInput = byId('model');
   const formatSelect = byId('format');
   const authSelect = byId('auth-mode');
-  const toolButtons = [...document.querySelectorAll('.bench-tool-toggle')];
+  const tabs = [...document.querySelectorAll('[role=tab]')];
   const unselected = { id: '', name: '', status: 'unselected' };
   const custom = {
     id: 'custom', name: '自定义服务商', status: 'supported', models: [],
@@ -14,11 +14,14 @@
   let providers = [];
   let sources = {};
   let selected = custom;
-  let thinkingModel = '';
+  let catalogModelIds = new Set();
+  let currentSearch = location.search;
+  let contextKey = '';
+  let choices = [];
+  let strength = '';
   let toastTimer;
   let toastOwner;
   const copyRequests = new WeakMap();
-  let returningToQuestion = false;
 
   function el(tag, text, className) {
     const node = document.createElement(tag);
@@ -31,62 +34,36 @@
     return select.selectedOptions[0]?.textContent || '';
   }
 
-  function setTool(hash, writeURL = false) {
-    const target = hash === 'thinking' ? 'lookup' : hash;
-    for (const button of toolButtons) {
-      const id = button.getAttribute('aria-controls');
-      const open = id === target && !button.closest('.bench-tool').hidden;
-      button.setAttribute('aria-expanded', String(open));
-      byId(id).hidden = !open;
-    }
-    if (target === 'lookup') {
-      byId(hash === 'thinking' ? 'lookup-thinking' : 'lookup-connection').checked = true;
-      renderPrompts();
-    }
-    if (writeURL) {
-      const url = new URL(location.href);
-      url.hash = hash;
-      replaceLocation(url);
-    }
-  }
-
   function replaceLocation(url) {
-    try { history.replaceState(null, '', url); } catch { /* Local previews can restrict history updates. */ }
+    try { history.replaceState(null, '', url); } catch { /* Some file viewers restrict history. */ }
+    currentSearch = location.search;
   }
 
-  for (const button of toolButtons) {
-    button.addEventListener('click', () => {
-      const target = button.getAttribute('aria-controls');
-      setTool(button.getAttribute('aria-expanded') === 'true' ? '' : target, true);
-    });
-  }
   function followHash() {
     const hash = location.hash.slice(1);
-    setTool(hash);
-    const target = hash === 'thinking' ? 'lookup' : hash;
-    const toggle = byId('tab-' + target);
-    if (toggle && !toggle.closest('.bench-tool').hidden) toggle.scrollIntoView({block: 'start'});
+    const thinking = hash === 'thinking' || hash === 'parameters';
+    for (const tab of tabs) {
+      const active = (tab.id === 'tab-thinking') === thinking;
+      tab.setAttribute('aria-selected', String(active));
+      tab.tabIndex = active ? 0 : -1;
+      byId(tab.getAttribute('aria-controls')).hidden = !active;
+    }
+    if (hash === 'parameters') byId('manual-parameters').open = true;
+    if (hash === 'prompts' || hash === 'lookup') byId(hash).open = true;
   }
-  window.addEventListener('hashchange', followHash);
-  byId('lookup-kind').addEventListener('change', () => setTool(byId('lookup-thinking').checked ? 'thinking' : 'lookup', true));
-  byId('choose-for-lookup').addEventListener('click', () => {
-    returningToQuestion = true;
-    const field = selected === custom ? byId('custom-name') : providerSelect;
-    field.focus();
-    field.scrollIntoView({block: 'center'});
-  });
-  byId('return-to-question').addEventListener('click', () => {
-    returningToQuestion = false;
-    byId('return-to-question').hidden = true;
-    document.querySelector('[data-copy="lookup-output"]').focus();
-  });
-  for (const shortcut of document.querySelectorAll('[data-preset]')) {
-    shortcut.addEventListener('click', () => {
-      providerSelect.value = shortcut.dataset.preset;
-      providerSelect.dispatchEvent(new Event('change'));
-      providerSelect.focus();
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener('click', () => { location.hash = tab.id.slice(4); followHash(); });
+    tab.addEventListener('keydown', event => {
+      const keys = { ArrowLeft: 1 - index, ArrowRight: 1 - index, Home: 0, End: 1 };
+      if (!(event.key in keys)) return;
+      event.preventDefault();
+      tabs[keys[event.key]].focus();
+      tabs[keys[event.key]].click();
     });
-  }
+  });
+  window.addEventListener('hashchange', followHash);
+  followHash();
 
   function field(label, value, id, placeholder = '留空', copyable = true) {
     const group = el('div');
@@ -120,12 +97,10 @@
     byId('compatibility-note').hidden = available;
     if (!available) {
       byId('compatibility-note').textContent = selected === unselected
-        ? '选好平台后，这里会列出需要填写的内容。'
-        : '这个服务目前无法接入。请在第 1 步改选其他平台。';
+        ? '选择服务商后即可查看连接字段。'
+        : '此服务已下线，请选择其他服务商。';
       return;
     }
-    const name = selected === custom ? byId('custom-name').value.trim() || '自定义服务' : selected.name;
-    byId('field-title').textContent = name + (/[a-z0-9]$/i.test(name) ? ' 的填写方式' : '的填写方式');
     const baseURL = byId('base-url').value.trim();
     const token = baseURL.match(/\{[^}]+\}/)?.[0];
     const endpoint = byId('endpoint').value.trim();
@@ -135,85 +110,80 @@
     defaults.replaceChildren();
     const formatField = field('请求格式', selectLabel(formatSelect), 'out-format', '', false);
     (formatSelect.value === 'openai_chat' ? defaults : list).append(formatField);
-    list.append(field('Base URL', baseURL, 'out-base', '先在第 1 步填写服务地址', !token));
+    list.append(field('Base URL', baseURL, 'out-base', '在「连接选项」中填写服务地址', !token));
     (endpoint ? list : defaults).append(field('端点路径覆盖', endpoint, 'out-endpoint', '留空'));
     list.append(field('API Key', keyInstruction(), 'out-key', '', false));
     const optionalAuth = authSelect.value === 'auto' || (authSelect.value === 'none' && selected.authMode === 'none');
     const authField = field('鉴权方式', selectLabel(authSelect), 'out-auth', '', false);
     (optionalAuth ? defaults : list).append(authField);
-    list.append(field('模型', modelInput.value.trim(), 'out-model', '先在第 1 步填入模型名称或部署名'));
+    list.append(field('模型', modelInput.value.trim(), 'out-model', '填写服务商提供的模型或部署名'));
     byId('defaults').hidden = !defaults.children.length;
-    byId('credential-note').textContent = token ? '请先在第 1 步将 ' + token + ' 换成你的实际取值，再复制服务地址。' : '';
+    byId('credential-note').textContent = token ? '在「连接选项」中将 ' + token + ' 换成你的实际取值，再复制服务地址。' : '';
     byId('default-auth-tip').hidden = !(optionalAuth && authSelect.value === 'none');
   }
 
-  function showPreparation() {
-    const guide = byId('provider-guide');
-    byId('prepare-guide').hidden = selected === unselected;
-    guide.hidden = !(selected.bob || selected.docs);
-    if (selected === unselected) return;
-    let title = '准备一把密钥';
-    let message = '登录「' + selected.name + '」的开发者平台，创建 API Key（密钥）。下一步直接把它粘贴到 Bob。';
-    let link = selected.bob ? '查看密钥申请教程' : '打开服务商文档';
-    if (selected === custom) {
-      title = '先向服务提供方确认';
-      message = '请管理员提供服务地址、模型名称和密钥要求。如果使用代理，地址和密钥都应来自代理平台。';
-    } else if (selected.status === 'unavailable') {
-      title = '服务已下线';
-      message = selected.note;
-      link = '查看 Bob 的服务说明';
-    } else if (selected.id === 'bilibili') {
-      title = '无需申请密钥';
-      message = '可以直接使用 bilibili 的公共翻译服务。下面已经选好一个模型，你可以先用它试译。';
-      link = '查看 Bob 的使用说明';
-    } else if (selected.group === 'local') {
-      title = '先启动模型服务';
-      message = selected.id === 'ollama' ? '在 Mac 上启动 Ollama，确认已经下载了要用的对话模型。默认本机连接可把密钥留空。'
-        : selected.id === 'lmstudio' ? '在 LM Studio 载入模型，然后到 Developer 启动服务器。开启了令牌验证时，需要在 Bob 中填写令牌。'
-        : '启动自己的模型服务器，确认能访问服务地址。如果服务器开启了密钥验证，准备同一把密钥。';
-      link = selected.bob ? '查看本地配置教程' : '查看服务启动说明';
-    } else if (selected.id === 'azure') {
-      title = '准备 Azure 资源';
-      message = '从 Azure 资源中复制密钥、资源地址和部署名称。三个值都要来自你正在使用的资源。';
-    } else if (selected.group === 'gateway') {
-      message = '在「' + selected.name + '」创建自己的 API Key。即使选择其他公司的模型，也要使用这个平台发给你的密钥。';
-    }
-    byId('prepare-title').textContent = title;
-    byId('prepare-copy').textContent = message;
-    if (!guide.hidden) {
-      guide.href = selected.bob || selected.docs;
-      guide.textContent = link + ' ↗';
-    }
+  function sourceLink(id, url) {
+    const link = byId(id);
+    link.hidden = !url;
+    if (url) link.href = url;
+    else link.removeAttribute('href');
   }
 
-  function renderModelDetails() {
+  function renderMetadata() {
     const source = sources[selected.id];
     const model = source?.models.find(item => item.id === modelInput.value.trim());
-    const example = selected.id !== 'bilibili' && selected.models?.includes(modelInput.value.trim());
-    byId('model-hint').textContent = (example ? '这里预填了一个示例，可换成你已开通的模型。' : '') + (selected.modelHint || '');
-    const endpoint = byId('endpoint').value.trim().split('?')[0];
-    const pathModel = endpoint.match(/\/models\/([^/]+):(?:streamGenerateContent|generateContent)$/)?.[1];
-    const levels = selected.id === 'gemini' && formatSelect.value === 'gemini_generate_content' && (!endpoint || pathModel === model?.id)
-      ? model?.thinkingLevels || [] : [];
-    const current = levels.length ? model.id : '';
-    if (thinkingModel !== current) {
-      thinkingModel = current;
-      byId('thinking-level').replaceChildren(new Option('使用模型默认值', ''), ...levels.map(level => new Option(level, level)));
-      renderJSON();
-    }
-    byId('thinking-field').hidden = !levels.length;
-    byId('edit-thinking').hidden = !levels.length;
     byId('model-details').hidden = !model;
+    byId('model-details').open = false;
     if (!model) return;
     const details = byId('model-data');
     details.replaceChildren();
-    for (const [label, value] of [['上下文长度', model.contextLength], ['最大输出', model.maxOutputTokens]]) {
-      if (value != null) details.append(el('dt', label), el('dd', value.toLocaleString('zh-CN') + ' tokens'));
+    const counts = [['上下文长度', model.contextLength], ['最大输出', model.maxOutputTokens]];
+    for (const [label, count] of counts) {
+      if (count != null) details.append(el('dt', label), el('dd', count.toLocaleString('zh-CN') + ' tokens'));
     }
-    if (levels.length) details.append(el('dt', '思考等级'), el('dd', levels.join(' · ')));
-    details.append(el('dt', '接口列出的参数'), el('dd', model.parameters?.length ? model.parameters.join(' · ') : '该来源未列出参数'));
-    byId('model-source').href = source.url;
+    if (model.parameters?.length) details.append(el('dt', '公开参数'), el('dd', model.parameters.join(' · ')));
+    sourceLink('model-source', source.url);
+    byId('model-source').textContent = '模型目录来源' + (source.updatedAt ? ' · ' + source.updatedAt : '') + ' ↗';
   }
+
+  function renderThinking() {
+    const model = modelInput.value.trim();
+    const format = formatSelect.value;
+    const endpoint = byId('endpoint').value.trim();
+    const baseURL = byId('base-url').value.trim();
+    const key = JSON.stringify([selected.id, model, format, endpoint, baseURL]);
+    if (key === contextKey) return;
+    contextKey = key;
+    const sourceModel = sources[selected.id]?.models.find(item => item.id === model);
+    const result = window.reasoningFor({ provider: selected, model, sourceModel, format, endpoint, baseURL });
+    choices = selected.status === 'supported' && model ? result.choices : [];
+    const lowest = choices[0]?.value;
+    strength = ['off', 'between_tools', 'minimal', 'low'].includes(lowest) ? lowest : '';
+    byId('thinking-note').textContent = selected === unselected ? '选择服务商和模型，查看能否关闭思考或调低强度。'
+      : selected.status !== 'supported' ? '此服务已下线，请选择其他服务商。'
+      : !model ? '输入模型或部署名称，查看它支持的思考设置。' : result.note;
+    sourceLink('thinking-source', selected.status === 'supported' ? result.url || selected.docs : '');
+    const group = byId('thinking-choices');
+    group.replaceChildren();
+    byId('thinking-options').hidden = !choices.length;
+    if (choices.length) {
+      for (const item of [{ value: '', label: '模型默认' }, ...choices]) {
+        const label = el('label');
+        const radio = el('input');
+        radio.type = 'radio';
+        radio.name = 'strength';
+        radio.value = item.value;
+        radio.checked = item.value === strength;
+        label.append(radio, el('span', item.label));
+        group.append(label);
+      }
+    }
+    renderJSON();
+  }
+  byId('thinking-choices').addEventListener('change', event => {
+    strength = event.target.value;
+    renderJSON();
+  });
 
   function renderPrompts() {
     const scene = byId('scene').value;
@@ -239,106 +209,87 @@
       if (byId('endpoint').value.trim()) context.push('端点路径覆盖：' + byId('endpoint').value.trim());
     }
     if (selected.docs) context.push('官方资料：' + selected.docs);
-    if (byId('lookup-thinking').checked) {
-      context.push('', '我刚开始用 Bob，希望划词后能更快看到译文。请查这个平台的官方文档，确认所选模型在这个接口能否关闭思考，或能否选择较低的思考等级。');
-      context.push('先用一句话告诉我能做什么，再按 Bob 界面的字段名给出操作步骤。若只需改「额外请求体」，就只给那一项可以复制的 JSON，省略 SDK 包装层，并说明其他设置可保留默认。请说明最低支持的等级并附上官方来源；如果没有明确依据，请直接说明。');
-    } else {
-      context.push('', '我是第一次使用 Bob，请查这个服务商的官方文档，帮我把它接入「Ai 翻译」插件。先告诉我到哪里申请密钥、找到当前账号能用的模型；本机服务则说明要先启动什么。');
-      context.push('然后按 Bob 里的字段名列出要填或更改的项目，例如「Base URL」「模型」「API Key」。对于「请求格式」「端点路径覆盖」「鉴权方式」，只展开这个服务需要改的项，其余用一句话说明能否保留默认。需要专属地址或部署名时，请具体说从哪里复制。请用占位符演示密钥。');
-      context.push('最后告诉我如何点击「验证」、开启服务并「保存」，附上官方资料链接。若还缺服务地址、地区或部署方式，请先问我。只有这个端点需要额外请求头或查询参数时才给 JSON 写法。');
+    const ready = selected.status === 'supported' && (selected !== custom || byId('custom-name').value.trim() || byId('base-url').value.trim());
+    const lookup = '请核对官方文档，按 Bob 的字段列出连接此服务所需的 Base URL、模型、API Key 获取方式、请求格式与鉴权方式。如需部署名称或自定义端点，请注明在哪里获取，并附官方来源。';
+    const thinking = '请根据官方文档核对这个模型与接口能否关闭思考，或支持哪些强度。给出可粘贴到 Bob「额外请求体 (JSON)」的关闭或最低强度写法，区分关闭与降低，附官方来源。若没有公开依据，请说明。';
+    for (const [section, id, question] of [['lookup','lookup-output',lookup], ['thinking-query','thinking-query-output',thinking]]) {
+      byId(section).hidden = !ready;
+      setCopyText(id, ready ? [...context, '', question].join('\n') : '');
     }
-    const ready = selected !== unselected && (selected !== custom || byId('custom-name').value.trim() || byId('base-url').value.trim());
-    const thinking = byId('lookup-thinking').checked;
-    setCopyText('lookup-output', ready ? context.join('\n') : '');
-    byId('lookup-preview').hidden = !ready;
-    byId('choose-for-lookup').hidden = Boolean(ready);
-    byId('return-to-question').hidden = !returningToQuestion || !ready;
-    byId('choose-for-lookup').textContent = selected === custom ? '填写服务名称或地址 ↑' : '先选择服务商 ↑';
-    byId('question-title').textContent = thinking ? '向助手询问思考设置' : '向助手询问插件设置';
-    byId('question-context').textContent = ready
-      ? '问题中包含「' + name + '」' + (modelInput.value.trim() ? '和模型 ' + modelInput.value.trim() : '') + '。'
-      : '先在第 1 步选择平台或填写自建服务，再复制适合它的问题。';
-    document.querySelector('[data-copy="lookup-output"]').disabled = !ready;
   }
 
-  function selectProvider(id) {
+  function selectProvider(id, requestedModel = '') {
     selected = id ? providers.find(item => item.id === id) || custom : unselected;
-    byId('start-shortcuts').hidden = selected !== unselected;
-    showPreparation();
+    const available = selected.status === 'supported';
     providerSelect.value = selected.id;
     byId('custom-field').hidden = selected !== custom;
-    byId('provider-note').textContent = selected.note || '';
-    byId('provider-note-wrap').hidden = !selected.note && !selected.docs;
-    byId('provider-docs').hidden = !selected.docs;
-    if (selected.docs) byId('provider-docs').href = selected.docs;
-    const available = selected.status === 'supported';
-    byId('editable-connection').hidden = !available;
-    byId('tab-prompts').closest('.bench-tool').hidden = selected.status === 'unavailable';
-    byId('tab-parameters').closest('.bench-tool').hidden = selected.status === 'unavailable';
+    byId('provider-note').textContent = selected.note || (selected === custom ? '使用服务提供方给出的模型名称、地址与密钥。' : '选择服务商可查看密钥、地址与模型的来源。');
+    sourceLink('provider-docs', selected.docs);
+    sourceLink('provider-guide', selected.bob !== selected.docs && selected.bob);
+    byId('prompts').hidden = selected.status === 'unavailable';
+    byId('manual-parameters').hidden = !available;
+    byId('thinking-preview').hidden = !available;
     byId('base-url').value = selected.baseURL || '';
     byId('endpoint').value = selected.endpointOverride || '';
     formatSelect.value = selected.format || custom.format;
     authSelect.value = selected.authMode || custom.authMode;
-    const source = sources[selected.id];
-    const models = source?.models.map(item => item.id) || selected.models || [];
+    const examples = selected.models || [];
+    const listed = sources[selected.id]?.models.map(item => item.id) || [];
+    catalogModelIds = new Set([...examples, ...listed]);
+    const models = [...catalogModelIds];
     byId('model-choices').replaceChildren(...models.map(id => new Option(id, id)));
-    modelInput.value = (selected.models || []).find(id => models.includes(id)) || '';
-    modelInput.placeholder = models.length ? '输入名称查找模型，或粘贴模型 ID' : '粘贴模型名称或部署名';
-    const addressRequired = selected === custom || /[{}<>]/.test(selected.baseURL || '');
-    byId(addressRequired ? 'required-address' : 'optional-address').append(byId('address-field'));
+    modelInput.disabled = !available;
+    modelInput.value = catalogModelIds.has(requestedModel) ? requestedModel : examples.find(id => listed.includes(id)) || examples[0] || '';
+    modelInput.placeholder = !available ? '先选择可用服务商' : models.length ? '选择或输入模型 ID' : '输入模型 ID 或部署名';
+    byId('model-hint').textContent = available && !models.length ? selected.modelHint : '';
+    byId('connection-options').hidden = !available;
+    byId('connection-options').open = available && (selected === custom || /[{}<>]/.test(selected.baseURL || ''));
     byId('address-hint').textContent = selected.id === 'azure' ? '将 {resource} 换成你的 Azure 资源名称。'
-      : selected.id === 'qwen' ? '将 {WorkspaceId} 换成业务空间 ID，或粘贴控制台显示的地域域名。'
-      : selected === custom ? '填写管理员提供的基础地址。若还需要单独填写接口路径，在下方修改连接方式。' : '';
-    byId('snapshot-hint').textContent = source?.models.length
-      ? '目录收录 ' + source.models.length + ' 个模型，可在输入框中检索。' + (source.updatedAt ? '最近变更于 ' + source.updatedAt + '。' : '')
-      : '';
-    byId('bilibili-template').hidden = selected.id !== 'bilibili';
-    byId('connection-options').open = false;
-    byId('provider-note-wrap').open = false;
+      : selected.id === 'qwen' ? '将 {WorkspaceId} 换成业务空间 ID，或粘贴控制台的地域域名。' : '';
+    byId('format-caption').textContent = selectLabel(formatSelect);
     byId('defaults').open = false;
-    byId('model-details').open = false;
+    renderMetadata();
     restoreRows();
     renderFields();
-    renderModelDetails();
+    renderThinking();
     renderPrompts();
-    setTool(location.hash.slice(1));
+    window.WorkbenchPickers?.refresh();
   }
 
   providerSelect.addEventListener('change', () => {
+    if (providerSelect.value === selected.id) return;
     rememberRows();
     const url = new URL(location.href);
     if (providerSelect.value) url.searchParams.set('provider', providerSelect.value);
     else url.searchParams.delete('provider');
+    url.searchParams.delete('model');
     replaceLocation(url);
     selectProvider(providerSelect.value);
   });
   for (const id of ['model', 'custom-name', 'format', 'auth-mode', 'base-url', 'endpoint', 'scene']) {
     byId(id).addEventListener('input', () => {
+      if (id === 'model') {
+        renderMetadata();
+        const url = new URL(location.href);
+        if (catalogModelIds.has(modelInput.value)) url.searchParams.set('model', modelInput.value);
+        else url.searchParams.delete('model');
+        if (url.search !== location.search) replaceLocation(url);
+      }
+      if (id === 'format') byId('format-caption').textContent = selectLabel(formatSelect);
+      if (['model', 'format', 'base-url', 'endpoint'].includes(id)) renderThinking();
       renderFields();
-      renderModelDetails();
       renderPrompts();
     });
   }
 
   const typeLabels = {string: '字符串', number: '数字', boolean: '布尔值', null: 'null', object: '对象', array: '数组'};
   const templates = {
-    reasoning_effort: ['none', 'string'],
-    reasoning: ['{"effort":"none"}', 'object'],
-    thinking: ['{"type":"disabled"}', 'object'],
-    enable_thinking: ['false', 'boolean'],
-    chat_template_kwargs: ['{"enable_thinking":false}', 'object'],
     top_p: ['0.9', 'number'],
     top_k: ['40', 'number'],
     response_format: ['{"type":"text"}', 'object']
   };
   const rowList = byId('param-rows');
   const drafts = new Map();
-  byId('edit-thinking').addEventListener('click', () => {
-    setTool('parameters', true);
-    byId('thinking-level').focus();
-  });
-  byId('thinking-level').addEventListener('change', renderJSON);
-
   function paramInputs(row) {
     return ['key', 'value', 'type'].map(role => row.querySelector('[data-role="' + role + '"]'));
   }
@@ -390,6 +341,7 @@
     });
     row.append(keyInput, valueInput, typeSelect, remove);
     rowList.append(row);
+    window.WorkbenchPickers?.refresh();
     return keyInput;
   }
 
@@ -408,15 +360,19 @@
     return parsed;
   }
 
-  function applyThinkingLevel(output, level) {
-    const config = output.generationConfig === undefined ? {} : output.generationConfig;
-    if (!config || typeof config !== 'object' || Array.isArray(config)) return '设置思考等级时，generationConfig 需要是 JSON 对象。';
-    const thinking = config.thinkingConfig === undefined ? {} : config.thinkingConfig;
-    if (!thinking || typeof thinking !== 'object' || Array.isArray(thinking)) return '设置思考等级时，thinkingConfig 需要是 JSON 对象。';
-    if ('thinkingBudget' in thinking || ('thinkingLevel' in thinking && thinking.thinkingLevel !== level)) {
-      return '手填参数中已有其他思考设置。请保留其中一种，或将上方思考等级切回「使用模型默认值」。';
+  function mergePreset(target, preset) {
+    for (const [key, value] of Object.entries(preset)) {
+      if (!Object.hasOwn(target, key)) {
+        target[key] = value;
+        continue;
+      }
+      const existing = target[key];
+      if (existing === value) continue;
+      if (!value || typeof value !== 'object' || !existing || typeof existing !== 'object' || Array.isArray(existing)) return false;
+      if (key === 'thinkingConfig' && (('thinkingLevel' in value && 'thinkingBudget' in existing) || ('thinkingBudget' in value && 'thinkingLevel' in existing))) return false;
+      if (!mergePreset(existing, value)) return false;
     }
-    output.generationConfig = { ...config, thinkingConfig: { ...thinking, thinkingLevel: level } };
+    return true;
   }
 
   function renderJSON() {
@@ -439,14 +395,18 @@
         valueInput.setAttribute('aria-invalid', 'true');
       }
     });
-    const level = byId('thinking-level').value;
-    if (!messages.length && level) {
-      const error = applyThinkingLevel(output, level);
-      if (error) messages.push(error);
+    const preset = choices.find(item => item.value === strength);
+    if (!messages.length && preset && !mergePreset(output, preset.body)) {
+      messages.push('手填参数与所选强度冲突。请修改手填值，或选择「模型默认」后自行填写。');
     }
-    setCopyText('json-output', messages.length ? '请先修正下面标出的参数。' : JSON.stringify(output, null, 2));
+    const hasFields = Object.keys(output).length > 0;
+    setCopyText('json-output', messages.length ? '请检查手填参数。' : JSON.stringify(output, null, 2));
     byId('param-error').textContent = messages.join(' ');
-    document.querySelector('[data-copy="json-output"]').disabled = Boolean(messages.length);
+    byId('json-instruction').textContent = messages.length ? '' : hasFields
+      ? '将以上字段填入 Bob 的「额外请求体 (JSON)」。已有其他参数时，保留原字段并合并。'
+      : choices.length ? '使用模型默认设置时可留空。恢复默认只需移除已有的思考参数。'
+        : '核对服务商文档后，可在下方手动添加请求参数。';
+    document.querySelector('[data-copy="json-output"]').disabled = Boolean(messages.length) || !hasFields || selected.status !== 'supported';
   }
 
   rowList.addEventListener('input', renderJSON);
@@ -513,7 +473,7 @@
       selection.removeAllRanges();
     }
     if (!current()) return;
-    notify(button.dataset.copy === 'lookup-output' ? '问题已复制，粘贴到能联网的 AI 助手中即可。' : '已复制', button);
+    notify(['lookup-output', 'thinking-query-output'].includes(button.dataset.copy) ? '问题已复制，粘贴到能联网的 AI 助手中即可。' : '已复制', button);
     button.textContent = '已复制';
     request.timer = setTimeout(() => clearCopyFeedback(button), 2200);
   });
@@ -547,8 +507,10 @@
       providerSelect.insertBefore(group, providerSelect.lastElementChild);
     }
     providerSelect.disabled = false;
-    const requested = new URLSearchParams(location.search).get('provider');
-    const initial = requested || (providers.length ? '' : 'custom');
+    const params = new URLSearchParams(location.search);
+    const requested = params.get('provider');
+    const defaultProvider = providers.find(item => item.id === 'openai')?.id ?? providers[0]?.id ?? 'custom';
+    const initial = requested || defaultProvider;
     let catalogWarning = '';
     if (!providers.length) {
       catalogWarning = '服务商目录暂时无法读取。你仍可以手动填写服务与模型。';
@@ -558,8 +520,17 @@
       catalogWarning = '自动同步的模型目录暂时无法读取，可手动填写模型 ID。';
     }
     byId('catalog-status').textContent = catalogWarning;
-    selectProvider(initial);
-    if (location.hash) followHash();
+    selectProvider(initial, params.get('model'));
+    followHash();
+    window.addEventListener('popstate', () => {
+      if (location.search !== currentSearch) {
+        currentSearch = location.search;
+        const params = new URLSearchParams(currentSearch);
+        rememberRows();
+        selectProvider(params.get('provider') || defaultProvider, params.get('model'));
+      }
+      followHash();
+    });
   }
 
   start();

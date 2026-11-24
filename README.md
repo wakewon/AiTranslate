@@ -1,38 +1,30 @@
 # AiTranslate
 
-AiTranslate 让你在 Mac 上选中一句话，直接用 Bob 阅读译文。可以用已有的翻译服务或本地模型，也可以先用免密钥的 bilibili 翻译试一下。
+AiTranslate 是 Bob 的文本翻译插件，可接入云端 API 或本地模型，并按模型支持程度关闭思考或调整推理强度。
 
-[下载插件](https://github.com/wakewon/AiTranslate/releases/latest) · [第一次使用指南](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html) · [选择翻译服务](https://wakewon.wwang.de/AiTranslate/#providers)
+[服务配置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#connection) · [思考设置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#thinking) · [下载插件](https://github.com/wakewon/AiTranslate/releases/latest)
 
 <a id="-安装"></a>
 
-## 翻译第一句话
+## 安装
 
-1. 在装有 Bob 1.8.0 或更高版本的 Mac 上，双击下载的 `.bobplugin` 文件。
-2. 打开 Bob「偏好设置 → 翻译 → 服务」，在「文本翻译」列表下点加号，选择「Ai 翻译」。
-3. 打开配置助手，选用 bilibili 翻译，把助手列出的地址和模型复制到 Bob，选择对应的下拉选项。API Key 可以留空。[打开 bilibili 配置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=bilibili#connection)
-4. 点击「验证」，开启服务并保存。在 Bob 中选择简体中文，输入 `See you tomorrow.` 后按回车，查看译文。
+在 Bob 1.8.0 或更高版本上，双击下载的 `.bobplugin` 文件。在「偏好设置 → 翻译 → 服务」中添加文本翻译服务「Ai 翻译」。
 
 <a id="-配置示例"></a>
 <a id="ollama本地"></a>
-
-已经有云服务密钥，或在 Mac 上运行 Ollama、LM Studio？在配置助手中选择对应的服务即可。指南里也介绍了如何申请密钥，以及到哪里复制本地模型的名称。[使用其他云服务或本地模型](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#prepare)
-
 <a id="-特性"></a>
 <a id="-文档中心"></a>
+<a id="鉴权方式"></a>
 
-## 接入其他服务
+## 服务配置
 
-选择实际提供翻译的平台，就能查看 Bob 里的填法。服务商给你的 **API Key** 用于确认账号，**模型**是该平台上负责翻译的具体程序。[查找服务商](https://wakewon.wwang.de/AiTranslate/#providers)
+选择实际使用的服务商和模型，将请求格式、Base URL、端点路径和鉴权方式填入 Bob。需要鉴权的云端服务使用平台签发的 API Key，本地服务填写服务器列出的模型名称。点击「验证」，开启服务并保存。[服务商目录](https://wakewon.wwang.de/AiTranslate/#providers) · [配置参考](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html)
 
-常用服务可以从这里直接打开。<a id="openai--chatgpt" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=openai">OpenAI</a> · <a id="anthropic-claude" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=anthropic">Claude</a> · <a id="google-gemini" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=gemini">Gemini</a> · <a id="deepseek" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=deepseek">DeepSeek</a> · <a id="siliconflow" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=siliconflow">硅基流动</a> · <a id="智谱-glm" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=glm">智谱 GLM</a>
+<a id="openai--chatgpt" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=openai#connection">OpenAI</a> · <a id="anthropic-claude" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=anthropic#connection">Claude</a> · <a id="google-gemini" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=gemini#connection">Gemini</a> · <a id="deepseek" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=deepseek#connection">DeepSeek</a> · <a id="siliconflow" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=siliconflow#connection">硅基流动</a> · <a id="智谱-glm" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=glm#connection">智谱 GLM</a> · [本地 Ollama](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=ollama#connection)
 
-<details>
-<summary id="鉴权方式">使用自建服务或需要手动填写接口</summary>
+## 思考设置
 
-插件支持 OpenAI、Claude、Gemini 等七种请求格式，可覆盖接口路径和密钥的发送方式。Azure OpenAI 使用部署名，本地服务使用服务器列出的模型 ID。[接口默认路径](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#format) · [模型 ID](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#model-ids) · [鉴权方式](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#authentication)
-
-</details>
+同一款模型经不同接口调用时，思考参数的写法可能不同。例如，DeepSeek 官方 Chat Completions 的思考开关是 `thinking.type`，Gemini 原生接口按型号使用 `thinkingLevel` 或 `thinkingBudget`。在配置助手中选择对应模型与档位，将 JSON 复制到 Bob 的「额外请求体」。[查看各接口的关闭条件与强度档位](https://wakewon.wwang.de/AiTranslate/docs/disable-thinking.html)
 
 <a id="-提示词变量"></a>
 
@@ -91,10 +83,10 @@ GitHub Actions 从八个官方来源更新[模型快照](data/model-catalog.json
 
 | 来源 | 收录范围 |
 | --- | --- |
-| OpenAI、Anthropic、DeepSeek | OpenAI 官方精选中支持 Chat Completions 的文本模型，Claude 与 DeepSeek 官方目录中的当前型号 |
-| Google Gemini | Google 型号目录和原生 `generateContent` 推理指南均列出的通用文本模型，记录各型号的思考等级和同步请求的输出上限 |
+| OpenAI、Anthropic、DeepSeek | OpenAI 官方精选中支持 Chat Completions 的文本模型和已确认的推理档位，Claude 与 DeepSeek 官方目录中的当前型号 |
+| Google Gemini | Google 型号目录和原生 `generateContent` 推理指南均列出的通用文本模型，记录公开的思考等级或预算范围，以及同步请求的输出上限 |
 | Groq、bilibili | Groq 生产环境的文本对话模型，bilibili 公共翻译端点列出的翻译模型 |
-| OpenRouter、AIHubMix | 各平台公开目录中的文本聊天模型，OpenRouter 另列出每个模型支持的参数名称 |
+| OpenRouter、AIHubMix | 各平台公开目录中的文本聊天模型，OpenRouter 另记录模型支持的参数名称，并从公开的推理元数据提取可选档位 |
 
 其他服务商沿用人工核对的预设。要了解某个参数允许的值，请查该模型在实际端点使用的接口文档。
 

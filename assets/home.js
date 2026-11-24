@@ -66,17 +66,29 @@
       protocol.textContent = authNames[auth];
       info.append(formats[provider.format], protocol);
     } else if (provider.group === 'local') {
-      info.textContent = '先在电脑上启动服务并加载模型';
+      info.textContent = '已启动的本机服务及模型';
     } else if (provider.authMode === 'none') {
-      info.textContent = '可以直接使用，无需密钥';
+      info.textContent = '免密钥';
     } else {
-      info.textContent = '准备好这个平台的密钥';
+      info.textContent = '平台 API Key';
     }
     const link = document.createElement('a');
-    link.href = supported ? 'tools/param-builder.html?provider=' + encodeURIComponent(provider.id) : provider.bob || provider.docs;
-    link.textContent = supported ? '查看填法 →' : '下线说明 ↗';
+    const params = new URLSearchParams({provider: provider.id});
+    const query = search.value.trim().toLowerCase();
+    const model = provider.modelIds.find(id => id.toLowerCase() === query);
+    if (model) params.set('model', model);
+    link.href = supported ? 'tools/param-builder.html?' + params : provider.bob || provider.docs;
+    link.textContent = supported ? '服务配置 →' : '下线说明 ↗';
     link.setAttribute('aria-label', (supported ? '配置 ' : '查看服务说明 ') + provider.name);
-    row.insertCell().append(link);
+    const actions = row.insertCell();
+    actions.append(link);
+    if (supported) {
+      const thinking = document.createElement('a');
+      thinking.href = link.href + '#thinking';
+      thinking.textContent = '思考设置 →';
+      thinking.setAttribute('aria-label', provider.name + ' 的思考设置');
+      actions.append(thinking);
+    }
     return row;
   }
 
@@ -87,7 +99,7 @@
       return (activeGroup === 'all' || (activeGroup === 'online' ? online : item.group === activeGroup))
         && item.searchText.includes(query);
     });
-    select('#provider-info-heading').textContent = showInterface.checked ? '接口与鉴权' : '使用前准备';
+    select('#provider-info-heading').textContent = showInterface.checked ? '接口与鉴权' : '连接条件';
     const pageCount = Math.ceil(matching.length / pageSize);
     const first = page * pageSize;
     const rows = matching.slice(first, first + pageSize);
@@ -117,10 +129,11 @@
     ]);
 
     directory = catalog.providers.map(provider => {
-      const modelIds = snapshot?.sources?.[provider.id]?.models?.map(model => model.id) || [];
+      const listed = snapshot?.sources?.[provider.id]?.models?.map(model => model.id) || [];
+      const modelIds = [...new Set([...(provider.models || []), ...listed])];
       const terms = [provider.name, provider.id, aliases[provider.id], provider.baseURL, provider.note, provider.format,
-        formats[provider.format], groups[provider.group], ...(provider.models || []), ...modelIds];
-      return { ...provider, searchText: terms.filter(Boolean).join(' ').toLowerCase() };
+        formats[provider.format], groups[provider.group], ...modelIds];
+      return { ...provider, modelIds, searchText: terms.filter(Boolean).join(' ').toLowerCase() };
     });
     for (const button of filters) {
       const group = button.dataset.group;

@@ -241,7 +241,7 @@
       "identifier": "extraBody",
       "type": "text",
       "title": "额外请求体 (JSON)",
-      "desc": "通常留空。要调整模型的思考等设置时，可把配置助手生成的 JSON 粘贴到这里。",
+      "desc": "关闭思考或调整强度时，在配置助手的「思考设置」中选择模型与档位，将生成的 JSON 填入此处。使用模型默认设置可留空。",
       "textConfig": {
         "type": "visible",
         "height": 140,

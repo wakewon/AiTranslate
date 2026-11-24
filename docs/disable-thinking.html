@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="翻译短句时，看看手里的模型能否减少思考时间，跟着示例在 Bob 中试一次。">
-  <title>让翻译少等一会儿 · AiTranslate</title>
+  <meta name="description" content="按模型与请求格式核对思考开关、可用档位和额外请求体。">
+  <title>思考设置 · AiTranslate</title>
   <link rel="icon" href="../favicon.ico">
   <link rel="stylesheet" href="../assets/site.css">
   <link rel="stylesheet" href="../assets/docs.css">
@@ -30,43 +30,47 @@
     <nav class="guide-sidebar" aria-label="文档导航">
       <span>使用文档</span>
       <a href="index.html">文档首页</a>
-      <a href="basic-usage.html">第一次翻译</a>
-      <a href="disable-thinking.html" aria-current="page">翻译时少等一会儿</a>
+      <a href="basic-usage.html">服务配置</a>
+      <a href="disable-thinking.html" aria-current="page">思考设置</a>
       <span>本页内容</span>
-      <a href="#where">怎样调整</a>
-      <a href="#examples">按服务找设置</a>
-      <a href="#verify">试译和恢复</a>
+      <a href="#where">应用到 Bob</a>
+      <a href="#examples">参数参考</a>
+      <a href="#verify">验证与还原</a>
     </nav>
     <article class="guide-article">
       <header class="guide-intro">
-        <h1>让翻译少等一会儿</h1>
-        <p>有些模型在写出译文前会先花时间思考。平时只查一个词、翻一句短句，如果等待太久，可以试试调低思考等级。已经能很快看到译文的话，沿用默认设置就好。</p>
+        <h1>思考设置</h1>
+        <p>能否关闭思考取决于模型和接口。例如，DeepSeek 官方 Chat Completions 支持思考开关，智谱 GLM-5.3 始终启用思考，最低强度为 low。</p>
+        <a class="button primary" href="../tools/param-builder.html#thinking">打开思考设置</a>
       </header>
       <section id="where">
-        <h2>先找你的翻译服务</h2>
-        <p>看看 Bob「Ai 翻译」中填的是哪个模型、用的是哪家服务。展开下面对应的说明，可以查到这个模型能否关闭思考，或调到较低的档位。</p>
-        <p>使用 Gemini 的话，配置助手能按模型列出可选等级。选好后复制生成的设置，粘贴到 Bob 的「额外请求体 (JSON)」。如果这里已经有内容，先留一份副本，方便恢复。<a href="../tools/param-builder.html?provider=gemini#parameters">在配置助手里选 Gemini 思考等级</a></p>
+        <h2>应用到 Bob</h2>
+        <p>在配置助手选择实际使用的服务、模型和请求格式。将对应的设置复制到 Bob「Ai 翻译 → 额外请求体 (JSON)」，保存后生效。若配置助手没有收录该模型的取值，可查服务商文档并手动填写。<a href="../tools/param-builder.html#parameters">编辑请求参数</a></p>
       </section>
       <section id="examples">
-        <h2>查看我用的服务</h2>
+        <h2>各接口的思考参数</h2>
         <details class="guide-fold">
           <summary>DeepSeek</summary>
-          <p>通过 DeepSeek 官方 Chat Completions 使用支持思考开关的模型时，将 <code>thinking.type</code> 设为 <code>disabled</code>。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></p>
+          <p>在官方 Chat Completions 接口中，<code>deepseek-flash</code> 和 <code>deepseek-v4-pro</code> 均可通过下列设置关闭思考。保留思考时，强度参数 <code>reasoning_effort</code> 可设为 <code>low</code>、<code>high</code> 或 <code>max</code>。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></p>
           <pre><code>{"thinking": {"type": "disabled"}}</code></pre>
         </details>
         <details class="guide-fold">
           <summary>OpenAI</summary>
-          <p>先看 Bob 中的「请求格式」，Responses 与 Chat Completions 的写法不同。例如，要使用 <code>low</code> 档位，先确认模型支持该值，再选择对应的写法。支持 <code>none</code> 的模型可以把值改为 <code>none</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></p>
+          <p>Responses 和 Chat Completions 的参数位置不同。以下示例均设为 <code>low</code>。GPT-6 Luna 支持 <code>none</code>，GPT-6.2 Astra 和 Sol 会拒绝该值。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a> · <a href="https://developers.openai.com/api/docs/models/gpt-6-luna">GPT-6 Luna</a></p>
           <h3>Responses API</h3>
           <pre><code>{"reasoning": {"effort": "low"}}</code></pre>
           <h3>Chat Completions</h3>
           <pre><code>{"reasoning_effort": "low"}</code></pre>
         </details>
         <details class="guide-fold">
+          <summary>Claude · Messages</summary>
+          <p>Haiku 5.5 用 <code>thinking.type = disabled</code> 关闭思考，强度须为 <code>high</code> 或更低。Sonnet 5.5 的 <code>between_tools</code> 仅关闭前置思考，工具调用间仍可推理，同样限于 <code>high</code> 或更低。Opus 5.5 和 Fable 5.2 始终使用自适应思考。<a href="https://platform.claude.com/docs/en/build-with-claude/thinking">Claude 各型号的思考模式</a></p>
+        </details>
+        <details class="guide-fold">
           <summary>Google Gemini</summary>
-          <p>选择「Gemini generateContent」和实际使用的模型。如果「JSON 参数」显示「当前模型的思考等级」，选中需要的档位，再把生成的 JSON 复制到 Bob 的「额外请求体」。例如，<code>gemini-4-hydrogen</code> 可以用 <code>low</code> 降低推理强度。</p>
+          <p>选择「Gemini generateContent」和实际使用的模型。有官方档位记录的模型可在「思考设置」选择相应取值。例如，<code>gemini-4-hydrogen</code> 可以用 <code>low</code> 降低推理强度。</p>
           <pre><code>{"generationConfig": {"thinkingConfig": {"thinkingLevel": "low"}}}</code></pre>
-          <p>Gemini 2.5 系列用 <code>thinkingBudget</code> 控制推理预算，允许的范围因型号而异。<a href="https://aistudio.google.com/docs/thinking?generate-content=true">Google 思考参数说明</a> · <a href="../tools/param-builder.html?provider=gemini#parameters">配置 Gemini 参数</a></p>
+          <p>部分 Gemini 3 Flash 型号提供 <code>minimal</code>，模型仍可能思考。Gemini 2.5 Flash-Lite 使用 <code>thinkingBudget</code>，设为 <code>0</code> 即可关闭思考。<a href="https://aistudio.google.com/docs/thinking?generate-content=true">Google 思考参数说明</a> · <a href="../tools/param-builder.html?provider=gemini#thinking">配置 Gemini 参数</a></p>
         </details>
         <details class="guide-fold">
           <summary>通义千问（阿里云百炼）</summary>
@@ -74,25 +78,29 @@
           <pre><code>{"enable_thinking": false}</code></pre>
         </details>
         <details class="guide-fold">
-          <summary>智谱（GLM-5.3）</summary>
-          <p>GLM-5.3 始终启用思考。要减少推理量，可以选择其最低档位 <code>low</code>。<a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">GLM-5.3 参数说明</a></p>
-          <pre><code>{"thinking": {"type": "enabled"}, "reasoning_effort": "low"}</code></pre>
+          <summary>智谱 GLM</summary>
+          <p>GLM-5.3 及其 Flash、FlashX 型号始终启用思考，可将强度设为 <code>low</code>、<code>high</code> 或 <code>max</code>。GLM-5.2 支持以 <code>thinking.type = disabled</code> 关闭思考。<a href="https://docs.bigmodel.cn/cn/guide/capabilities/thinking">智谱思考模式</a> · <a href="https://docs.bigmodel.cn/cn/guide/models/vlm/glm-5.3-flash">Flash 与 FlashX 说明</a></p>
+          <pre><code>{"reasoning_effort": "low"}</code></pre>
+        </details>
+        <details class="guide-fold">
+          <summary>OpenRouter</summary>
+          <p>以 OpenRouter 上的完整模型 ID 为准。模型目录中的 <code>reasoning.supported_efforts</code> 列出可选强度，<code>mandatory</code> 为 <code>true</code> 表示模型始终推理。实际聊天请求使用 <code>reasoning.effort</code>。<a href="https://openrouter.ai/docs/guides/best-practices/reasoning-tokens">OpenRouter 思考参数</a></p>
         </details>
         <details class="guide-fold">
           <summary>本地 Ollama</summary>
           <p>使用 OpenAI 兼容接口时，先从本地服务的 <code>/api/show</code> 查看模型支持的推理档位。兼容接口可用 <code>reasoning_effort</code>，<code>none</code> 的实际效果取决于模型，例如 GPT-OSS 会按最低档位运行。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></p>
         </details>
-        <p>没有看到自己的服务？在配置助手中填入服务商和模型名称，复制生成的问题，请能联网的 AI 助手帮你查官方说明。<a href="../tools/param-builder.html#thinking">帮我写一段查询问题</a></p>
+        <p>模型或自定义端点的思考选项尚未收录时，可在「思考设置」中生成针对该模型的查询提示词。<a href="../tools/param-builder.html#thinking">核对其他模型的思考设置</a></p>
       </section>
       <section id="verify">
-        <h2>用同一句话再试一次</h2>
-        <p>保存设置，翻译之前试过的同一句话，看看等待时间和译文是否合适。如果翻译报错，先移除刚添加的字段，或把之前留存的内容粘贴回去，再点击「保存」。</p>
+        <h2>验证与还原</h2>
+        <p>保存后用同一段原文比较响应时间和译文。移除新增字段并保存，即可恢复原先的思考设置。</p>
         <details class="guide-fold">
-          <summary>想确认模型是否真的减少了思考</summary>
+          <summary>核对推理用量</summary>
           <p>有些服务会在控制台记录每次请求的思考用量。找到本次翻译，对比调整前后的推理 Token 数。如果返回 <code>400</code> 错误，核对报错中提到的参数名和可用取值。</p>
         </details>
         <details class="guide-fold">
-          <summary>官方文档里有 extra_body，怎样复制？</summary>
+          <summary>SDK 示例中的 extra_body</summary>
           <p>有些 SDK 把自定义字段放在 <code>extra_body</code> 中。Bob 的「额外请求体 (JSON)」只需要里面的字段。如果已经设置了其他参数，把它们合并在同一对花括号内。<a href="../tools/param-builder.html#parameters">编辑额外请求参数</a></p>
         </details>
       </section>

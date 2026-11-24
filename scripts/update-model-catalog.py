@@ -18,6 +18,7 @@ SNAPSHOT = ROOT / "data/model-catalog.json"
 MODEL_ID = re.compile(r"~?[a-zA-Z0-9][a-zA-Z0-9_:.~/+-]{0,159}")
 PARAMETER = re.compile(r"[a-z][a-z0-9_]{0,90}")
 MAX_BYTES = 20 * 1024 * 1024
+EFFORTS = ("none", "minimal", "low", "medium", "high", "xhigh", "max")
 
 
 def fetch(url):
@@ -48,8 +49,20 @@ def openrouter(url):
         modalities = item["architecture"]
         if ("text" in modalities["input_modalities"] and "text" in modalities["output_modalities"]
                 and "/api/v1/chat/completions" in item["endpoints"]):
-            yield model(item["id"], item["context_length"], item["top_provider"]["max_completion_tokens"],
-                        item["supported_parameters"])
+            entry = model(item["id"], item["context_length"], item["top_provider"]["max_completion_tokens"],
+                          item["supported_parameters"])
+            reasoning = item.get("reasoning") or {}
+            # OpenRouter distinguishes an omitted effort selector from a null (all efforts) selector.
+            if "supported_efforts" in reasoning and "reasoning" in entry["parameters"]:
+                supported = reasoning["supported_efforts"]
+                levels = EFFORTS if supported is None else supported
+                if not isinstance(levels, (list, tuple)) or any(level not in EFFORTS for level in levels):
+                    raise ValueError(f"unknown OpenRouter effort for {item['id']}")
+                allowed = [level for level in EFFORTS if level in levels
+                           and (level != "none" or reasoning.get("mandatory") is False)]
+                if allowed:
+                    entry["reasoningEfforts"] = allowed
+            yield entry
 
 
 def bilibili(url):
@@ -116,6 +129,12 @@ def openai(url):
     if not match:
         raise ValueError("featured models section missing")
     paths = re.findall(r"\]\((/api/docs/models/[a-zA-Z0-9.-]+\.md)\)", match[1])
+    guide = " ".join(fetch("https://developers.openai.com/api/docs/guides/deployment-checklist.md").split())
+    # A model card may list all efforts, or only say that "none" is rejected.
+    # The common effort list in the deployment guide explicitly names the models it covers.
+    title_pattern = r"GPT-[\d.]+ [A-Za-z]+"
+    guide_lists = re.findall(rf"({title_pattern}(?:,? (?:and )?{title_pattern})+) support "
+                             r"((?:`[a-z]+`(?:,? (?:and )?)?)+)\.", guide)
     for path in dict.fromkeys(paths):
         page = fetch("https://developers.openai.com" + path)
         if "| Chat Completions | `v1/chat/completions` | Supported |" not in page:
@@ -127,7 +146,21 @@ def openai(url):
         output = re.search(r"^- ([\d,]+) max output tokens$", page, re.M)
         if not all((name, context, output)):
             raise ValueError(f"model details missing on {path}")
-        yield model(name[1], int(context[1].replace(",", "")), int(output[1].replace(",", "")))
+        entry = model(name[1], int(context[1].replace(",", "")), int(output[1].replace(",", "")))
+        card = " ".join(page.split())
+        declared = re.search(r"`reasoning\.effort` supports ([^.]+)\.", card)
+        levels = re.findall(r"`([a-z]+)`", declared[1]) if declared else []
+        if not levels:
+            title = page.splitlines()[0].removeprefix("# ").strip()
+            for names, values in guide_lists:
+                if title in re.split(r",\s*(?:and )?| and ", names):
+                    levels.extend(re.findall(r"`([a-z]+)`", values))
+        if levels:
+            entry["reasoningEfforts"] = levels
+            entry["reasoningFormats"] = ["openai_chat"]
+            if "| Responses | `v1/responses` | Supported |" in page:
+                entry["reasoningFormats"].append("openai_responses")
+        yield entry
 
 
 def groq(url):
@@ -152,6 +185,18 @@ def groq(url):
         yield model(name, token_limit(row[context_col].replace(",", "")), token_limit(row[output_col].replace(",", "")))
 
 
+def gemini_model(name):
+    page = fetch(f"https://aistudio.google.com/docs/models/{name}.md")
+    if not re.search(r"\*\*Outputs?\*\* Text\s*\n", page):
+        raise ValueError(f"Gemini text output missing on {name}")
+    # Older cards publish a separate input limit; that is not a unified context limit.
+    context = re.search(r"\*\*Context window \(unified input and output token limit\)\*\* ([\d,]+)", page)
+    output = re.search(r"\*\*(?:Output token limit|Max output)\*\* ([\d,]+)", page)
+    if not output:
+        raise ValueError(f"Gemini output limit missing on {name}")
+    return model(name, int(context[1].replace(",", "")) if context else None, int(output[1].replace(",", "")))
+
+
 def gemini(url):
     # Intersect the generateContent thinking table with models still listed by AI Studio.
     # Restrict to general-purpose families: the table also contains image and robotics models.
@@ -172,17 +217,25 @@ def gemini(url):
         name, _, values = fields
         if name not in listed or not family.fullmatch(name):
             continue
-        page = fetch(f"https://aistudio.google.com/docs/models/{name}.md")
-        if not re.search(r"\*\*Outputs?\*\* Text\s*\n", page):
-            raise ValueError(f"Gemini text output missing on {name}")
-        # Older cards publish a separate input limit; that is not a unified context limit.
-        context = re.search(r"\*\*Context window \(unified input and output token limit\)\*\* ([\d,]+)", page)
-        output = re.search(r"\*\*(?:Output token limit|Max output)\*\* ([\d,]+)", page)
-        if not output:
-            raise ValueError(f"Gemini output limit missing on {name}")
-        item = model(name, int(context[1].replace(",", "")) if context else None, int(output[1].replace(",", "")))
+        item = gemini_model(name)
         item["thinkingLevels"] = [level.strip() for level in values.split(",")]
         yield item
+
+    # The stable 2.5 Flash-Lite still serves existing users and uses token budgets, not levels.
+    # Stop offering it when Google removes it from the index or announces a sunset.
+    legacy = "gemini-2.5-flash-lite"
+    if f"](/docs/models/{legacy})" not in listing:
+        return
+    lifecycle = fetch("https://aistudio.google.com/docs/deprecations.md")
+    if not re.search(rf"\* `{re.escape(legacy)}`\s*\n\s*\* [^\n]+\n\s*\* No shutdown date announced", lifecycle):
+        return
+    budget = re.search(r"\* \*\*2\.5 Flash Lite\*\*\s*\* Model does not think\s*"
+                       r"\* `(\d+)` to `(\d+)`\s*\* `thinkingBudget = 0`\s*\* `thinkingBudget = -1`", guide)
+    if not budget:
+        raise ValueError("Gemini 2.5 Flash-Lite budget table missing")
+    item = gemini_model(legacy)
+    item["thinkingBudget"] = {"min": int(budget[1]), "max": int(budget[2]), "off": 0, "dynamic": -1}
+    yield item
 
 
 # Only these reviewed, public origins are requested. No account keys or inference requests.
@@ -211,10 +264,27 @@ def validate_models(models):
             value = entry[key]
             if value is not None and (type(value) is not int or not 0 < value < 2 ** 53):
                 raise ValueError(f"invalid {key} for {name}")
+        if "reasoningEfforts" in entry:
+            efforts = entry["reasoningEfforts"]
+            if (not isinstance(efforts, list) or not efforts or any(level not in EFFORTS for level in efforts)
+                    or len(efforts) != len(set(efforts))):
+                raise ValueError(f"invalid reasoning efforts for {name}")
+        if "reasoningFormats" in entry:
+            formats = entry["reasoningFormats"]
+            if (not isinstance(formats, list) or not formats or "reasoningEfforts" not in entry
+                    or any(value not in ("openai_chat", "openai_responses") for value in formats)
+                    or len(formats) != len(set(formats))):
+                raise ValueError(f"invalid reasoning formats for {name}")
         if "thinkingLevels" in entry:
             levels = entry["thinkingLevels"]
             if not isinstance(levels, list) or not levels or not all(re.fullmatch("[a-z][a-z0-9_]{0,24}", level) for level in levels):
                 raise ValueError(f"invalid thinking levels for {name}")
+        if "thinkingBudget" in entry:
+            budget = entry["thinkingBudget"]
+            if (not isinstance(budget, dict) or set(budget) != {"min", "max", "off", "dynamic"}
+                    or any(type(v) is not int for v in budget.values()) or not 0 < budget["min"] <= budget["max"]
+                    or budget["off"] != 0 or budget["dynamic"] != -1):
+                raise ValueError(f"invalid thinking budget for {name}")
         params = entry["parameters"]
         if not isinstance(params, list) or not all(PARAMETER.fullmatch(param) for param in params):
             raise ValueError(f"invalid parameter names for {name}")

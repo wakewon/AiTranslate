@@ -8,8 +8,11 @@
   <link rel="icon" href="../favicon.ico">
   <link rel="stylesheet" href="../assets/site.css">
   <link rel="stylesheet" href="../assets/workbench.css">
+  <link rel="stylesheet" href="../assets/pickers.css">
   <script src="../assets/site.js"></script>
   <!-- offline-data -->
+  <script defer src="../assets/pickers.js"></script>
+  <script defer src="../assets/reasoning.js"></script>
   <script defer src="../assets/workbench.js"></script>
 </head>
 <body>
@@ -30,49 +33,27 @@
   </header>
   <main id="main" class="wrap bench">
     <header class="bench-heading">
-      <h1>把翻译服务接入 Bob</h1>
-      <p>选好提供翻译的平台，再跟着下方说明把设置填进 Bob。还没有安装插件？<a href="../docs/basic-usage.html#install">先安装 AiTranslate</a>。</p>
+      <h1>配置助手</h1>
+      <p>将翻译服务接入 Bob，按模型调整思考强度。</p>
     </header>
-    <noscript><p>请启用 JavaScript 以生成配置。也可以参照<a href="../docs/basic-usage.html">配置指南</a>手动填写。</p></noscript>
-    <div class="bench-grid">
-      <section class="bench-input" aria-labelledby="source-title">
-        <h2 id="source-title" class="bench-step"><span>1</span>准备翻译服务</h2>
-        <label for="provider">你打算用哪个平台翻译？</label>
-        <select id="provider" disabled><option value="">选择服务商</option><option value="custom">自定义服务商或代理</option></select>
-        <p id="catalog-status" class="bench-help" role="status">正在读取服务商目录…</p>
-        <div id="start-shortcuts" hidden>
-          <p class="bench-help">已有 API Key？选择发给你密钥的平台。也可以从这里开始。</p>
-          <div class="bench-shortcuts">
-            <button type="button" data-preset="bilibili"><strong>先试译一句</strong><span>bilibili 翻译，无需密钥</span></button>
-            <button type="button" data-preset="ollama"><strong>用 Mac 上的模型</strong><span>连接本机的 Ollama</span></button>
-            <button type="button" data-preset="custom"><strong>使用自己的服务地址</strong><span>连接代理或自建服务</span></button>
-          </div>
-          <a class="bench-link" href="../index.html#providers">浏览全部服务商 →</a>
-        </div>
-        <div id="custom-field" hidden>
-          <label for="custom-name">服务商或部署名称</label>
-          <input id="custom-name" type="text" placeholder="例如：公司内部的模型服务" autocomplete="off">
-        </div>
-        <div id="prepare-guide" hidden>
-          <h3 id="prepare-title"></h3>
-          <p id="prepare-copy" class="bench-help"></p>
-          <a id="provider-guide" class="bench-link" target="_blank" rel="noopener" hidden></a>
-        </div>
-        <div id="editable-connection" hidden>
-          <label for="model">要使用的模型</label>
-          <input id="model" list="model-choices" type="text" spellcheck="false" autocomplete="off" placeholder="粘贴模型名称或部署名" aria-describedby="model-hint">
-          <datalist id="model-choices"></datalist>
-          <p id="model-hint" class="bench-help"></p>
-          <div id="required-address"></div>
-          <details id="connection-options" class="bench-details">
-            <summary>修改地址或连接方式</summary>
-            <div id="optional-address"><div id="address-field">
-              <label for="base-url">服务地址（Base URL）</label>
-              <input id="base-url" type="text" spellcheck="false" autocomplete="off" placeholder="https://api.example.com">
-              <p id="address-hint" class="bench-help"></p>
-            </div></div>
-            <label for="format">请求格式</label>
-            <select id="format">
+    <noscript><p>配置助手需要 JavaScript。也可参阅<a href="../docs/basic-usage.html">服务配置指南</a>和<a href="../docs/disable-thinking.html">思考设置指南</a>。</p></noscript>
+    <div class="bench-tabs" role="tablist" aria-label="配置任务">
+      <button id="tab-connection" type="button" role="tab" aria-selected="true" aria-controls="panel-connection">服务配置</button>
+      <button id="tab-thinking" type="button" role="tab" aria-selected="false" aria-controls="panel-thinking" tabindex="-1">思考设置</button>
+    </div>
+    <section class="bench-context" aria-label="当前服务与模型">
+      <div class="bench-context-grid">
+        <div><label for="provider">服务商</label><select id="provider" disabled><option value="" disabled>选择服务商</option><option value="custom">自定义服务或代理</option></select></div>
+        <div><label for="model">模型或部署名</label><input id="model" list="model-choices" type="text" disabled spellcheck="false" autocomplete="off" placeholder="先选择服务商" aria-describedby="model-hint"><datalist id="model-choices"></datalist></div>
+      </div>
+      <p id="catalog-status" class="bench-help" role="status">正在读取服务商目录…</p>
+      <p id="model-hint" class="bench-help"></p>
+      <div id="custom-field" class="bench-control" hidden><label for="custom-name">服务名称</label><input id="custom-name" placeholder="例如公司内部翻译服务" autocomplete="off"></div>
+      <details id="connection-options" class="bench-details" hidden>
+        <summary>连接选项<span id="format-caption"></span></summary>
+        <div class="bench-options-grid">
+          <div><label for="base-url">服务地址（Base URL）</label><input id="base-url" type="text" spellcheck="false" autocomplete="off" placeholder="https://api.example.com" aria-describedby="address-hint"><p id="address-hint" class="bench-help"></p></div>
+          <div><label for="format">请求格式</label><select id="format">
               <option value="openai_chat">OpenAI Chat Completions（通用兼容）</option>
               <option value="openai_responses">OpenAI Responses API</option>
               <option value="openai_completions">OpenAI Legacy Completions</option>
@@ -80,11 +61,9 @@
               <option value="anthropic_openai_chat">Anthropic OpenAI 兼容</option>
               <option value="gemini_generate_content">Gemini generateContent</option>
               <option value="gemini_openai_chat">Gemini OpenAI 兼容</option>
-            </select>
-            <label for="endpoint">端点路径覆盖</label>
-            <input id="endpoint" type="text" spellcheck="false" autocomplete="off" placeholder="留空使用默认路径">
-            <label for="auth-mode">鉴权方式</label>
-            <select id="auth-mode">
+            </select></div>
+          <div><label for="endpoint">端点路径覆盖</label><input id="endpoint" type="text" spellcheck="false" autocomplete="off" placeholder="留空使用默认路径"></div>
+          <div><label for="auth-mode">鉴权方式</label><select id="auth-mode">
               <option value="auto">自动（按请求格式）</option>
               <option value="authorization">Authorization: Bearer</option>
               <option value="x-api-key">x-api-key</option>
@@ -92,94 +71,58 @@
               <option value="api-key">api-key</option>
               <option value="query-key">URL 查询参数 key</option>
               <option value="none">手动或无需鉴权</option>
-            </select>
+            </select></div>
+        </div>
+      </details>
+    </section>
+    <section id="panel-connection" class="bench-pane" role="tabpanel" aria-labelledby="tab-connection" tabindex="0">
+      <div class="bench-layout">
+        <div>
+          <h2>在 Bob 中填写</h2>
+          <p class="bench-description">打开 Bob「偏好设置 → 翻译」，在文本翻译服务中添加或选中「Ai 翻译」。填好后点击「验证」并保存。</p>
+          <p id="compatibility-note" class="bench-pending">选择服务商后即可查看连接字段。</p>
+          <div id="setup-fields" hidden>
+            <dl id="field-list" class="bench-fields"></dl>
+            <p class="bench-help" id="credential-note"></p>
+            <details id="defaults" class="bench-details"><summary>可保留的默认项</summary><dl id="default-list" class="bench-fields"></dl><p id="default-auth-tip" class="bench-help" hidden>密钥留空时，鉴权方式也可保留「自动（按请求格式）」。</p></details>
+          </div>
+        </div>
+        <aside class="bench-aside">
+          <h3>服务说明</h3><p id="provider-note"></p>
+          <div class="bench-links"><a id="provider-docs" target="_blank" rel="noopener" hidden>官方文档 ↗</a><a id="provider-guide" target="_blank" rel="noopener" hidden>Bob 服务说明 ↗</a><a href="../docs/basic-usage.html">安装与配置指南 →</a></div>
+          <details id="model-details" class="bench-details" hidden><summary>模型公开参数</summary><dl id="model-data"></dl><a id="model-source" target="_blank" rel="noopener"></a></details>
+          <details id="lookup" class="bench-details" hidden><summary>向 AI 查询服务配置</summary>
+            <p class="bench-help">将问题复制到能联网查资料的助手。</p>
+            <pre id="lookup-output"></pre><button type="button" data-copy="lookup-output">复制问题</button>
           </details>
-          <details id="model-details" class="bench-details" hidden>
-            <summary>模型公开参数</summary>
-            <p id="snapshot-hint" class="bench-help"></p>
-            <dl id="model-data"></dl>
-            <a id="model-source" class="bench-link" target="_blank" rel="noopener">查看数据来源 ↗</a>
-            <button type="button" id="edit-thinking" hidden>设置思考等级</button>
-          </details>
-        </div>
-        <button type="button" id="return-to-question" class="bench-text" hidden>回到已准备的问题 ↓</button>
-        <details id="provider-note-wrap" class="bench-details" hidden>
-          <summary>平台说明与官方文档</summary>
-          <p id="provider-note" class="bench-help"></p>
-          <a id="provider-docs" class="bench-link" target="_blank" rel="noopener" hidden>服务商官方文档 ↗</a>
-        </details>
-      </section>
-      <section id="connection" class="bench-output bench-panel" aria-labelledby="connection-title">
-        <h2 id="connection-title" class="bench-step"><span>2</span>在 Bob 中填写</h2>
-        <p class="bench-description">打开「偏好设置 → 翻译 → 服务」，选中「文本翻译」。点击下方的加号，选择「Ai 翻译」。</p>
-        <p id="compatibility-note" class="bench-pending">选好平台后，这里会列出需要填写的内容。</p>
-        <div id="setup-fields" hidden>
-          <h3 id="field-title"></h3>
-          <dl id="field-list" class="bench-fields"></dl>
-          <p class="bench-help" id="credential-note"></p>
-          <details id="defaults" class="bench-details"><summary>可以保留的默认设置</summary><dl id="default-list" class="bench-fields"></dl><p id="default-auth-tip" class="bench-help" hidden>密钥留空时，Bob 的鉴权方式也可以保持「自动（按请求格式）」。</p></details>
-        </div>
-        <div class="bench-verify">
-          <h2 class="bench-step"><span>3</span>验证并保存</h2>
-          <p>填好后点击「验证」。验证通过，开启这项服务并点击右下角的「保存」，再选中一句话试译。</p>
-          <a class="bench-link" href="../docs/basic-usage.html#troubleshooting">验证失败怎么办？</a>
-        </div>
-      </section>
-    </div>
-    <section class="bench-extras" aria-labelledby="extras-title">
-      <h2 id="extras-title">需要更多帮助？</h2>
-      <div class="bench-extras-grid">
-        <section class="bench-tool">
-          <h3 id="tab-lookup" class="bench-always-title">请 AI 帮我查设置</h3>
-          <div id="lookup" class="bench-panel" aria-labelledby="tab-lookup">
-            <p class="bench-description">选择想解决的问题。复制后，发给能联网查资料的 AI 助手，它会按你选的平台和模型去查官方文档。</p>
-            <fieldset id="lookup-kind" class="bench-choices"><legend>你想知道什么？</legend>
-              <label class="bench-choice"><input id="lookup-connection" type="radio" name="question" value="connection" checked><span><strong>我该在 Bob 里填什么？</strong><small>查清服务地址、模型名称，以及密钥应填在哪里。</small></span></label>
-              <label class="bench-choice"><input id="lookup-thinking" type="radio" name="question" value="thinking"><span><strong>怎样让译文更快出现？</strong><small>核对这个模型能否缩短思考时间，以及需要改哪一项。</small></span></label>
-            </fieldset>
-            <div class="bench-question-action"><div><h3 id="question-title">配置问题</h3><p id="question-context" class="bench-help"></p></div><button type="button" class="bench-primary" data-copy="lookup-output" disabled>复制问题</button></div>
-            <button type="button" id="choose-for-lookup" class="bench-text">先选择服务商 ↑</button>
-            <details class="bench-details" id="lookup-preview" hidden><summary>预览要发给助手的问题</summary><pre id="lookup-output"></pre></details>
-          </div>
-        </section>
-        <section class="bench-tool">
-          <h3><button type="button" class="bench-tool-toggle" id="tab-prompts" aria-expanded="false" aria-controls="prompts">调整译文风格<span aria-hidden="true"></span></button></h3>
-          <div id="prompts" class="bench-panel" aria-labelledby="tab-prompts" hidden>
-            <p class="bench-description">日常翻译可以沿用默认指令。想让邮件更得体、技术术语更一致时，选一种场景，把生成的两段文字分别粘贴到 Bob 的同名字段。</p>
-            <label for="scene">翻译场景</label>
-            <select id="scene"><option value="general">日常文本</option><option value="technical">技术文档</option><option value="mail">商务邮件</option></select>
-            <div class="bench-snippet"><div class="bench-section-title"><h3>自定义系统指令</h3><button type="button" data-copy="system-output">复制</button></div><pre id="system-output"></pre></div>
-            <div class="bench-snippet"><div class="bench-section-title"><h3>自定义用户指令</h3><button type="button" data-copy="user-output">复制</button></div><pre id="user-output"></pre></div>
-          </div>
-        </section>
-        <section class="bench-tool">
-          <h3><button type="button" class="bench-tool-toggle" id="tab-parameters" aria-expanded="false" aria-controls="parameters">编辑高级参数<span aria-hidden="true"></span></button></h3>
-          <div id="parameters" class="bench-panel" aria-labelledby="tab-parameters" hidden>
-            <p class="bench-description">按模型文档添加参数，再把生成的 JSON 粘贴到 Bob 的「额外请求体」。</p>
-            <div id="thinking-field" hidden>
-              <label for="thinking-level">当前模型的思考等级</label>
-              <select id="thinking-level"></select>
-            </div>
-            <label for="template">从参数示例开始</label>
-            <div class="bench-template"><select id="template">
-              <option value="">选择示例</option>
-              <option value="reasoning_effort">Chat Completions · reasoning_effort</option>
-              <option value="reasoning">Responses · reasoning.effort</option>
-              <option value="thinking">DeepSeek · thinking.type</option>
-              <option value="chat_template_kwargs" id="bilibili-template" hidden>bilibili 翻译 · chat_template_kwargs</option>
-              <option value="enable_thinking">通义千问 · enable_thinking</option>
-              <option value="top_p">采样概率 · top_p</option>
-              <option value="top_k">采样范围 · top_k</option>
-              <option value="response_format">输出格式 · response_format</option>
-            </select><button type="button" id="add-template" disabled>加入</button></div>
-            <p class="bench-help">同一家服务商的不同模型也可能支持不同的参数。<a href="../docs/disable-thinking.html">查看思考参数说明</a></p>
-            <div id="param-rows"></div>
-            <button type="button" class="bench-add" id="add-row">＋ 添加参数</button>
-            <div class="bench-snippet"><div class="bench-section-title"><h3>JSON 预览</h3><button type="button" data-copy="json-output">复制 JSON</button></div><pre id="json-output">{}</pre></div>
-            <p id="param-error" role="status" class="bench-error"></p>
-          </div>
-        </section>
+        </aside>
       </div>
+      <details id="prompts" class="bench-details bench-extra"><summary>自定义翻译指令</summary>
+        <label for="scene">翻译场景</label><select id="scene"><option value="general">日常文本</option><option value="technical">技术文档</option><option value="mail">商务邮件</option></select>
+        <div class="bench-snippets"><div><div class="bench-section-title"><h3>自定义系统指令</h3><button type="button" data-copy="system-output">复制</button></div><pre id="system-output"></pre></div>
+        <div><div class="bench-section-title"><h3>自定义用户指令</h3><button type="button" data-copy="user-output">复制</button></div><pre id="user-output"></pre></div></div>
+      </details>
+    </section>
+    <section id="panel-thinking" class="bench-pane" role="tabpanel" aria-labelledby="tab-thinking" tabindex="0" hidden>
+      <div class="bench-layout reasoning-layout">
+        <div>
+          <h2>调整思考强度</h2>
+          <p id="thinking-note" class="bench-description" aria-live="polite">选择服务商和模型，查看能否关闭思考或调低强度。</p>
+          <fieldset id="thinking-options" hidden><legend class="sr-only">思考强度</legend><div id="thinking-choices"></div></fieldset>
+          <div class="bench-links"><a id="thinking-source" target="_blank" rel="noopener" hidden>查看服务商说明 ↗</a><a href="../docs/disable-thinking.html">思考设置指南 →</a></div>
+          <details id="thinking-query" class="bench-details" hidden><summary>向 AI 核对这个模型</summary><p class="bench-help">将问题复制到能联网查资料的助手。</p><pre id="thinking-query-output"></pre><button type="button" data-copy="thinking-query-output">复制问题</button></details>
+        </div>
+        <div id="thinking-preview" class="bench-result">
+          <div class="bench-section-title"><h3>额外请求体 <small>JSON</small></h3><button type="button" data-copy="json-output" disabled>复制 JSON</button></div>
+          <pre id="json-output" aria-label="额外请求体预览">{}</pre><p id="json-instruction"></p>
+          <p id="param-error" role="status" class="bench-error"></p>
+        </div>
+      </div>
+      <details id="manual-parameters" class="bench-details bench-extra"><summary>手动添加请求参数</summary>
+        <p class="bench-help">用于服务商另有要求的字段。手填参数会合并到上方的 JSON。</p>
+        <label for="template">参数示例</label><div class="bench-template"><select id="template"><option value="">选择参数</option><option value="top_p">采样概率 · top_p</option><option value="top_k">采样范围 · top_k</option><option value="response_format">输出格式 · response_format</option></select><button type="button" id="add-template" disabled>添加示例</button></div>
+        <div id="param-rows"></div><button type="button" id="add-row">添加自定义参数</button>
+      </details>
     </section>
     <div id="copy-status" role="status" aria-live="polite" class="bench-toast"></div>
   </main>

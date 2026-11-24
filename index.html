@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="在 Mac 上选中文字，用 Bob 查看译文。跟着安装指南添加翻译服务，也可以使用本机已有的模型。">
+  <meta name="description" content="Bob 的文本翻译插件。查询服务商配置，按模型选择是否关闭思考或调整推理强度。">
   <title>AiTranslate · Bob 翻译插件</title>
   <link rel="icon" href="favicon.ico">
   <link rel="stylesheet" href="assets/site.css">
@@ -33,13 +33,13 @@
     <section class="hero wrap" aria-labelledby="hero-heading">
       <div class="hero-copy">
         <p class="kicker"><span class="rule-mark" aria-hidden="true"></span>Bob 文本翻译插件</p>
-        <h1 id="hero-heading">选中文字，<br>在 Bob 里看<em>译文</em>。</h1>
-        <p class="hero-description">读网页或邮件时，用 Bob 的划词快捷键翻译。<br class="wide-only">你可以选择在线服务，也可以用 Mac 上已有的模型。</p>
+        <h1 id="hero-heading">在 Bob 中使用<br><em>云端与本地模型</em></h1>
+        <p class="hero-description">查询服务商的接口、鉴权方式和模型名称。<br class="wide-only">按模型支持的选项，关闭思考或调整推理强度。</p>
         <div class="hero-actions">
-          <a class="button primary" href="docs/basic-usage.html">从安装开始 <span aria-hidden="true">→</span></a>
-          <a class="button" href="#providers">已安装，去配置</a>
+          <a class="button primary" href="tools/param-builder.html#connection">服务配置 <span aria-hidden="true">→</span></a>
+          <a class="button" href="tools/param-builder.html#thinking">思考设置 <span aria-hidden="true">→</span></a>
         </div>
-        <p class="compatibility">需要 macOS 版 Bob 1.8.0 或以上版本 <a id="download" data-appcast="appcast.json" href="https://github.com/wakewon/AiTranslate/releases/latest">直接下载插件</a></p>
+        <p class="compatibility">适用于 Bob 1.8.0 及以上版本 <a id="download" data-appcast="appcast.json" href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件</a></p>
       </div>
 
       <figure class="preview" aria-label="翻译示例">
@@ -67,11 +67,9 @@
     <section class="directory" id="providers" aria-labelledby="directory-heading">
       <div class="wrap">
         <div class="section-head">
-          <div><h2 id="directory-heading">选择你的翻译服务</h2>
-          <p>密钥（API Key）是服务商发给你的一串字符。在哪个平台申请的，就选哪一家。</p></div>
-          <a class="no-key" href="tools/param-builder.html?provider=bilibili">
-            <strong>还没有密钥？</strong><span>用 bilibili 翻译试一试 <b aria-hidden="true">→</b></span>
-          </a>
+          <div><h2 id="directory-heading">服务商目录</h2>
+          <p>按平台或模型名称查找连接设置。</p></div>
+          <a class="text-link" href="tools/param-builder.html?provider=custom#connection">自定义服务 <span aria-hidden="true">→</span></a>
         </div>
         <div class="directory-tools" hidden>
           <div class="filter-set" role="group" aria-label="按使用方式筛选">
@@ -79,14 +77,14 @@
             <button type="button" data-group="online" aria-pressed="false">在线服务</button>
             <button type="button" data-group="local" aria-pressed="false">本机运行</button>
           </div>
-          <label class="search-box"><span class="magnifier" aria-hidden="true"></span><span class="sr-only">搜索服务商或模型名称</span><input id="provider-search" type="search" placeholder="搜索名称，如 DeepSeek"></label>
+          <label class="search-box"><span class="magnifier" aria-hidden="true"></span><span class="sr-only">搜索服务商或模型名称</span><input id="provider-search" type="search" placeholder="搜索服务商或模型"></label>
         </div>
         <div id="directory-results" aria-busy="true">
           <p class="directory-message" id="directory-message">正在读取服务商目录…</p>
           <noscript><p>启用 JavaScript 后即可筛选服务商。也可以直接阅读<a href="docs/basic-usage.html">安装与设置指南</a>。</p></noscript>
           <table class="provider-table" id="provider-table" hidden>
-            <caption class="sr-only">翻译服务及其设置指南</caption>
-            <thead><tr><th scope="col">服务商</th><th scope="col" id="provider-info-heading">使用前准备</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead>
+            <caption class="sr-only">服务商连接配置</caption>
+            <thead><tr><th scope="col">服务商</th><th scope="col" id="provider-info-heading">连接条件</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead>
             <tbody id="provider-rows"></tbody>
           </table>
         </div>
@@ -94,16 +92,14 @@
           <div class="directory-meta"><span id="directory-count" role="status"></span><label class="technical-toggle"><input type="checkbox" id="show-interface" aria-controls="provider-table">显示接口详情</label></div>
           <div class="page-controls"><button id="page-prev" type="button" aria-label="上一页服务商">←</button><span id="page-indicator"></span><button id="page-next" type="button" aria-label="下一页服务商">→</button></div>
         </div>
-        <p class="custom-service">找不到你用的服务？<a href="tools/param-builder.html?provider=custom">手动填写服务信息 <span aria-hidden="true">→</span></a></p>
       </div>
     </section>
 
     <section class="guides wrap" aria-labelledby="guides-heading">
-      <div class="section-head"><h2 id="guides-heading">使用中遇到问题</h2><a class="text-link" href="docs/index.html">全部文档 <span aria-hidden="true">→</span></a></div>
+      <div class="section-head"><h2 id="guides-heading">配置文档</h2><a class="text-link" href="docs/index.html">全部文档 <span aria-hidden="true">→</span></a></div>
       <div class="guide-links">
-        <a href="docs/basic-usage.html#troubleshooting"><strong>点了验证，为什么没通过？ <span aria-hidden="true">↗</span></strong><span>按 Bob 显示的错误提示逐项检查。</span></a>
-        <a href="tools/param-builder.html#prompts"><strong>想换一种译文风格 <span aria-hidden="true">↗</span></strong><span>选择日常文本、技术文档或商务邮件。</span></a>
-        <a href="docs/disable-thinking.html"><strong>等译文要很久 <span aria-hidden="true">↗</span></strong><span>看看你用的模型能否少花些时间思考。</span></a>
+        <a href="docs/basic-usage.html"><strong>服务配置 <span aria-hidden="true">↗</span></strong><span>安装插件，填写接口、密钥和模型。</span></a>
+        <a href="docs/disable-thinking.html"><strong>思考设置 <span aria-hidden="true">↗</span></strong><span>按模型核对思考开关、强度档位和参数写法。</span></a>
       </div>
     </section>
   </main>

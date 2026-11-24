@@ -41,11 +41,6 @@
 .section-head p { margin-top: 8px; color: var(--muted); font-size: 15px; }
 .section-head .text-link { white-space: nowrap; }
 .directory .section-head { align-items: center; }
-.no-key { flex-shrink: 0; display: grid; gap: 3px; min-width: 222px; border-left: 2px solid var(--accent); padding: 9px 15px; background: var(--tint); color: var(--ink); text-decoration: none; }
-.no-key strong { font-size: 15px; font-weight: 630; }
-.no-key span { color: var(--accent); font-size: 14px; }
-.no-key b { display: inline-block; margin-left: 5px; }
-.no-key:hover span { text-decoration: underline; }
 .directory-tools { margin: 25px 0 18px; display: flex; gap: 14px; align-items: center; justify-content: space-between; }
 .filter-set { display: flex; flex-wrap: wrap; gap: 6px; }
 .filter-set button { border-radius: 20px; border: 1px solid transparent; background: transparent; padding: 6px 14px; font-size: 13px; font-weight: 550; color: var(--muted); }
@@ -67,11 +62,10 @@
 .provider-table tbody td { font-size: 13px; }
 .provider-table tbody tr:hover { background: var(--paper); }
 .provider-table td a { display: inline-block; padding: 7px 0; font-weight: 600; text-decoration: none; }
+.provider-table td a + a { margin-inline-start: 1.35rem; }
 .provider-table td a:hover { text-decoration: underline; }
 .technical-toggle { display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 .technical-toggle input { margin: 0; width: 15px; height: 15px; accent-color: var(--accent); }
-.custom-service { margin-top: 24px; color: var(--muted); font-size: 14px; }
-.custom-service a { margin-left: .3em; }
 .directory-foot { margin-top: 16px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--muted); }
 .directory-meta { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 15px; }
 .page-controls { gap: 12px; }
@@ -81,7 +75,7 @@
 #page-indicator { font-family: var(--mono); }
 .directory-message { padding: 24px 4px; color: var(--muted); }
 .guides { padding-block: 52px 62px; }
-.guide-links { display: grid; grid-template-columns: repeat(3,1fr); margin-top: 25px; }
+.guide-links { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); margin-top: 25px; }
 .guide-links a { display: block; padding: 1px 24px; border-left: 1px solid var(--line); color: var(--muted); text-decoration: none; }
 .guide-links a:first-child { border: 0; padding-left: 0; }
 .guide-links strong { display: block; color: var(--ink); font-size: 17px; }
@@ -106,7 +100,6 @@
   .translation { padding-top: 10px; }
   .directory, .guides { padding-block: 33px; }
   .directory .section-head { align-items: stretch; flex-direction: column; gap: 15px; }
-  .no-key { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 10px; min-width: 0; }
   .directory-tools { align-items: stretch; flex-direction: column-reverse; margin-top: 19px; }
   .search-box input { width: 100%; min-width: 0; }
   .section-head { flex-wrap: wrap; row-gap: 6px; }
@@ -114,6 +107,8 @@
   .guide-links a, .guide-links a:first-child { border: 0; padding: 14px 0; border-bottom: 1px solid var(--line); }
 }
 @media (max-width: 560px) {
+  .provider-table td a { display: block; padding-block: 4px; }
+  .provider-table td a + a { margin-inline-start: 0; }
   .provider-table tbody th { width: 34%; font-size: 14px; overflow-wrap: anywhere; }
   .provider-table td { overflow-wrap: anywhere; }
   .directory-foot { gap: 10px; }

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="在 Mac 上安装 AiTranslate，用免密钥服务、自己的云服务账号或本地模型译出第一句话。">
-  <title>第一次翻译 · AiTranslate</title>
+  <meta name="description" content="为 AiTranslate 配置云端或本地翻译服务，核对模型、请求地址及鉴权方式。">
+  <title>服务配置 · AiTranslate</title>
   <link rel="icon" href="../favicon.ico">
   <link rel="stylesheet" href="../assets/site.css">
   <link rel="stylesheet" href="../assets/docs.css">
@@ -30,52 +30,36 @@
     <nav class="guide-sidebar" aria-label="文档导航">
       <span>使用文档</span>
       <a href="index.html">文档首页</a>
-      <a href="basic-usage.html" aria-current="page">第一次翻译</a>
-      <a href="disable-thinking.html">翻译时少等一会儿</a>
+      <a href="basic-usage.html" aria-current="page">服务配置</a>
+      <a href="disable-thinking.html">思考设置</a>
       <span>本页内容</span>
-      <a href="#install">安装插件</a>
-      <a href="#prepare">选择服务</a>
-      <a href="#fill">填写到 Bob</a>
-      <a href="#test">翻译一句话</a>
-      <a href="#troubleshooting">遇到问题</a>
-      <a href="#reference">其他设置</a>
+      <a href="#install">安装与启用</a>
+      <a href="#prepare">服务与模型</a>
+      <a href="#troubleshooting">常见问题</a>
+      <a href="#reference">字段参考</a>
     </nav>
     <article class="guide-article">
       <header class="guide-intro">
-        <h1>在 Bob 里翻译第一句话</h1>
-        <p>下面用 bilibili 翻译做一次设置。它目前可以免密钥使用。已经有其他服务的密钥，或已经在 Mac 上运行了模型，也可以用自己的服务完成这几步。</p>
+        <h1>服务配置</h1>
+        <p>平台决定服务地址和鉴权方式，模型名称以实际账号或本地部署为准。</p>
+        <a class="button primary" href="../tools/param-builder.html#connection">打开服务配置</a>
       </header>
-      <section id="install" class="guide-step">
-        <h2><span>1</span>把插件加到 Bob</h2>
-        <p>如果 Mac 上还没有 Bob，请先从官网安装并打开。已安装的 Bob 需要 1.8.0 或更高版本。<a href="https://bobtranslate.com/">获取 Bob</a></p>
-        <p>下载 AiTranslate 后，双击下载好的 <code>.bobplugin</code> 文件安装。如果打开的是 GitHub 发布页，安装包在「Assets」下方。<a data-appcast="../appcast.json" href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件安装包</a></p>
-        <p>打开 Bob「偏好设置 → 翻译 → 服务」，选中「文本翻译」。点列表下方的加号，选择刚安装的<strong>「Ai 翻译」</strong>。让这个窗口保持打开，稍后在这里填写。</p>
+      <section id="install">
+        <h2>安装与启用</h2>
+        <p>双击下载的 <code>.bobplugin</code> 文件安装。在 Bob「偏好设置 → 翻译 → 服务」的「文本翻译」列表中点加号，添加「Ai 翻译」。插件需要 Bob 1.8.0 或更高版本。<a data-appcast="../appcast.json" href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件</a> · <a href="https://bobtranslate.com/">获取 Bob</a></p>
       </section>
-      <section id="prepare" class="guide-step">
-        <h2><span>2</span>选一个翻译服务</h2>
-        <p>第一次试用可以直接打开 bilibili 的配置助手。页面已经选好了服务和模型，<strong>模型</strong>就是实际负责翻译的程序。</p>
-        <p><a class="button primary" href="../tools/param-builder.html?provider=bilibili#connection">打开 bilibili 的配置</a></p>
-        <details class="guide-fold">
-          <summary>我想用 DeepSeek 或其他云服务</summary>
-          <p>云服务通常会给你一串专用密钥，叫做 <strong>API Key</strong>，用来确认这次翻译属于哪个账号。登录服务商的开发者平台，在「API Keys」或「密钥管理」里创建并复制密钥。例如，DeepSeek 可以从这里申请。<a href="https://platform.deepseek.com/api_keys">DeepSeek 密钥管理</a></p>
-          <p>在配置助手中选同一家服务商，再选你账号能用的模型。密钥只需填在 Bob 里。<a href="../tools/param-builder.html?provider=deepseek#connection">打开 DeepSeek 配置</a> · <a href="../index.html#providers">查找其他服务商</a></p>
-        </details>
-        <details class="guide-fold">
-          <summary>我想用 Mac 上已经下载的模型</summary>
-          <p>先启动本地服务。用 Ollama 的话，在终端运行 <code>ollama list</code>，从 NAME 列复制模型名称（包括冒号后的标签）。用 LM Studio 的话，在 Developer 页启动服务器，复制要使用的模型标识符。把名称填进对应的配置助手。默认本机服务可以留空 API Key。<a href="../tools/param-builder.html?provider=ollama#connection">配置 Ollama</a> · <a href="../tools/param-builder.html?provider=lmstudio#connection">配置 LM Studio</a></p>
-        </details>
-      </section>
-      <section id="fill" class="guide-step">
-        <h2><span>3</span>把设置填回 Bob</h2>
-        <p>对照助手里的「在 Bob 中填写」，回到刚才的「Ai 翻译」窗口。把<strong>服务地址（Base URL）</strong>和<strong>模型</strong>复制到同名输入框，需要改的下拉选项按助手给出的名称选择。</p>
-        <p>以 bilibili 为例，Base URL 填 <code>https://index-translate.bilibili.com</code>，模型填写助手选中的名称，API Key 留空。如果选的是需要密钥的服务，在这里粘贴刚才申请的密钥。其余设置可以先用默认值。</p>
-      </section>
-      <section id="test" class="guide-step">
-        <h2><span>4</span>试译一句话</h2>
-        <p>在 Bob 点击「验证」。看到成功提示后，开启这项服务并点击「保存」。打开翻译窗口，选「简体中文」作为目标语言，输入 <strong lang="en">See you tomorrow.</strong> 后按回车。如果「Ai 翻译」显示「明天见」或意思相近的译文，就设置好了。</p>
+      <section id="prepare">
+        <h2>选择服务与模型</h2>
+        <dl class="guide-facts">
+          <div><dt>云端服务</dt><dd>选择签发 API Key 的平台和账号可用的模型。密钥在服务商的开发者平台申请，只需填在 Bob 里。<a href="https://platform.deepseek.com/api_keys">DeepSeek 密钥管理</a> · <a href="../tools/param-builder.html?provider=deepseek#connection">DeepSeek 配置</a></dd></div>
+          <div><dt>本地服务</dt><dd>启动本地服务器。Ollama 用 <code>ollama list</code> 查看模型名，LM Studio 使用 Developer 页显示的模型标识符。本地服务未启用鉴权时，API Key 可留空。<a href="../tools/param-builder.html?provider=ollama#connection">Ollama 配置</a> · <a href="../tools/param-builder.html?provider=lmstudio#connection">LM Studio 配置</a></dd></div>
+          <div><dt>免密钥服务</dt><dd>bilibili 的公共翻译接口目前可免密钥使用，模型从该端点提供的列表中选择。<a href="../tools/param-builder.html?provider=bilibili#connection">bilibili 配置</a></dd></div>
+        </dl>
+        <p id="fill">在 Bob 中选择配置助手所示的「请求格式」和「鉴权方式」，复制 Base URL、模型名称及需要覆盖的端点路径。</p>
+        <p id="test">在 Bob 点击「验证」，通过后开启服务并保存。</p>
       </section>
       <section id="troubleshooting">
-        <h2>没有看到译文？</h2>
+        <h2>连接与显示问题</h2>
         <details class="guide-fold">
           <summary>加号菜单里找不到「Ai 翻译」</summary>
           <p>在 Bob 的「偏好设置 → 插件」中确认已安装「Ai 翻译」。回到「翻译 → 服务」，选中「文本翻译」再点加号。<a href="https://bobtranslate.com/guide/advance/plugin.html">Bob 插件安装图解</a></p>
@@ -98,9 +82,9 @@
         </details>
       </section>
       <section id="reference">
-        <h2>需要改设置时再看</h2>
+        <h2>字段参考</h2>
         <details class="guide-fold">
-          <summary>怎样让译文保留术语、代码和段落？</summary>
+          <summary>翻译指令与变量</summary>
           <div id="prompts">
             <p>插件已有默认翻译指令。需要保留术语、代码或 Markdown 结构时，可以把固定要求写在「自定义系统指令」里。下面是一组翻译技术文档的示例。</p>
             <h3>自定义系统指令</h3>
@@ -113,7 +97,7 @@ $text</code></pre>
           </div>
         </details>
         <details class="guide-fold">
-          <summary>账号或本地服务器里要复制哪个模型名称？</summary>
+          <summary>模型 ID 与部署名称</summary>
           <div id="model-ids">
             <p>到实际提供 API 的平台查 ID，再把它完整复制到「模型」。同一个模型在不同平台可能有不同的名称。</p>
             <dl class="guide-facts">
@@ -124,7 +108,7 @@ $text</code></pre>
           </div>
         </details>
         <details class="guide-fold">
-          <summary>服务地址和接口路径应怎么区分？</summary>
+          <summary>Base URL 与接口路径</summary>
           <div id="format">
             <p>在服务商文档里找到发送请求的网址。以 OpenAI 的 <code>https://api.openai.com/v1/chat/completions</code> 为例，「Base URL」填 <code>https://api.openai.com</code>，选择 Chat Completions 后，插件会补上后半段路径。</p>
             <p>如果服务商用的路径不同，在「端点路径覆盖」中填写从 <code>/</code> 开始的完整路径。插件会将它直接接在 Base URL 后面。把 <code>/v1</code> 同时写进这两个字段会导致地址重复。</p>
@@ -144,7 +128,7 @@ $text</code></pre>
               </table>
             </details>
             <details class="guide-fold">
-              <summary>其他兼容服务怎么填？</summary>
+              <summary>其他兼容端点</summary>
               <p>Together AI 的 Chat Completions 可以使用默认格式，Base URL 填 <code>https://api.together.ai</code>。模型名称通常包含提供方前缀，要从 Together 当前的模型列表完整复制。<a href="https://docs.together.ai/docs/inference/openai-compatibility">Together AI 接口说明</a></p>
               <p>使用 DeepSeek 的 Anthropic 兼容接口时，选择「Anthropic Claude Messages」，Base URL 填 <code>https://api.deepseek.com</code>，端点路径覆盖填 <code>/anthropic/v1/messages</code>。<a href="https://api-docs.deepseek.com/guides/anthropic_api/">DeepSeek 的 Anthropic 接口</a></p>
               <p>使用 vLLM、llama.cpp 或 LocalAI 自建服务时，先确认服务器提供的接口和模型 ID。在配置助手的「自定义服务商」中填入实际地址，就可以生成配置查询提示词。<a href="../tools/param-builder.html?provider=custom#lookup">查询自定义配置</a></p>
@@ -152,14 +136,14 @@ $text</code></pre>
           </div>
         </details>
         <details class="guide-fold">
-          <summary>Gemini 的模型名称填在哪里？</summary>
+          <summary>Gemini 原生接口的模型路径</summary>
           <div id="gemini-endpoint">
             <p>选择「Gemini generateContent」，Base URL 填 <code>https://generativelanguage.googleapis.com</code>，「端点路径覆盖」留空。在「模型」里填写模型 ID，省略 <code>models/</code> 前缀。插件会构造 <code>/v1beta/models/{model}:generateContent</code>，开启流式时自动改用 <code>:streamGenerateContent?alt=sse</code>。</p>
             <p>如果代理要求你手填路径，请把 <code>{model}</code> 换成实际 ID，并选择与流式开关对应的接口。插件会原样发送这条路径。<a href="https://ai.google.dev/api/generate-content">Gemini 接口文档</a></p>
           </div>
         </details>
         <details class="guide-fold">
-          <summary>服务商要求指定发送密钥的方式，怎么选？</summary>
+          <summary>鉴权方式与请求头</summary>
           <div id="authentication">
             <p>通常保留「自动（按请求格式）」，在「API Key」里粘贴原始密钥。插件对 Gemini 原生接口使用 <code>x-goog-api-key</code>，对其他六种格式添加 <code>Authorization: Bearer</code> 请求头。</p>
             <details class="guide-fold">
@@ -168,7 +152,7 @@ $text</code></pre>
               <p>使用 Claude 的跨工作区密钥时，在「额外请求头」填写目标工作区的 <code>anthropic-workspace-id</code>。<a href="https://platform.claude.com/docs/en/manage-claude/authentication">Claude 鉴权说明</a></p>
             </details>
             <details class="guide-fold">
-              <summary>本地 Ollama 或 LM Studio 需要填密钥吗？</summary>
+              <summary>本地服务的密钥设置</summary>
               <p>直连默认的本地 Ollama 或 LM Studio 时，「API Key」留空即可。LM Studio 开启鉴权后要填服务器签发的令牌。经代理访问时要看代理的设置，直连 Ollama Cloud 则要填云端密钥。<a href="https://docs.ollama.com/api/authentication">Ollama 鉴权</a> · <a href="https://lmstudio.ai/docs/developer/core/authentication">LM Studio 鉴权</a></p>
             </details>
             <details class="guide-fold">
@@ -178,7 +162,7 @@ $text</code></pre>
           </div>
         </details>
       </section>
-      <p class="guide-next"><a href="disable-thinking.html">翻译短句时，怎样减少等待？</a></p>
+      <p class="guide-next"><a href="disable-thinking.html">配置模型的思考模式</a></p>
     </article>
   </main>
   <footer class="site-footer">

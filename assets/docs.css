@@ -89,18 +89,13 @@
 }
 .guide-article pre code { font-size: .9rem; }
 
-.guide-step h2 {
-  display: flex;
-  gap: 12px;
-  align-items: baseline;
+.guide-intro .button { margin-top: 18px; }
+.guide-topics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 32px;
 }
-.guide-step h2 > span {
-  flex: none;
-  color: var(--accent);
-  font: 600 .85em/1 var(--serif);
-  font-variant-numeric: tabular-nums;
-}
-.guide-article section p > .button { margin-block: 5px 8px; }
+.guide-topics .guide-link-title { font: 600 1.65rem/1.4 var(--serif); }
 .guide-fold > div[id] { scroll-margin-top: 30px; }
 .guide-fold .guide-fold { padding-inline-start: 14px; }
 .guide-fold .guide-fold summary { font-weight: 550; }
@@ -182,6 +177,9 @@
   .guide-sidebar a:first-of-type { padding-inline-start: 0; }
   .guide-intro { margin-bottom: 24px; padding-bottom: 24px; }
   .guide-article > section + section { margin-top: 34px; }
+}
+@media (max-width: 540px) {
+  .guide-topics { grid-template-columns: 1fr; gap: 0; }
 }
 @media (max-width: 420px) {
   .guide-facts > div { grid-template-columns: 1fr; gap: 2px; }
