@@ -79,7 +79,7 @@
       <div class="bench-layout">
         <div>
           <h2>在 Bob 中填写</h2>
-          <p class="bench-description">打开 Bob「偏好设置 → 翻译」，在文本翻译服务中添加或选中「Ai 翻译」。填好后点击「验证」并保存。</p>
+          <p class="bench-description">打开 Bob「偏好设置 → 翻译」，在文本翻译服务中添加或选中「AiTranslate」。填好后点击「验证」并保存。</p>
           <p id="compatibility-note" class="bench-pending">选择服务商后即可查看连接字段。</p>
           <div id="setup-fields" hidden>
             <dl id="field-list" class="bench-fields"></dl>
@@ -91,9 +91,10 @@
           <h3>服务说明</h3><p id="provider-note"></p>
           <div class="bench-links"><a id="provider-docs" target="_blank" rel="noopener" hidden>官方文档 ↗</a><a id="provider-guide" target="_blank" rel="noopener" hidden>Bob 服务说明 ↗</a><a href="../docs/basic-usage.html">安装与配置指南 →</a></div>
           <details id="model-details" class="bench-details" hidden><summary>模型公开参数</summary><dl id="model-data"></dl><a id="model-source" target="_blank" rel="noopener"></a></details>
-          <details id="lookup" class="bench-details" hidden><summary>向 AI 查询服务配置</summary>
-            <p class="bench-help">将问题复制到能联网查资料的助手。</p>
-            <pre id="lookup-output"></pre><button type="button" data-copy="lookup-output">复制问题</button>
+          <details id="lookup" class="bench-details bench-query" hidden><summary>向 AI 查询服务配置</summary>
+            <p class="bench-help">将当前连接设置和插件文档一起发给能联网的 AI 助手。</p>
+            <button type="button" data-copy="lookup-output">复制提示词</button>
+            <pre id="lookup-output" tabindex="0" aria-label="服务配置查询提示词"></pre>
           </details>
         </aside>
       </div>
@@ -110,7 +111,11 @@
           <p id="thinking-note" class="bench-description" aria-live="polite">选择服务商和模型，查看能否关闭思考或调低强度。</p>
           <fieldset id="thinking-options" hidden><legend class="sr-only">思考强度</legend><div id="thinking-choices"></div></fieldset>
           <div class="bench-links"><a id="thinking-source" target="_blank" rel="noopener" hidden>查看服务商说明 ↗</a><a href="../docs/disable-thinking.html">思考设置指南 →</a></div>
-          <details id="thinking-query" class="bench-details" hidden><summary>向 AI 核对这个模型</summary><p class="bench-help">将问题复制到能联网查资料的助手。</p><pre id="thinking-query-output"></pre><button type="button" data-copy="thinking-query-output">复制问题</button></details>
+          <details id="thinking-query" class="bench-details bench-query" hidden><summary>向 AI 核对这个模型</summary>
+            <p class="bench-help">让能联网的 AI 助手核对当前模型的思考参数和可用档位。</p>
+            <button type="button" data-copy="thinking-query-output">复制提示词</button>
+            <pre id="thinking-query-output" tabindex="0" aria-label="思考设置查询提示词"></pre>
+          </details>
         </div>
         <div id="thinking-preview" class="bench-result">
           <div class="bench-section-title"><h3>额外请求体 <small>JSON</small></h3><button type="button" data-copy="json-output" disabled>复制 JSON</button></div>

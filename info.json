@@ -2,7 +2,7 @@
   "identifier": "com.github.wakewon.ai.translate",
   "version": "1.2.0",
   "category": "translate",
-  "name": "Ai 翻译",
+  "name": "AiTranslate",
   "summary": "在 Bob 中连接云端或本地模型，支持 OpenAI、Claude 和 Gemini 等接口格式。",
   "icon": "icon.png",
   "author": "wakewon",

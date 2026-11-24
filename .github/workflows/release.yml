@@ -265,7 +265,7 @@ jobs:
               gh release delete "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --yes
               gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
                 --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
-                --title "Ai 翻译 v$VERSION" \
+                --title "AiTranslate v$VERSION" \
                 --notes-file "$NOTES_FILE"
               gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
             else
@@ -286,7 +286,7 @@ jobs:
             fi
             gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
               --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
-              --title "Ai 翻译 v$VERSION" \
+              --title "AiTranslate v$VERSION" \
               --notes-file "$NOTES_FILE"
             gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
           fi

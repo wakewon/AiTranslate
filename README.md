@@ -8,7 +8,7 @@ AiTranslate 是 Bob 的文本翻译插件，可接入云端 API 或本地模型�
 
 ## 安装
 
-在 Bob 1.8.0 或更高版本上，双击下载的 `.bobplugin` 文件。在「偏好设置 → 翻译 → 服务」中添加文本翻译服务「Ai 翻译」。
+在 Bob 1.8.0 或更高版本上，双击下载的 `.bobplugin` 文件。在「偏好设置 → 翻译 → 服务」中添加文本翻译服务「AiTranslate」。
 
 <a id="-配置示例"></a>
 <a id="ollama本地"></a>
@@ -50,7 +50,9 @@ AiTranslate 是 Bob 的文本翻译插件，可接入云端 API 或本地模型�
 $text
 ```
 
-插件会把 `$text` 换成原文，把 `$sourceLang` 和 `$targetLang` 换成语言名称。配置助手也能按所选服务生成翻译指令，以及用于向 AI 助手查询配置的提示词。[在配置助手生成提示词](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#prompts)
+插件会把 `$text` 换成原文，把 `$sourceLang` 和 `$targetLang` 换成语言名称。[按翻译场景生成指令](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#prompts)
+
+向能联网的 AI 助手查询配置时，可直接复制包含服务商、模型、请求格式和插件文档的提示词。[查询服务配置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#lookup) · [核对思考设置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#thinking-query)
 
 <a id="-扩展参数"></a>
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Ai 翻译插件一键打包脚本
+# AiTranslate 插件一键打包脚本
 set -euo pipefail
 
 # 检查依赖

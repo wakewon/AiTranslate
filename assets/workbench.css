@@ -73,6 +73,8 @@
 .bench-template > button { flex: none; }
 .bench-snippets { display: grid; grid-template-columns: 1fr 1fr; gap: 1.4rem; margin-top: 1rem; }
 .bench-snippets pre, .bench-details pre { background: var(--surface); border: 1px solid var(--line); font-family: var(--sans); }
+.bench-query > button { margin-top: .6rem; }
+.bench-query > pre { max-height: 18rem; overflow-y: auto; }
 #param-rows { margin-block: .8rem; }
 .bench-param-row { display: grid; grid-template-columns: minmax(5rem, 1fr) minmax(7rem, 1.8fr) 6.25rem auto; gap: .5rem; align-items: center; margin-block: .6rem; }
 .bench-toast { position: fixed; z-index: 35; bottom: 1.2rem; left: 50%; transform: translateX(-50%); max-width: 90vw; width: max-content; padding: .55rem 1rem; border-radius: 7px; background: var(--ink); color: var(--paper); font-size: .85rem; pointer-events: none; }

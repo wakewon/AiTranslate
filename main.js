@@ -1,5 +1,5 @@
 /**
- * Ai 翻译 — Bob 通用 AI 翻译插件
+ * AiTranslate — Bob 通用 AI 翻译插件
  * 
  * 支持 OpenAI / Anthropic / Gemini 等主流 API 格式，
  * 通过选择"请求格式"切换适配器，一个插件搞定所有 AI 翻译服务。

@@ -41,7 +41,7 @@
 
   function followHash() {
     const hash = location.hash.slice(1);
-    const thinking = hash === 'thinking' || hash === 'parameters';
+    const thinking = ['thinking', 'thinking-query', 'parameters'].includes(hash);
     for (const tab of tabs) {
       const active = (tab.id === 'tab-thinking') === thinking;
       tab.setAttribute('aria-selected', String(active));
@@ -49,7 +49,7 @@
       byId(tab.getAttribute('aria-controls')).hidden = !active;
     }
     if (hash === 'parameters') byId('manual-parameters').open = true;
-    if (hash === 'prompts' || hash === 'lookup') byId(hash).open = true;
+    if (['prompts', 'lookup', 'thinking-query'].includes(hash)) byId(hash).open = true;
   }
 
   tabs.forEach((tab, index) => {
@@ -183,6 +183,7 @@
   byId('thinking-choices').addEventListener('change', event => {
     strength = event.target.value;
     renderJSON();
+    renderQueryPrompts();
   });
 
   function renderPrompts() {
@@ -200,22 +201,119 @@
     } else {
       setCopyText('user-output', '请将以下原文从 $sourceLang 翻译成 $targetLang。\n\n$text');
     }
-    const name = selected === custom ? byId('custom-name').value.trim() || byId('base-url').value.trim() || '自建服务' : selected.name;
-    const context = ['我想在 Bob 的「Ai 翻译」插件中使用「' + name + '」。'];
-    if (modelInput.value.trim()) context.push('模型或部署名：' + modelInput.value.trim());
-    if (selected.status === 'supported') {
-      context.push('拟用请求格式：' + selectLabel(formatSelect));
-      if (byId('base-url').value.trim()) context.push('Base URL：' + byId('base-url').value.trim());
-      if (byId('endpoint').value.trim()) context.push('端点路径覆盖：' + byId('endpoint').value.trim());
+    renderQueryPrompts();
+  }
+
+  function connectionExample() {
+    if (selected.id === 'azure') return '如果 Azure 控制台同时列出基础型号和部署名称，请指出「模型」应复制哪一项、资源地址到哪里找。我的部署名称需要从自己的资源中读取。';
+    if (selected.id === 'qwen') return '如果地址里有 {WorkspaceId}，请说明到哪里复制业务空间 ID，以及怎样确认域名、模型和密钥属于同一地域。';
+    if (selected.group === 'local') return '本地服务的地址、端口和已加载模型取决于我的机器。请说明怎样从运行中的服务查看模型 ID，以及开启令牌验证后要改哪一项。';
+    if (selected.id === 'bilibili') return '请核对公共翻译端点是否需要密钥，以及从哪里确认该端点开放的翻译型号。';
+    if (selected.group === 'gateway' || selected === custom) return '如果同一个模型也由原厂提供，请按我实际连接的平台核对密钥和模型 ID。代理是否转发某个字段，需要这个代理自己的文档或部署配置来确认。';
+    return '如果控制台显示模型的商品名或聊天应用的名称，请说明怎样找到能通过这个 API 调用的模型 ID，以及在哪里查看我的账号是否已开通。';
+  }
+
+  function addressExample() {
+    if (byId('endpoint').value.trim()) {
+      return '例如，假设文档给出 POST https://api.example.com/gateway/translate，Base URL 可以填 https://api.example.com，端点路径覆盖填 /gateway/translate。AiTranslate 会把两项拼起来。请按实际文档检查版本号和网关路径有没有重复或遗漏。';
     }
-    if (selected.docs) context.push('官方资料：' + selected.docs);
-    const ready = selected.status === 'supported' && (selected !== custom || byId('custom-name').value.trim() || byId('base-url').value.trim());
-    const lookup = '请核对官方文档，按 Bob 的字段列出连接此服务所需的 Base URL、模型、API Key 获取方式、请求格式与鉴权方式。如需部署名称或自定义端点，请注明在哪里获取，并附官方来源。';
-    const thinking = '请根据官方文档核对这个模型与接口能否关闭思考，或支持哪些强度。给出可粘贴到 Bob「额外请求体 (JSON)」的关闭或最低强度写法，区分关闭与降低，附官方来源。若没有公开依据，请说明。';
-    for (const [section, id, question] of [['lookup','lookup-output',lookup], ['thinking-query','thinking-query-output',thinking]]) {
-      byId(section).hidden = !ready;
-      setCopyText(id, ready ? [...context, '', question].join('\n') : '');
+    if (formatSelect.value === 'gemini_generate_content') {
+      return '例如，使用原生 generateContent 时，端点留空可让 AiTranslate 把模型 ID 填入路径，并按流式开关选用 :generateContent 或 :streamGenerateContent。若建议覆盖路径，请分别核对普通翻译和流式翻译的实际地址。';
     }
+    const path = {
+      anthropic_messages: '/v1/messages',
+      gemini_openai_chat: '/v1beta/openai/chat/completions',
+      openai_completions: '/v1/completions',
+      openai_responses: '/v1/responses'
+    }[formatSelect.value] || '/v1/chat/completions';
+    return '例如，假设文档给出 POST https://api.example.com' + path + '，Base URL 可以填 https://api.example.com，端点路径覆盖留空，让 AiTranslate 按所选格式补上 ' + path + '。示例域名只用来演示字段拆分，请换成当前服务的实际地址。';
+  }
+
+  function thinkingExample() {
+    if (formatSelect.value === 'gemini_generate_content') {
+      return '以 Gemini 原生接口为例，若文档明确该型号支持零预算，写法是 {"generationConfig":{"thinkingConfig":{"thinkingBudget":0}}。使用 thinkingLevel 的型号应按各自的枚举值填写。请查明当前型号采用哪种方式，以及最低档是否仍会消耗思考 token。';
+    }
+    if (formatSelect.value === 'anthropic_messages') {
+      return '以 Messages 接口为例，若文档列出 {"thinking":{"type":"disabled"}}，还要核对这个型号是否限制同时使用的 effort 档位。如果只能跳过答复前的思考，请解释它与完全关闭的区别。';
+    }
+    if (formatSelect.value === 'openai_completions') {
+      return '例如，接口文档若只在 Chat Completions 一节列出推理参数，请查明当前 Legacy Completions 端点是否也接受它。如果需要更换请求格式，请说明前提。';
+    }
+    return '举例来说，若文档确认某型号支持 low，OpenAI Chat Completions 的写法可以是 {"reasoning_effort":"low"}，Responses 的写法可以是 {"reasoning":{"effort":"low"}}。这里演示的是字段位置，low 仍是低强度。请按实际接口给出取值，只有文档明确允许时才给关闭写法。';
+  }
+
+  function renderQueryPrompts() {
+    const customName = byId('custom-name').value.trim();
+    const base = byId('base-url').value.trim();
+    const ready = selected.status === 'supported' && (selected !== custom || customName || base);
+    byId('lookup').hidden = !ready;
+    byId('thinking-query').hidden = !ready;
+    if (!ready) {
+      setCopyText('lookup-output', '');
+      setCopyText('thinking-query-output', '');
+      return;
+    }
+
+    const home = 'https://wakewon.wwang.de/AiTranslate/';
+    const settings = [
+      '我在 AiTranslate 配置助手中选了以下设置，请逐项核对。预填的选项也可能需要修改。',
+      '服务商 = ' + (selected === custom ? customName || '自定义服务（名称未填写）' : selected.name),
+      '模型或部署名 = ' + (modelInput.value.trim() || '尚未填写'),
+      '请求格式 = ' + selectLabel(formatSelect),
+      'Base URL = ' + (promptAddress(base) || '尚未填写'),
+      '端点路径覆盖 = ' + (promptAddress(byId('endpoint').value.trim()) || '留空，由插件按请求格式生成路径'),
+      '鉴权方式 = ' + selectLabel(authSelect)
+    ].join('\n');
+
+    const references = [
+      '请在回答中保留插件名 AiTranslate。先查它的字段说明，再用实际接入平台的 API 文档核实模型和接口能力。',
+      'AiTranslate 插件主页 ' + home,
+      '如果主页无法访问，可查项目仓库中的 info.json（字段和菜单）及 main.js（请求构造） https://github.com/wakewon/AiTranslate'
+    ];
+    if (selected.docs) references.push('服务商文档 ' + selected.docs);
+    const evidence = '请在关键结论旁附上实际查阅的文档页面，说明它适用于哪个接口或型号。如果资料打不开、文档未说明，或缺少地域、部署名等信息，请指出具体缺口，告诉我该去哪里查或请我提供哪段脱敏文档。';
+
+    const connection = [
+      '我想在 macOS 的 Bob 中用 AiTranslate 做文本翻译。请给我一份可以照着 Bob 设置界面填写的连接配置。',
+      settings,
+      [...references, '插件服务配置指南 ' + home + 'docs/basic-usage.html'].join('\n'),
+      '请按以下方式回答',
+      '1. 先说明这个平台能否通过所选接口完成文本翻译。把「请求格式」「Base URL」「端点路径覆盖」「模型」「鉴权方式」「API Key」列成表，每行写出填写值和取值依据。可留空的项请写明“留空”及插件会采用的默认行为。密钥只说明去哪里创建和填在哪里，示例统一用 <API_KEY>。',
+      '2. 给出拼接后的请求 URL，用占位符代表我的私有部署。' + addressExample(),
+      '3. ' + connectionExample() + ' 只有该接口确实要求附加字段时，才分别给出可粘贴到「额外请求头 (JSON)」「额外查询参数 (JSON)」或「额外请求体 (JSON)」的 JSON 对象，并指出每段要填的位置。',
+      '4. 最后给一个简短的验证步骤。AiTranslate 的「验证」会发送一次非流式翻译请求。如果这个接口对流式翻译另有要求，请说明怎样用一句原文在 Bob 中复测。',
+      evidence
+    ];
+
+    const preset = choices.find(item => item.value === strength);
+    let candidate = choices.length ? '配置助手当前选中「模型默认」。请说明留空时这个型号的默认思考行为。'
+      : '配置助手尚未确认这组模型和接口的可用档位，请从服务商资料开始查证。';
+    if (preset) {
+      candidate = '配置助手内置的「' + preset.label + '」候选写法如下，请核对每个字段与取值是否适用。\n' + JSON.stringify(preset.body, null, 2);
+    }
+    const thinkingReferences = [...references, '插件思考设置指南 ' + home + 'docs/disable-thinking.html'];
+    const source = byId('thinking-source').getAttribute('href');
+    if (source && source !== selected.docs) thinkingReferences.push('配置助手引用的思考参数资料 ' + source);
+    const thinking = [
+      '我在 macOS 的 Bob 中用 AiTranslate 翻译文本。短句翻译时，我希望尽快看到译文。请帮我确认当前模型能否关闭思考。如果必须思考，我想知道能用的最低强度或预算。',
+      settings,
+      candidate,
+      thinkingReferences.join('\n'),
+      '请按以下方式回答',
+      '1. 先给出结论，再列出该模型在当前端点明确支持的开关、强度或预算，以及能查到的默认值。请分别说明“完全关闭”“降低思考量”和“只隐藏思考内容”的实际效果。如果通过聚合平台或自建代理接入，请查它是否支持并转发这些字段。',
+      '2. 对有文档依据的方案，分别给出一段能粘贴到 AiTranslate「额外请求体 (JSON)」的合法 JSON。如果上面有候选写法，请逐项确认或修正。如果文档没有证实可用值，请把该项标为“未核实”，省去猜测的 JSON。插件会生成翻译消息，再合并这个对象。只给需要新增的字段，保留布尔值和数字的类型，省去 SDK 的 extra_body 包装、密钥和整份请求。',
+      '3. ' + thinkingExample(),
+      '4. 说明怎样应用、核对和恢复默认。比如，如果同一份额外请求体还有其他设置，请指出只需改动哪些键。如果服务商公开返回推理用量，请说明看哪个字段，以及该数据能证明什么。响应速度或界面有没有显示思考过程只能作为观察线索。',
+      evidence
+    ];
+    setCopyText('lookup-output', connection.join('\n\n'));
+    setCopyText('thinking-query-output', thinking.join('\n\n'));
+  }
+
+  // Only the externally copied description needs a redacted address.
+  function promptAddress(address) {
+    return address.replace(/^((?:https?:\/\/|\/\/)?)[^/?#\s]+@/i, '$1')
+      .replace(/([?&](?:key|api[_-]?key|access[_-]?token|token|signature|sig|password)=)[^&#]*/gi, '$1<REDACTED>');
   }
 
   function selectProvider(id, requestedModel = '') {
@@ -473,7 +571,7 @@
       selection.removeAllRanges();
     }
     if (!current()) return;
-    notify(['lookup-output', 'thinking-query-output'].includes(button.dataset.copy) ? '问题已复制，粘贴到能联网的 AI 助手中即可。' : '已复制', button);
+    notify(['lookup-output', 'thinking-query-output'].includes(button.dataset.copy) ? '提示词已复制，可直接粘贴到能联网的 AI 助手。' : '已复制', button);
     button.textContent = '已复制';
     request.timer = setTimeout(() => clearCopyFeedback(button), 2200);
   });
