@@ -1,48 +1,38 @@
 # AiTranslate
 
-AiTranslate 是 Bob 的文本翻译插件，安装后在服务列表里叫「Ai 翻译」。你可以接入已有的云端模型，也可以连接 Mac 上的 Ollama 或 LM Studio。插件向 Bob 提供 100 多种语言选项，划词后即可在翻译窗口里阅读译文。
+AiTranslate 让你在 Mac 上选中一句话，直接用 Bob 阅读译文。可以用已有的翻译服务或本地模型，也可以先用免密钥的 bilibili 翻译试一下。
 
-[下载插件](https://github.com/wakewon/AiTranslate/releases/latest) · [查询服务商](https://wakewon.wwang.de/AiTranslate/#providers) · [使用文档](https://wakewon.wwang.de/AiTranslate/docs/) · [配置工作台](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html)
+[下载插件](https://github.com/wakewon/AiTranslate/releases/latest) · [第一次使用指南](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html) · [选择翻译服务](https://wakewon.wwang.de/AiTranslate/#providers)
 
 <a id="-安装"></a>
 
-## 安装与初次配置
+## 翻译第一句话
 
-1. 在发布页的 **Assets** 下下载后缀为 `.bobplugin` 的文件，双击安装。
-2. 打开 Bob「偏好设置 → 翻译 → 服务」，在「文本翻译」列表下方点加号，选择「Ai 翻译」。
-3. 在服务商目录找到你实际使用的平台，将工作台列出的请求格式、Base URL、端点路径和模型 ID 填进 Bob。需要密钥的端点，在 Bob 的「API Key」里填你的密钥。
-4. 点击「验证」，开启这项服务并保存。选中一句话调用 Bob，即可看到译文。
+1. 在装有 Bob 1.8.0 或更高版本的 Mac 上，双击下载的 `.bobplugin` 文件。
+2. 打开 Bob「偏好设置 → 翻译 → 服务」，在「文本翻译」列表下点加号，选择「Ai 翻译」。
+3. 打开配置助手，选用 bilibili 翻译，把助手列出的地址和模型复制到 Bob，选择对应的下拉选项。API Key 可以留空。[打开 bilibili 配置](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=bilibili#connection)
+4. 点击「验证」，开启服务并保存。在 Bob 中选择简体中文，输入 `See you tomorrow.` 后按回车，查看译文。
 
 <a id="-配置示例"></a>
-
 <a id="ollama本地"></a>
 
-### 在本机试用 Ollama
-
-先启动 Ollama，并用 `ollama list` 查看已经下载的模型。在 Bob 中使用下面的配置。通过代理访问或直连 Ollama Cloud 时，要按对应入口的要求填写凭据。[Ollama 接口说明](https://docs.ollama.com/api/openai-compatibility)
-
-| Bob 选项 | 本地 Ollama 的填法 |
-| --- | --- |
-| 请求格式 | OpenAI Chat Completions（通用兼容） |
-| Base URL | `http://localhost:11434` |
-| 端点路径覆盖 | 留空，插件会加上 `/v1/chat/completions` |
-| API Key | 默认的本地服务可留空 |
-| 模型 | 从 `ollama list` 复制完整的名称和标签 |
+已经有云服务密钥，或在 Mac 上运行 Ollama、LM Studio？在配置助手中选择对应的服务即可。指南里也介绍了如何申请密钥，以及到哪里复制本地模型的名称。[使用其他云服务或本地模型](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#prepare)
 
 <a id="-特性"></a>
 <a id="-文档中心"></a>
 
 ## 接入其他服务
 
-**请求格式**决定插件会发送什么数据，以及如何读取译文。可选 OpenAI Chat Completions、Responses 或 Legacy Completions，Anthropic Messages 或其 OpenAI 兼容格式，以及 Gemini generateContent 或其 OpenAI 兼容格式。填写 Base URL 时留意服务商示例中是否已经包含端点路径。[查看七种格式的默认路径](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#format)
+选择实际提供翻译的平台，就能查看 Bob 里的填法。服务商给你的 **API Key** 用于确认账号，**模型**是该平台上负责翻译的具体程序。[查找服务商](https://wakewon.wwang.de/AiTranslate/#providers)
 
-**模型 ID** 从实际使用的平台复制。同一模型经不同平台调用时，名称和可用参数可能不同。Azure OpenAI 填部署名称，本地服务填服务器列出的模型 ID。Gemini 原生格式会根据「模型」和流式开关自动拼接路径。[查找模型 ID](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#model-ids)
+常用服务可以从这里直接打开。<a id="openai--chatgpt" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=openai">OpenAI</a> · <a id="anthropic-claude" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=anthropic">Claude</a> · <a id="google-gemini" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=gemini">Gemini</a> · <a id="deepseek" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=deepseek">DeepSeek</a> · <a id="siliconflow" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=siliconflow">硅基流动</a> · <a id="智谱-glm" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=glm">智谱 GLM</a>
 
-可直接在工作台打开常用配置。<a id="openai--chatgpt" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=openai">OpenAI</a> · <a id="anthropic-claude" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=anthropic">Claude</a> · <a id="google-gemini" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=gemini">Gemini</a> · <a id="deepseek" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=deepseek">DeepSeek</a> · <a id="siliconflow" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=siliconflow">硅基流动</a> · <a id="智谱-glm" href="https://wakewon.wwang.de/AiTranslate/tools/param-builder.html?provider=glm">智谱 GLM</a>
+<details>
+<summary id="鉴权方式">使用自建服务或需要手动填写接口</summary>
 
-### 鉴权方式
+插件支持 OpenAI、Claude、Gemini 等七种请求格式，可覆盖接口路径和密钥的发送方式。Azure OpenAI 使用部署名，本地服务使用服务器列出的模型 ID。[接口默认路径](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#format) · [模型 ID](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#model-ids) · [鉴权方式](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#authentication)
 
-「鉴权方式」选「自动」时，插件对 Gemini 原生接口使用 `x-goog-api-key`，对其余格式使用 Bearer。服务商要求特定请求头时，也可手动选择 `x-api-key`、`x-goog-api-key`、`api-key`、Bearer，或 URL 查询参数 `key`。选择 Bearer 时直接填原始密钥，插件会添加前缀。[鉴权设置及本地服务说明](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#authentication)
+</details>
 
 <a id="-提示词变量"></a>
 
@@ -68,7 +58,7 @@ AiTranslate 是 Bob 的文本翻译插件，安装后在服务列表里叫「Ai 
 $text
 ```
 
-插件会把 `$text` 换成原文，把 `$sourceLang` 和 `$targetLang` 换成语言名称。工作台也能按所选服务生成翻译指令，以及用于向 AI 助手查询配置的提示词。[在工作台生成提示词](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#prompts)
+插件会把 `$text` 换成原文，把 `$sourceLang` 和 `$targetLang` 换成语言名称。配置助手也能按所选服务生成翻译指令，以及用于向 AI 助手查询配置的提示词。[在配置助手生成提示词](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#prompts)
 
 <a id="-扩展参数"></a>
 
@@ -77,7 +67,7 @@ $text
 <a id="参数构建工具"></a>
 <a id="额外请求体示例"></a>
 
-「额外请求头」「额外查询参数」「额外请求体」都接收 JSON 对象。自定义请求头可以覆盖同名默认值。额外请求体会与插件构造的数据合并，适合填写当前模型支持的推理参数等设置。工作台可编辑和复制 JSON。[编辑参数](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#parameters) · [按模型调整推理强度](https://wakewon.wwang.de/AiTranslate/docs/disable-thinking.html)
+「额外请求头」「额外查询参数」「额外请求体」都接收 JSON 对象。自定义请求头可以覆盖同名默认值。额外请求体会与插件构造的数据合并，适合填写当前模型支持的推理参数等设置。配置助手可编辑和复制 JSON。[编辑参数](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html#parameters) · [按模型调整推理强度](https://wakewon.wwang.de/AiTranslate/docs/disable-thinking.html)
 
 <a id="-版本兼容"></a>
 
@@ -95,7 +85,7 @@ $text
 
 ## 服务商目录维护
 
-服务商的地址、请求格式、鉴权方式和官方资料保存在 [data/providers.json](data/providers.json)。新增服务、端点改版和鉴权变更由维护者对照官方文档审核。已下线的服务会保留状态说明，工作台不再提供可复制的连接配置。自建端点可以手动填写地址和模型 ID。账号可用的模型、Azure 部署名和本地模型，请从自己的控制台或服务器查询。
+服务商的地址、请求格式、鉴权方式和官方资料保存在 [data/providers.json](data/providers.json)。新增服务、端点改版和鉴权变更由维护者对照官方文档审核。已下线的服务会保留状态说明，配置助手不再提供可复制的连接配置。自建端点可以手动填写地址和模型 ID。账号可用的模型、Azure 部署名和本地模型，请从自己的控制台或服务器查询。
 
 GitHub Actions 从八个官方来源更新[模型快照](data/model-catalog.json)，无需服务商密钥或额外的 AI API。快照记录模型 ID，以及来源明确公布的上下文窗口、最大输出长度等字段。
 

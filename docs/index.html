@@ -17,7 +17,7 @@
       <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
       <nav class="site-nav" aria-label="主导航">
         <a href="../index.html#providers">服务商</a>
-        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="../tools/param-builder.html">配置助手</a>
         <a href="index.html" aria-current="page">使用文档</a>
       </nav>
       <div class="nav-tools">
@@ -31,40 +31,41 @@
       <span>使用文档</span>
       <a href="index.html" aria-current="page">文档首页</a>
       <a href="basic-usage.html">第一次翻译</a>
-      <a href="disable-thinking.html">调整推理参数</a>
+      <a href="disable-thinking.html">翻译时少等一会儿</a>
       <span>本页内容</span>
-      <a href="#guides">在 Bob 中使用</a>
-      <a href="#reference">查找配置</a>
+      <a href="#guides">第一次使用</a>
+      <a href="#reference">安装后常见问题</a>
     </nav>
     <article class="guide-article">
       <header class="guide-intro">
         <h1>使用指南</h1>
-        <p>用已有的云端服务或本地模型完成第一次翻译，再按需要调整译文格式和推理强度。</p>
+        <p>从安装插件开始，让 Bob 译出第一句话。已经能看到译文的话，可以直接查找想改的设置。</p>
       </header>
       <section id="guides">
-        <h2>在 Bob 中使用</h2>
-        <div class="guide-links">
-          <a class="guide-link" href="basic-usage.html">
-            <span class="guide-link-title">安装插件，完成第一次翻译</span>
-            <span class="guide-link-desc">添加文本翻译服务，填写地址、模型和密钥，用一句短文本验证配置。</span>
-          </a>
-          <a class="guide-link" href="basic-usage.html#prompts">
-            <span class="guide-link-title">编写翻译指令</span>
-            <span class="guide-link-desc">保留原文的段落、术语和代码，让模型按你的习惯给出译文。</span>
-          </a>
-          <a class="guide-link" href="disable-thinking.html">
-            <span class="guide-link-title">调整推理参数</span>
-            <span class="guide-link-desc">核对模型能否关闭思考、支持哪些档位，以及怎样填写额外请求体。</span>
-          </a>
-        </div>
+        <h2>第一次使用</h2>
+        <p>用 bilibili 翻译试一次，可以跳过申请密钥这一步。已经有 DeepSeek 等服务的密钥，或者 Mac 上已装好本地模型，也能按同一篇指南设置。</p>
+        <p><a class="button primary" href="basic-usage.html">跟着做第一次翻译</a></p>
       </section>
       <section id="reference">
-        <h2>查找配置</h2>
-        <dl class="guide-facts">
-          <div><dt><a href="../index.html#providers">服务商目录</a></dt><dd>查接口地址、请求格式和鉴权方式，从服务商条目进入对应的配置。</dd></div>
-          <div><dt><a href="../tools/param-builder.html">配置工作台</a></dt><dd>选择服务商或填写自建端点，准备要复制到 Bob 的字段和提示词。</dd></div>
-          <div><dt><a href="basic-usage.html#troubleshooting">常见问题</a></dt><dd>检查验证失败、流式响应为空，以及 Markdown 译文的显示方式。</dd></div>
-        </dl>
+        <h2>我已经装好了</h2>
+        <div class="guide-links">
+          <a class="guide-link" href="../index.html#providers">
+            <span class="guide-link-title">换一个翻译服务</span>
+            <span class="guide-link-desc">找到你要用的平台，查看 Bob 里对应的填法。</span>
+          </a>
+          <a class="guide-link" href="basic-usage.html#prompts">
+            <span class="guide-link-title">希望译文保留术语和排版</span>
+            <span class="guide-link-desc">把常用的翻译要求保存到 Bob，下次翻译时自动带上。</span>
+          </a>
+          <a class="guide-link" href="disable-thinking.html">
+            <span class="guide-link-title">翻译短句时想少等一会儿</span>
+            <span class="guide-link-desc">看看你的模型能否少花一些时间思考。</span>
+          </a>
+          <a class="guide-link" href="basic-usage.html#troubleshooting">
+            <span class="guide-link-title">验证失败或没有译文</span>
+            <span class="guide-link-desc">按 Bob 显示的提示，找到对应的处理方法。</span>
+          </a>
+        </div>
       </section>
     </article>
   </main>

@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="按服务商、模型和端点调整推理强度，在 Bob 中填写并验证额外请求体。">
-  <title>调整推理参数 · AiTranslate</title>
+  <meta name="description" content="翻译短句时，看看手里的模型能否减少思考时间，跟着示例在 Bob 中试一次。">
+  <title>让翻译少等一会儿 · AiTranslate</title>
   <link rel="icon" href="../favicon.ico">
   <link rel="stylesheet" href="../assets/site.css">
   <link rel="stylesheet" href="../assets/docs.css">
@@ -17,7 +17,7 @@
       <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
       <nav class="site-nav" aria-label="主导航">
         <a href="../index.html#providers">服务商</a>
-        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="../tools/param-builder.html">配置助手</a>
         <a href="index.html" aria-current="page">使用文档</a>
       </nav>
       <div class="nav-tools">
@@ -31,67 +31,70 @@
       <span>使用文档</span>
       <a href="index.html">文档首页</a>
       <a href="basic-usage.html">第一次翻译</a>
-      <a href="disable-thinking.html" aria-current="page">调整推理参数</a>
+      <a href="disable-thinking.html" aria-current="page">翻译时少等一会儿</a>
       <span>本页内容</span>
-      <a href="#where">填写位置</a>
-      <a href="#examples">接口参数</a>
-      <a href="#verify">验证配置</a>
+      <a href="#where">怎样调整</a>
+      <a href="#examples">按服务找设置</a>
+      <a href="#verify">试译和恢复</a>
     </nav>
     <article class="guide-article">
       <header class="guide-intro">
-        <h1>调整推理参数</h1>
-        <p>有些模型会先推理再给出译文。翻译短句时，如果等待时间比较长，可以降低推理强度。支持关闭推理的模型也可以直接输出译文。</p>
+        <h1>让翻译少等一会儿</h1>
+        <p>有些模型在写出译文前会先花时间思考。平时只查一个词、翻一句短句，如果等待太久，可以试试调低思考等级。已经能很快看到译文的话，沿用默认设置就好。</p>
       </header>
       <section id="where">
-        <h2>把参数填在哪里</h2>
-        <p>在 Bob 的「Ai 翻译」服务设置中找到「额外请求体 (JSON)」，填入当前接口接受的 JSON 对象。已有其他参数时，将新字段加进同一对花括号内。</p>
-        <p>有些 SDK 把自定义字段放在 <code>extra_body</code> 中。插件直接发送 HTTP 请求，复制到 Bob 时只需保留里面的字段。<a href="../tools/param-builder.html#parameters">在工作台编辑 JSON</a></p>
+        <h2>先找你的翻译服务</h2>
+        <p>看看 Bob「Ai 翻译」中填的是哪个模型、用的是哪家服务。展开下面对应的说明，可以查到这个模型能否关闭思考，或调到较低的档位。</p>
+        <p>使用 Gemini 的话，配置助手能按模型列出可选等级。选好后复制生成的设置，粘贴到 Bob 的「额外请求体 (JSON)」。如果这里已经有内容，先留一份副本，方便恢复。<a href="../tools/param-builder.html?provider=gemini#parameters">在配置助手里选 Gemini 思考等级</a></p>
       </section>
       <section id="examples">
-        <h2>按接口查参数</h2>
-        <p>先认准实际调用的平台，再核对模型支持的档位。同一款模型经第三方平台调用时，以该平台的接口说明为准。</p>
-        <details class="guide-fold" open>
-          <summary>DeepSeek 官方 Chat Completions</summary>
-          <p>使用支持思考开关的模型时，将 <code>thinking.type</code> 设为 <code>disabled</code>。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></p>
+        <h2>查看我用的服务</h2>
+        <details class="guide-fold">
+          <summary>DeepSeek</summary>
+          <p>通过 DeepSeek 官方 Chat Completions 使用支持思考开关的模型时，将 <code>thinking.type</code> 设为 <code>disabled</code>。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></p>
           <pre><code>{"thinking": {"type": "disabled"}}</code></pre>
         </details>
         <details class="guide-fold">
-          <summary>OpenAI Responses 与 Chat Completions</summary>
-          <p>同一个模型换用这两个接口时，参数所在的位置会变。例如，要使用 <code>low</code> 档位，先确认模型支持该值，再选择对应的写法。支持 <code>none</code> 的模型可以把值改为 <code>none</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></p>
+          <summary>OpenAI</summary>
+          <p>先看 Bob 中的「请求格式」，Responses 与 Chat Completions 的写法不同。例如，要使用 <code>low</code> 档位，先确认模型支持该值，再选择对应的写法。支持 <code>none</code> 的模型可以把值改为 <code>none</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></p>
           <h3>Responses API</h3>
           <pre><code>{"reasoning": {"effort": "low"}}</code></pre>
           <h3>Chat Completions</h3>
           <pre><code>{"reasoning_effort": "low"}</code></pre>
         </details>
         <details class="guide-fold">
-          <summary>Google Gemini · generateContent</summary>
+          <summary>Google Gemini</summary>
           <p>选择「Gemini generateContent」和实际使用的模型。如果「JSON 参数」显示「当前模型的思考等级」，选中需要的档位，再把生成的 JSON 复制到 Bob 的「额外请求体」。例如，<code>gemini-4-hydrogen</code> 可以用 <code>low</code> 降低推理强度。</p>
           <pre><code>{"generationConfig": {"thinkingConfig": {"thinkingLevel": "low"}}}</code></pre>
           <p>Gemini 2.5 系列用 <code>thinkingBudget</code> 控制推理预算，允许的范围因型号而异。<a href="https://aistudio.google.com/docs/thinking?generate-content=true">Google 思考参数说明</a> · <a href="../tools/param-builder.html?provider=gemini#parameters">配置 Gemini 参数</a></p>
         </details>
         <details class="guide-fold">
-          <summary>通义千问 · 阿里云百炼</summary>
+          <summary>通义千问（阿里云百炼）</summary>
           <p>通过百炼的 OpenAI 兼容 Chat Completions 使用支持此开关的混合思考模型时，可将 <code>enable_thinking</code> 设为 <code>false</code>。<a href="https://help.aliyun.com/zh/model-studio/deep-thinking">百炼深度思考说明</a></p>
           <pre><code>{"enable_thinking": false}</code></pre>
         </details>
         <details class="guide-fold">
-          <summary>智谱 · GLM-5.3</summary>
+          <summary>智谱（GLM-5.3）</summary>
           <p>GLM-5.3 始终启用思考。要减少推理量，可以选择其最低档位 <code>low</code>。<a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">GLM-5.3 参数说明</a></p>
           <pre><code>{"thinking": {"type": "enabled"}, "reasoning_effort": "low"}</code></pre>
         </details>
         <details class="guide-fold">
-          <summary>Ollama · OpenAI 兼容接口</summary>
-          <p>先从本地服务的 <code>/api/show</code> 查看模型支持的推理档位。兼容接口可用 <code>reasoning_effort</code>，<code>none</code> 的实际效果取决于模型，例如 GPT-OSS 会按最低档位运行。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></p>
+          <summary>本地 Ollama</summary>
+          <p>使用 OpenAI 兼容接口时，先从本地服务的 <code>/api/show</code> 查看模型支持的推理档位。兼容接口可用 <code>reasoning_effort</code>，<code>none</code> 的实际效果取决于模型，例如 GPT-OSS 会按最低档位运行。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></p>
         </details>
-        <p>使用其他服务时，可在工作台填写服务商和模型名称，生成一段供 AI 助手查官方资料的提问。<a href="../tools/param-builder.html#thinking">生成推理参数查询提示词</a></p>
+        <p>没有看到自己的服务？在配置助手中填入服务商和模型名称，复制生成的问题，请能联网的 AI 助手帮你查官方说明。<a href="../tools/param-builder.html#thinking">帮我写一段查询问题</a></p>
       </section>
       <section id="verify">
-        <h2>验证参数是否生效</h2>
-        <ol>
-          <li>先将「额外请求体」留空，翻译一句短文本，确认当前地址和模型能正常返回译文。</li>
-          <li>只加入准备测试的参数并保存，再译同一句话。遇到 <code>400</code> 错误时，查看返回信息提到的字段名和允许值。</li>
-          <li>如果 Bob 能显示译文，但你不确定模型是否仍在推理，可到服务商控制台查看这次请求的用量。服务商如提供推理 Token 数，可用它核对变化。清空新增字段即可恢复模型默认行为。</li>
-        </ol>
+        <h2>用同一句话再试一次</h2>
+        <p>保存设置，翻译之前试过的同一句话，看看等待时间和译文是否合适。如果翻译报错，先移除刚添加的字段，或把之前留存的内容粘贴回去，再点击「保存」。</p>
+        <details class="guide-fold">
+          <summary>想确认模型是否真的减少了思考</summary>
+          <p>有些服务会在控制台记录每次请求的思考用量。找到本次翻译，对比调整前后的推理 Token 数。如果返回 <code>400</code> 错误，核对报错中提到的参数名和可用取值。</p>
+        </details>
+        <details class="guide-fold">
+          <summary>官方文档里有 extra_body，怎样复制？</summary>
+          <p>有些 SDK 把自定义字段放在 <code>extra_body</code> 中。Bob 的「额外请求体 (JSON)」只需要里面的字段。如果已经设置了其他参数，把它们合并在同一对花括号内。<a href="../tools/param-builder.html#parameters">编辑额外请求参数</a></p>
+        </details>
       </section>
       <p class="guide-next"><a href="basic-usage.html#troubleshooting">查看连接与显示问题</a></p>
     </article>

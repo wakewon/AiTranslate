@@ -7,7 +7,7 @@
   "icon": "icon.png",
   "author": "wakewon",
   "homepage": "https://wakewon.wwang.de/AiTranslate/",
-  "tutorial": "https://wakewon.wwang.de/AiTranslate/",
+  "tutorial": "https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html",
   "appcast": "https://raw.githubusercontent.com/wakewon/AiTranslate/main/appcast.json",
   "minBobVersion": "1.8.0",
   "options": [
@@ -16,7 +16,7 @@
       "type": "menu",
       "title": "请求格式",
       "defaultValue": "openai_chat",
-      "desc": "选择 AI 服务的 API 请求格式。「鉴权方式」设为自动时，插件会按所选格式发送 API Key。",
+      "desc": "按配置助手的说明选择。多数服务可以保留默认的 OpenAI Chat Completions。",
       "menuValues": [
         {
           "title": "OpenAI Chat Completions（通用兼容）",
@@ -52,18 +52,18 @@
       "identifier": "baseURL",
       "type": "text",
       "title": "Base URL",
-      "desc": "API 服务的基础地址。\n\nOpenAI: https://api.openai.com\nAnthropic: https://api.anthropic.com\nGemini: https://generativelanguage.googleapis.com\nDeepSeek: https://api.deepseek.com\nSiliconFlow: https://api.siliconflow.cn\nOllama: http://localhost:11434",
+      "desc": "把配置助手列出的 Base URL 粘贴到这里。这是 Bob 发送原文的服务地址。",
       "textConfig": {
         "type": "visible",
         "height": 40,
-        "placeholderText": "https://api.openai.com"
+        "placeholderText": "粘贴服务地址"
       }
     },
     {
       "identifier": "endpointOverride",
       "type": "text",
       "title": "端点路径覆盖",
-      "desc": "留空使用请求格式的默认路径。填写后按原样使用。手动覆盖 Gemini 原生端点时，请写出实际模型 ID，插件不会替换 {model}。\n\n各格式默认路径：\n- OpenAI Chat / Anthropic OpenAI 兼容: /v1/chat/completions\n- Anthropic Messages: /v1/messages\n- OpenAI Responses: /v1/responses\n- OpenAI Completions: /v1/completions\n- Gemini 原生: /v1beta/models/...:generateContent（默认从「模型」字段拼入 ID，流式使用 streamGenerateContent）\n- Gemini OpenAI 兼容: /v1beta/openai/chat/completions",
+      "desc": "通常留空，插件会自动补上路径。如果配置助手列出了这项，请复制完整路径，包括开头的 /。手动填写 Gemini 路径时要写出实际模型名。",
       "textConfig": {
         "type": "visible",
         "height": 40,
@@ -74,7 +74,7 @@
       "identifier": "apiKey",
       "type": "text",
       "title": "API Key",
-      "desc": "需要鉴权的服务请填写有效密钥或令牌。未开启鉴权的本地服务（如默认的 Ollama、LM Studio）可留空，无需占位值。留空时只发送你在「额外请求头」或「额外查询参数」中配置的凭据。支持用英文逗号分隔多个 Key。",
+      "desc": "需要密钥时，粘贴服务商给你的 API Key。使用 bilibili 公共服务，或使用未开启密钥验证的本机模型时，可以留空。多个密钥用英文逗号隔开。",
       "textConfig": {
         "type": "secure",
         "height": 40,
@@ -86,7 +86,7 @@
       "type": "menu",
       "title": "鉴权方式",
       "defaultValue": "auto",
-      "desc": "自动模式按请求格式发送 API Key。Gemini 原生使用 x-goog-api-key，其余格式使用 Bearer。也可以手动指定密钥的发送方式。自动模式优先使用已配置的标准鉴权头或 key 查询参数。选择「手动或无需鉴权」时，只发送你自行添加的鉴权信息。",
+      "desc": "通常保留「自动」。如果配置助手列出了这一项，请按它给的名称选择。它决定 Bob 怎样把密钥交给服务商。",
       "menuValues": [
         {
           "title": "自动（按请求格式）",
@@ -122,7 +122,7 @@
       "identifier": "model",
       "type": "text",
       "title": "模型",
-      "desc": "填写当前端点支持的模型 ID，可在主页的配置工作台查看示例。Azure OpenAI 填部署名，自托管服务填服务器列出的 ID。Gemini 原生使用默认路径时可留空，插件会使用内置模型 ID。覆盖 Gemini 原生端点时以路径里的模型 ID 为准。",
+      "desc": "复制配置助手或服务商列出的完整模型名称。Azure OpenAI 要填自己的部署名，本机服务要填已加载的模型名。",
       "textConfig": {
         "type": "visible",
         "placeholderText": "服务商提供的模型 ID"
@@ -133,7 +133,7 @@
       "type": "text",
       "title": "自定义系统指令",
       "defaultValue": "",
-      "desc": "可选。留空使用默认系统指令。可使用变量：\n$text — 原文\n$sourceLang — 源语言\n$targetLang — 目标语言",
+      "desc": "日常翻译可以留空。想固定译文风格时，在这里写下要求，例如「保留术语和段落，只输出译文」。",
       "textConfig": {
         "type": "visible",
         "height": 120,
@@ -150,7 +150,7 @@
       "type": "text",
       "title": "自定义用户指令",
       "defaultValue": "",
-      "desc": "可选。留空使用默认用户指令。请确保包含 $text 变量，否则翻译内容将不会被发送。\n\n可使用变量：\n$text — 原文\n$sourceLang — 源语言\n$targetLang — 目标语言",
+      "desc": "日常翻译可以留空。自己编写时请保留 $text，插件会用原文替换它。$sourceLang 和 $targetLang 会分别替换为原文语言和译文语言。",
       "textConfig": {
         "type": "visible",
         "height": 120,
@@ -183,7 +183,7 @@
       "type": "menu",
       "title": "Markdown 渲染",
       "defaultValue": "enable",
-      "desc": "开启后，译文按 Markdown 渲染（标题、列表、代码块、表格等）；关闭则按纯文本原样显示。\n\n仅 Bob 1.21.0+ 且 macOS 13+ 支持渲染；更低版本无论开关，译文都按纯文本显示，模型输出的 Markdown 标记会原样保留。\n\n若翻译内容包含 * _ # | 等符号被误渲染，可关闭此项。也可在 Bob「偏好设置 - 翻译 - Markdown」中全局关闭。",
+      "desc": "开启后，译文可以显示标题、列表和表格。需要查看原始代码或标记时可关闭。此功能需要 Bob 1.21.0 及以上和 macOS 13 及以上，较早版本显示纯文本。",
       "menuValues": [
         {
           "title": "开启",
@@ -241,7 +241,7 @@
       "identifier": "extraBody",
       "type": "text",
       "title": "额外请求体 (JSON)",
-      "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。使用当前端点和模型支持的字段。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n在主页的「配置工作台」中可以编辑字段并复制生成的 JSON。",
+      "desc": "通常留空。要调整模型的思考等设置时，可把配置助手生成的 JSON 粘贴到这里。",
       "textConfig": {
         "type": "visible",
         "height": 140,

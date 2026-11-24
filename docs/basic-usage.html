@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="在 Bob 中安装 AiTranslate，填写模型、请求格式和鉴权方式，验证第一次翻译。">
+  <meta name="description" content="在 Mac 上安装 AiTranslate，用免密钥服务、自己的云服务账号或本地模型译出第一句话。">
   <title>第一次翻译 · AiTranslate</title>
   <link rel="icon" href="../favicon.ico">
   <link rel="stylesheet" href="../assets/site.css">
@@ -17,7 +17,7 @@
       <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
       <nav class="site-nav" aria-label="主导航">
         <a href="../index.html#providers">服务商</a>
-        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="../tools/param-builder.html">配置助手</a>
         <a href="index.html" aria-current="page">使用文档</a>
       </nav>
       <div class="nav-tools">
@@ -31,115 +31,154 @@
       <span>使用文档</span>
       <a href="index.html">文档首页</a>
       <a href="basic-usage.html" aria-current="page">第一次翻译</a>
-      <a href="disable-thinking.html">调整推理参数</a>
+      <a href="disable-thinking.html">翻译时少等一会儿</a>
       <span>本页内容</span>
-      <a href="#install">安装与启用</a>
-      <a href="#format">地址与格式</a>
-      <a href="#model-ids">模型 ID</a>
-      <a href="#authentication">鉴权方式</a>
-      <a href="#prompts">翻译指令</a>
-      <a href="#troubleshooting">常见问题</a>
+      <a href="#install">安装插件</a>
+      <a href="#prepare">选择服务</a>
+      <a href="#fill">填写到 Bob</a>
+      <a href="#test">翻译一句话</a>
+      <a href="#troubleshooting">遇到问题</a>
+      <a href="#reference">其他设置</a>
     </nav>
     <article class="guide-article">
       <header class="guide-intro">
-        <h1>第一次翻译</h1>
-        <p>先在 Bob 里添加「Ai 翻译」，再接入你已有的模型。第一次只需填好地址、模型和鉴权信息，提示词和额外参数都可以留空。</p>
+        <h1>在 Bob 里翻译第一句话</h1>
+        <p>下面用 bilibili 翻译做一次设置。它目前可以免密钥使用。已经有其他服务的密钥，或已经在 Mac 上运行了模型，也可以用自己的服务完成这几步。</p>
       </header>
-      <section id="install">
-        <h2>安装并添加服务</h2>
-        <ol>
-          <li>打开最新版的发布页，在 Assets 下下载后缀为 <code>.bobplugin</code> 的安装包，双击安装。插件需要 Bob 1.8.0 或更高版本。<a href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件</a></li>
-          <li>在 Bob 的「偏好设置 → 翻译 → 服务」中选中「文本翻译」，点击列表下方的加号，选择「Ai 翻译」。</li>
-          <li>在服务商目录选中你的服务，进入配置工作台，把对应的请求格式、地址和模型 ID 填回 Bob。如果服务需要密钥，将它填入 Bob 的「API Key」。<a href="../index.html#providers">查询服务商</a></li>
-          <li>点击「验证」。插件会发送一次非流式请求，将 <code>hello</code> 译成简体中文。验证通过后，开启服务并点击「保存」，就可以在 Bob 中划词翻译了。<a href="https://bobtranslate.com/guide/advance/service.html">Bob 添加服务说明</a></li>
-        </ol>
+      <section id="install" class="guide-step">
+        <h2><span>1</span>把插件加到 Bob</h2>
+        <p>如果 Mac 上还没有 Bob，请先从官网安装并打开。已安装的 Bob 需要 1.8.0 或更高版本。<a href="https://bobtranslate.com/">获取 Bob</a></p>
+        <p>下载 AiTranslate 后，双击下载好的 <code>.bobplugin</code> 文件安装。如果打开的是 GitHub 发布页，安装包在「Assets」下方。<a data-appcast="../appcast.json" href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件安装包</a></p>
+        <p>打开 Bob「偏好设置 → 翻译 → 服务」，选中「文本翻译」。点列表下方的加号，选择刚安装的<strong>「Ai 翻译」</strong>。让这个窗口保持打开，稍后在这里填写。</p>
       </section>
-      <section id="format">
-        <h2>填写地址和请求格式</h2>
-        <p>在服务商文档里找到发送请求的网址。以 OpenAI 的 <code>https://api.openai.com/v1/chat/completions</code> 为例，「Base URL」填 <code>https://api.openai.com</code>，选择 Chat Completions 后，插件会补上后半段路径。</p>
-        <p>如果服务商用的路径不同，在「端点路径覆盖」中填写从 <code>/</code> 开始的完整路径。插件会将它直接接在 Base URL 后面。把 <code>/v1</code> 同时写进这两个字段会导致地址重复。</p>
+      <section id="prepare" class="guide-step">
+        <h2><span>2</span>选一个翻译服务</h2>
+        <p>第一次试用可以直接打开 bilibili 的配置助手。页面已经选好了服务和模型，<strong>模型</strong>就是实际负责翻译的程序。</p>
+        <p><a class="button primary" href="../tools/param-builder.html?provider=bilibili#connection">打开 bilibili 的配置</a></p>
         <details class="guide-fold">
-          <summary>查看七种请求格式的默认路径</summary>
-          <table class="guide-table">
-            <thead><tr><th scope="col">Bob 中的请求格式</th><th scope="col">默认路径</th></tr></thead>
-            <tbody>
-              <tr><td>OpenAI Chat Completions（通用兼容）</td><td><code>/v1/chat/completions</code></td></tr>
-              <tr><td>OpenAI Responses API</td><td><code>/v1/responses</code></td></tr>
-              <tr><td>OpenAI Legacy Completions</td><td><code>/v1/completions</code></td></tr>
-              <tr><td>Anthropic Claude Messages</td><td><code>/v1/messages</code></td></tr>
-              <tr><td>Anthropic OpenAI 兼容</td><td><code>/v1/chat/completions</code></td></tr>
-              <tr><td>Gemini generateContent</td><td>按模型和流式开关生成，见下文</td></tr>
-              <tr><td>Gemini OpenAI 兼容</td><td><code>/v1beta/openai/chat/completions</code></td></tr>
-            </tbody>
-          </table>
+          <summary>我想用 DeepSeek 或其他云服务</summary>
+          <p>云服务通常会给你一串专用密钥，叫做 <strong>API Key</strong>，用来确认这次翻译属于哪个账号。登录服务商的开发者平台，在「API Keys」或「密钥管理」里创建并复制密钥。例如，DeepSeek 可以从这里申请。<a href="https://platform.deepseek.com/api_keys">DeepSeek 密钥管理</a></p>
+          <p>在配置助手中选同一家服务商，再选你账号能用的模型。密钥只需填在 Bob 里。<a href="../tools/param-builder.html?provider=deepseek#connection">打开 DeepSeek 配置</a> · <a href="../index.html#providers">查找其他服务商</a></p>
         </details>
         <details class="guide-fold">
-          <summary>其他兼容服务怎么填？</summary>
-          <p>Together AI 的 Chat Completions 可以使用默认格式，Base URL 填 <code>https://api.together.ai</code>。模型名称通常包含提供方前缀，要从 Together 当前的模型列表完整复制。<a href="https://docs.together.ai/docs/inference/openai-compatibility">Together AI 接口说明</a></p>
-          <p>使用 DeepSeek 的 Anthropic 兼容接口时，选择「Anthropic Claude Messages」，Base URL 填 <code>https://api.deepseek.com</code>，端点路径覆盖填 <code>/anthropic/v1/messages</code>。<a href="https://api-docs.deepseek.com/guides/anthropic_api/">DeepSeek 的 Anthropic 接口</a></p>
-          <p>使用 vLLM、llama.cpp 或 LocalAI 自建服务时，先确认服务器提供的接口和模型 ID。在工作台的「自定义服务商」中填入实际地址，就可以生成配置查询提示词。<a href="../tools/param-builder.html?provider=custom#lookup">查询自定义配置</a></p>
-        </details>
-        <h3 id="gemini-endpoint">Gemini 原生接口</h3>
-        <p>选择「Gemini generateContent」，Base URL 填 <code>https://generativelanguage.googleapis.com</code>，「端点路径覆盖」留空。在「模型」里填写模型 ID，省略 <code>models/</code> 前缀。插件会构造 <code>/v1beta/models/{model}:generateContent</code>，开启流式时自动改用 <code>:streamGenerateContent?alt=sse</code>。</p>
-        <p>如果代理要求你手填路径，请把 <code>{model}</code> 换成实际 ID，并选择与流式开关对应的接口。插件会原样发送这条路径。<a href="https://ai.google.dev/api/generate-content">Gemini 接口文档</a></p>
-      </section>
-      <section id="model-ids">
-        <h2>找到正确的模型 ID</h2>
-        <p>到实际提供 API 的平台查 ID，再把它完整复制到「模型」。同一个模型在不同平台可能有不同的名称。</p>
-        <dl class="guide-facts">
-          <div><dt>云端 API</dt><dd>在服务商控制台确认该模型支持文本生成，且已向你的账号、项目和地区开放。<a href="../index.html#providers">从目录查官方文档</a></dd></div>
-          <div><dt>Azure OpenAI</dt><dd>填资源中自定义的部署名称。可以在部署详情中复制。<a href="https://learn.microsoft.com/en-us/azure/developer/ai/how-to/switching-endpoints#specify-the-model">Microsoft 部署说明</a></dd></div>
-          <div><dt>本地服务</dt><dd>Ollama 填 <code>ollama list</code> 列出的名称，保留冒号后的标签。LM Studio、vLLM 等服务填当前服务器提供的模型 ID。<a href="https://lmstudio.ai/docs/developer/openai-compat/models">LM Studio 模型列表</a></dd></div>
-        </dl>
-      </section>
-      <section id="authentication">
-        <h2>选择鉴权方式</h2>
-        <p>通常保留「自动（按请求格式）」，在「API Key」里粘贴原始密钥。插件对 Gemini 原生接口使用 <code>x-goog-api-key</code>，对其他六种格式添加 <code>Authorization: Bearer</code> 请求头。</p>
-        <details class="guide-fold">
-          <summary>服务商指定了其他请求头或 URL 参数</summary>
-          <p>按接口要求，在「鉴权方式」里选择 <code>x-api-key</code>、<code>x-goog-api-key</code>、<code>api-key</code> 或 URL 查询参数 <code>key</code>。例如，Azure 用资源密钥时选 <code>api-key</code>，用 Microsoft Entra 访问令牌时选 Bearer。<a href="https://learn.microsoft.com/en-us/rest/api/microsoft-foundry/azureopenai/chat#authentication">Azure 鉴权说明</a></p>
-          <p>使用 Claude 的跨工作区密钥时，在「额外请求头」填写目标工作区的 <code>anthropic-workspace-id</code>。<a href="https://platform.claude.com/docs/en/manage-claude/authentication">Claude 鉴权说明</a></p>
-        </details>
-        <details class="guide-fold">
-          <summary>本地 Ollama 或 LM Studio 需要填密钥吗？</summary>
-          <p>直连默认的本地 Ollama 或 LM Studio 时，「API Key」留空即可。LM Studio 开启鉴权后要填服务器签发的令牌。经代理访问时要看代理的设置，直连 Ollama Cloud 则要填云端密钥。<a href="https://docs.ollama.com/api/authentication">Ollama 鉴权</a> · <a href="https://lmstudio.ai/docs/developer/core/authentication">LM Studio 鉴权</a></p>
-        </details>
-        <details class="guide-fold">
-          <summary>已经在额外字段里配置了凭据</summary>
-          <p>自动模式遇到已有的标准鉴权头或查询参数 <code>key</code> 时，会沿用你提供的值。若服务用自定义名称，可选「手动或无需鉴权」，再填写额外请求头或额外查询参数。请求头名称不区分大小写。留空「API Key」也会跳过自动鉴权。</p>
+          <summary>我想用 Mac 上已经下载的模型</summary>
+          <p>先启动本地服务。用 Ollama 的话，在终端运行 <code>ollama list</code>，从 NAME 列复制模型名称（包括冒号后的标签）。用 LM Studio 的话，在 Developer 页启动服务器，复制要使用的模型标识符。把名称填进对应的配置助手。默认本机服务可以留空 API Key。<a href="../tools/param-builder.html?provider=ollama#connection">配置 Ollama</a> · <a href="../tools/param-builder.html?provider=lmstudio#connection">配置 LM Studio</a></p>
         </details>
       </section>
-      <section id="prompts">
-        <h2>让译文保留原文格式</h2>
-        <p>插件已有默认翻译指令。需要保留术语、代码或 Markdown 结构时，可以把固定要求写在「自定义系统指令」里。下面是一组翻译技术文档的示例。</p>
-        <h3>自定义系统指令</h3>
-        <pre><code>你是技术文档译者。保留代码、变量名和 Markdown 结构，只输出译文。</code></pre>
-        <h3>自定义用户指令</h3>
-        <pre><code>请将下面的 $sourceLang 原文译成 $targetLang。
-
-$text</code></pre>
-        <p>插件会把 <code>$text</code> 换成选中的原文，把两个语言变量换成 Bob 提供的语言名称。自行填写用户指令时记得保留 <code>$text</code>。<a href="../tools/param-builder.html#prompts">在工作台生成翻译指令</a></p>
+      <section id="fill" class="guide-step">
+        <h2><span>3</span>把设置填回 Bob</h2>
+        <p>对照助手里的「在 Bob 中填写」，回到刚才的「Ai 翻译」窗口。把<strong>服务地址（Base URL）</strong>和<strong>模型</strong>复制到同名输入框，需要改的下拉选项按助手给出的名称选择。</p>
+        <p>以 bilibili 为例，Base URL 填 <code>https://index-translate.bilibili.com</code>，模型填写助手选中的名称，API Key 留空。如果选的是需要密钥的服务，在这里粘贴刚才申请的密钥。其余设置可以先用默认值。</p>
+      </section>
+      <section id="test" class="guide-step">
+        <h2><span>4</span>试译一句话</h2>
+        <p>在 Bob 点击「验证」。看到成功提示后，开启这项服务并点击「保存」。打开翻译窗口，选「简体中文」作为目标语言，输入 <strong lang="en">See you tomorrow.</strong> 后按回车。如果「Ai 翻译」显示「明天见」或意思相近的译文，就设置好了。</p>
       </section>
       <section id="troubleshooting">
-        <h2>排查常见问题</h2>
+        <h2>没有看到译文？</h2>
         <details class="guide-fold">
-          <summary>提示 401 或 403</summary>
-          <p>检查密钥是否属于当前 Base URL 对应的平台，是否有权访问该模型。选择 Bearer 时只填令牌本身，插件会添加前缀。</p>
+          <summary>加号菜单里找不到「Ai 翻译」</summary>
+          <p>在 Bob 的「偏好设置 → 插件」中确认已安装「Ai 翻译」。回到「翻译 → 服务」，选中「文本翻译」再点加号。<a href="https://bobtranslate.com/guide/advance/plugin.html">Bob 插件安装图解</a></p>
         </details>
         <details class="guide-fold">
-          <summary>提示 404 或找不到模型</summary>
-          <p>将 Base URL 与端点路径拼在一起，与服务商文档逐段比较。再查模型 ID 的拼写、地区和部署名称。</p>
+          <summary>验证时提示密钥无效（401 或 403）</summary>
+          <p>从申请密钥的平台重新复制一次，确认 Bob 中选的是同一家服务、账号也能使用这个模型。再按配置助手的建议选择「鉴权方式」。</p>
+        </details>
+        <details class="guide-fold">
+          <summary>提示找不到模型或地址（404）</summary>
+          <p>从配置助手重新复制地址和模型名称。使用公司或本地服务时，向提供服务的人确认当前可用的模型。</p>
         </details>
         <details class="guide-fold">
           <summary>验证通过，翻译时提示「流式响应为空」</summary>
           <p>「验证」使用非流式请求。先关闭「流式输出」再翻译同一句话。如果这样能收到译文，请核对端点的流式接口和代理的 SSE 支持。</p>
         </details>
         <details class="guide-fold">
-          <summary>译文里能看到 Markdown 标记</summary>
+          <summary>译文里出现了 ** 或 # 这样的符号</summary>
           <p>Bob 1.21.0 及以上搭配 macOS 13 及以上可以渲染 Markdown。检查插件里的「Markdown 渲染」和 Bob 的「偏好设置 → 翻译 → Markdown」。较早的版本会按纯文本显示。需要纯文本译文时，也可以在系统指令中指定。<a href="https://bobtranslate.com/blog/2026-09-21-markdown-plugin.html">Bob 的 Markdown 支持说明</a></p>
         </details>
       </section>
-      <p class="guide-next"><a href="disable-thinking.html">继续阅读《调整推理参数》</a></p>
+      <section id="reference">
+        <h2>需要改设置时再看</h2>
+        <details class="guide-fold">
+          <summary>怎样让译文保留术语、代码和段落？</summary>
+          <div id="prompts">
+            <p>插件已有默认翻译指令。需要保留术语、代码或 Markdown 结构时，可以把固定要求写在「自定义系统指令」里。下面是一组翻译技术文档的示例。</p>
+            <h3>自定义系统指令</h3>
+            <pre><code>你是技术文档译者。保留代码、变量名和 Markdown 结构，只输出译文。</code></pre>
+            <h3>自定义用户指令</h3>
+            <pre><code>请将下面的 $sourceLang 原文译成 $targetLang。
+
+$text</code></pre>
+            <p>插件会把 <code>$text</code> 换成选中的原文，把两个语言变量换成 Bob 提供的语言名称。自行填写用户指令时记得保留 <code>$text</code>。<a href="../tools/param-builder.html#prompts">在配置助手生成翻译指令</a></p>
+          </div>
+        </details>
+        <details class="guide-fold">
+          <summary>账号或本地服务器里要复制哪个模型名称？</summary>
+          <div id="model-ids">
+            <p>到实际提供 API 的平台查 ID，再把它完整复制到「模型」。同一个模型在不同平台可能有不同的名称。</p>
+            <dl class="guide-facts">
+              <div><dt>云端 API</dt><dd>在服务商控制台确认该模型支持文本生成，且已向你的账号、项目和地区开放。<a href="../index.html#providers">从目录查官方文档</a></dd></div>
+              <div><dt>Azure OpenAI</dt><dd>填资源中自定义的部署名称。可以在部署详情中复制。<a href="https://learn.microsoft.com/en-us/azure/developer/ai/how-to/switching-endpoints#specify-the-model">Microsoft 部署说明</a></dd></div>
+              <div><dt>本地服务</dt><dd>Ollama 填 <code>ollama list</code> 列出的名称，保留冒号后的标签。LM Studio、vLLM 等服务填当前服务器提供的模型 ID。<a href="https://lmstudio.ai/docs/developer/openai-compat/models">LM Studio 模型列表</a></dd></div>
+            </dl>
+          </div>
+        </details>
+        <details class="guide-fold">
+          <summary>服务地址和接口路径应怎么区分？</summary>
+          <div id="format">
+            <p>在服务商文档里找到发送请求的网址。以 OpenAI 的 <code>https://api.openai.com/v1/chat/completions</code> 为例，「Base URL」填 <code>https://api.openai.com</code>，选择 Chat Completions 后，插件会补上后半段路径。</p>
+            <p>如果服务商用的路径不同，在「端点路径覆盖」中填写从 <code>/</code> 开始的完整路径。插件会将它直接接在 Base URL 后面。把 <code>/v1</code> 同时写进这两个字段会导致地址重复。</p>
+            <details class="guide-fold">
+              <summary>查看七种请求格式的默认路径</summary>
+              <table class="guide-table">
+                <thead><tr><th scope="col">Bob 中的请求格式</th><th scope="col">默认路径</th></tr></thead>
+                <tbody>
+                  <tr><td>OpenAI Chat Completions（通用兼容）</td><td><code>/v1/chat/completions</code></td></tr>
+                  <tr><td>OpenAI Responses API</td><td><code>/v1/responses</code></td></tr>
+                  <tr><td>OpenAI Legacy Completions</td><td><code>/v1/completions</code></td></tr>
+                  <tr><td>Anthropic Claude Messages</td><td><code>/v1/messages</code></td></tr>
+                  <tr><td>Anthropic OpenAI 兼容</td><td><code>/v1/chat/completions</code></td></tr>
+                  <tr><td>Gemini generateContent</td><td>按模型和流式开关生成，见下文</td></tr>
+                  <tr><td>Gemini OpenAI 兼容</td><td><code>/v1beta/openai/chat/completions</code></td></tr>
+                </tbody>
+              </table>
+            </details>
+            <details class="guide-fold">
+              <summary>其他兼容服务怎么填？</summary>
+              <p>Together AI 的 Chat Completions 可以使用默认格式，Base URL 填 <code>https://api.together.ai</code>。模型名称通常包含提供方前缀，要从 Together 当前的模型列表完整复制。<a href="https://docs.together.ai/docs/inference/openai-compatibility">Together AI 接口说明</a></p>
+              <p>使用 DeepSeek 的 Anthropic 兼容接口时，选择「Anthropic Claude Messages」，Base URL 填 <code>https://api.deepseek.com</code>，端点路径覆盖填 <code>/anthropic/v1/messages</code>。<a href="https://api-docs.deepseek.com/guides/anthropic_api/">DeepSeek 的 Anthropic 接口</a></p>
+              <p>使用 vLLM、llama.cpp 或 LocalAI 自建服务时，先确认服务器提供的接口和模型 ID。在配置助手的「自定义服务商」中填入实际地址，就可以生成配置查询提示词。<a href="../tools/param-builder.html?provider=custom#lookup">查询自定义配置</a></p>
+            </details>
+          </div>
+        </details>
+        <details class="guide-fold">
+          <summary>Gemini 的模型名称填在哪里？</summary>
+          <div id="gemini-endpoint">
+            <p>选择「Gemini generateContent」，Base URL 填 <code>https://generativelanguage.googleapis.com</code>，「端点路径覆盖」留空。在「模型」里填写模型 ID，省略 <code>models/</code> 前缀。插件会构造 <code>/v1beta/models/{model}:generateContent</code>，开启流式时自动改用 <code>:streamGenerateContent?alt=sse</code>。</p>
+            <p>如果代理要求你手填路径，请把 <code>{model}</code> 换成实际 ID，并选择与流式开关对应的接口。插件会原样发送这条路径。<a href="https://ai.google.dev/api/generate-content">Gemini 接口文档</a></p>
+          </div>
+        </details>
+        <details class="guide-fold">
+          <summary>服务商要求指定发送密钥的方式，怎么选？</summary>
+          <div id="authentication">
+            <p>通常保留「自动（按请求格式）」，在「API Key」里粘贴原始密钥。插件对 Gemini 原生接口使用 <code>x-goog-api-key</code>，对其他六种格式添加 <code>Authorization: Bearer</code> 请求头。</p>
+            <details class="guide-fold">
+              <summary>服务商指定了其他请求头或 URL 参数</summary>
+              <p>按接口要求，在「鉴权方式」里选择 <code>x-api-key</code>、<code>x-goog-api-key</code>、<code>api-key</code> 或 URL 查询参数 <code>key</code>。例如，Azure 用资源密钥时选 <code>api-key</code>，用 Microsoft Entra 访问令牌时选 Bearer。<a href="https://learn.microsoft.com/en-us/rest/api/microsoft-foundry/azureopenai/chat#authentication">Azure 鉴权说明</a></p>
+              <p>使用 Claude 的跨工作区密钥时，在「额外请求头」填写目标工作区的 <code>anthropic-workspace-id</code>。<a href="https://platform.claude.com/docs/en/manage-claude/authentication">Claude 鉴权说明</a></p>
+            </details>
+            <details class="guide-fold">
+              <summary>本地 Ollama 或 LM Studio 需要填密钥吗？</summary>
+              <p>直连默认的本地 Ollama 或 LM Studio 时，「API Key」留空即可。LM Studio 开启鉴权后要填服务器签发的令牌。经代理访问时要看代理的设置，直连 Ollama Cloud 则要填云端密钥。<a href="https://docs.ollama.com/api/authentication">Ollama 鉴权</a> · <a href="https://lmstudio.ai/docs/developer/core/authentication">LM Studio 鉴权</a></p>
+            </details>
+            <details class="guide-fold">
+              <summary>已经在额外字段里配置了凭据</summary>
+              <p>自动模式遇到已有的标准鉴权头或查询参数 <code>key</code> 时，会沿用你提供的值。若服务用自定义名称，可选「手动或无需鉴权」，再填写额外请求头或额外查询参数。请求头名称不区分大小写。留空「API Key」也会跳过自动鉴权。</p>
+            </details>
+          </div>
+        </details>
+      </section>
+      <p class="guide-next"><a href="disable-thinking.html">翻译短句时，怎样减少等待？</a></p>
     </article>
   </main>
   <footer class="site-footer">
