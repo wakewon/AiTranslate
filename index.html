@@ -1,627 +1,114 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ai 翻译 — 通用 AI 翻译 Bob 插件</title>
-<link rel="icon" href="favicon.ico" type="image/x-icon">
-<script>
-  (function() {
-    try {
-      const saved = localStorage.getItem('ai-translate-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } catch (e) {}
-  })();
-</script>
-<style>
-/* ===== CSS Variables ===== */
-:root {
-  --bg-page: #F5F5F7;
-  --bg-nav: rgba(245, 245, 247, 0.8);
-  --bg-card: #FFFFFF;
-  --bg-primary: #F2F2F7;
-  --bg-secondary: #FFFFFF;
-  --bg-hover: #E5E5EA;
-  --bg-cta: #EAECEF;
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --text-muted: #98989D;
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-focus: #0071E3;
-  --accent-color: #0071E3;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
-  --gradient-primary: linear-gradient(135deg, #0071E3, #45B3CB);
-}
-
-[data-theme="dark"] {
-  --bg-page: #000000;
-  --bg-nav: rgba(0, 0, 0, 0.8);
-  --bg-card: #1C1C1E;
-  --bg-primary: #1C1C1E;
-  --bg-secondary: #2C2C2E;
-  --bg-hover: #3A3A3C;
-  --bg-cta: #1C1C1E;
-  --text-primary: #F5F5F7;
-  --text-secondary: #86868B;
-  --text-muted: #636366;
-  --border-color: rgba(255, 255, 255, 0.1);
-  --border-focus: #0A84FF;
-  --accent-color: #0A84FF;
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --gradient-primary: linear-gradient(135deg, #0A84FF, #5E5CE6);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-size: 15px;
-}
-
-body {
-  background-color: var(--bg-page);
-  color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden;
-}
-
-/* ===== Typography ===== */
-h1, h2, h3 {
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  font-weight: 700;
-  letter-spacing: -0.015em;
-}
-
-a {
-  color: var(--accent-color);
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-a:hover {
-  opacity: 0.8;
-}
-
-/* ===== Layout ===== */
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-/* ===== Navbar ===== */
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 24px;
-  margin: 0 -24px;
-  background: var(--bg-nav);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--border-color);
-}
-
-.logo {
-  font-size: 1.2rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-primary);
-}
-
-.nav-links {
-  display: flex;
-  gap: 24px;
-  align-items: center;
-}
-
-.nav-links a {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-  color: var(--text-primary);
-}
-
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.theme-toggle {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  width: 48px;
-  height: 26px;
-  border-radius: 13px;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.3s ease;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
-
-.theme-toggle::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--bg-secondary);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.theme-toggle.light::after {
-  transform: translateX(22px);
-}
-
-.theme-toggle-icons {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 6px;
-  font-size: 11px;
-  pointer-events: none;
-  opacity: 0.5;
-}
-
-/* ===== Hero Section ===== */
-.hero {
-  text-align: center;
-  padding: 80px 0 60px;
-}
-
-.hero-badge {
-  display: inline-block;
-  padding: 6px 12px;
-  background: rgba(10, 132, 255, 0.1);
-  color: var(--accent-color);
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 24px;
-  backdrop-filter: blur(8px);
-}
-
-.hero h1 {
-  font-size: 3.5rem;
-  line-height: 1.1;
-  margin-bottom: 24px;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hero p {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
-  max-width: 600px;
-  margin: 0 auto 40px;
-}
-
-.hero-actions {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 28px;
-  border-radius: 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--text-primary);
-  color: var(--bg-page);
-  box-shadow: var(--shadow-md);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
-  opacity: 0.9;
-}
-
-.btn-secondary {
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-  background: var(--bg-hover);
-}
-
-/* ===== Section Styling ===== */
-.section {
-  padding: 60px 0;
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.section-header h2 {
-  font-size: 2.2rem;
-  margin-bottom: 16px;
-}
-
-.section-header p {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-}
-
-/* ===== Cards ===== */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.card-icon {
-  font-size: 2rem;
-  margin-bottom: 20px;
-}
-
-.card h3 {
-  font-size: 1.3rem;
-  margin-bottom: 12px;
-}
-
-.card p {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-}
-
-/* ===== Tables ===== */
-.table-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-th, td {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-th {
-  background: var(--bg-primary);
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-td code {
-  background: var(--bg-primary);
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-/* ===== Code Block ===== */
-.code-block {
-  background: var(--bg-primary);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.9rem;
-  color: var(--text-primary);
-  overflow-x: auto;
-  margin: 16px 0;
-}
-
-/* ===== Footer ===== */
-.footer {
-  text-align: center;
-  padding: 60px 0 40px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-  border-top: 1px solid var(--border-color);
-  margin-top: 60px;
-}
-
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .hero h1 { font-size: 2.5rem; }
-  .hero p { font-size: 1.1rem; }
-  .table-container { overflow-x: auto; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在 Bob 里使用自己的翻译模型。查找服务商的接口、鉴权方式和模型配置，也可以连接本地模型。">
+  <title>AiTranslate · Bob 翻译插件</title>
+  <link rel="icon" href="favicon.ico">
+  <link rel="stylesheet" href="assets/site.css">
+  <link rel="stylesheet" href="assets/home.css">
+  <script src="assets/site.js"></script>
+  <!-- offline-data -->
+  <script src="assets/home.js" defer></script>
 </head>
 <body>
-
-<div class="container">
-  <!-- Navbar -->
-  <nav class="navbar">
-    <a href="./index.html" class="logo">
-      <img src="icon-large.png" alt="AiTranslate Icon" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
-    </a>
-    <div class="nav-links">
-      <a href="./index.html" class="active">首页</a>
-      <a href="./docs/index.html">文档中心</a>
-      <a href="./tools/param-builder.html">参数构建器</a>
-      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
-    </div>
-    <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换明暗主题">
-        <span class="theme-toggle-icons">
-          <span>🌙</span>
-          <span>☀️</span>
-        </span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- Hero -->
-  <header class="hero">
-    <div class="hero-badge">Bob Plugin v1.2.0</div>
-    <h1>一个插件，搞定所有大模型。</h1>
-    <p>基于「请求格式」建模，支持动态参数注入。彻底解决 Bob 翻译插件一服务商一插件、参数写死的痛点。</p>
-    <div class="hero-actions">
-      <a href="https://github.com/wakewon/AiTranslate/releases/latest" class="btn btn-primary">
-        ⬇️ 下载插件 (.bobplugin)
-      </a>
-      <a href="./docs/basic-usage.html" class="btn btn-secondary">
-        📖 基础使用教程
-      </a>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="wrap nav-wrap">
+      <a class="brand" href="./index.html"><img src="./icon.png" width="30" height="30" alt="">AiTranslate</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="./index.html#providers">服务商</a>
+        <a href="./tools/param-builder.html">配置工作台</a>
+        <a href="./docs/index.html">使用文档</a>
+      </nav>
+      <div class="nav-tools">
+        <a class="repo-link" href="https://github.com/wakewon/AiTranslate">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-switch" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true"></span></button>
+      </div>
     </div>
   </header>
 
-  <!-- Features -->
-  <section class="section">
-    <div class="section-header">
-      <h2>为什么选择 AiTranslate？</h2>
-      <p>重新思考通用翻译插件的设计哲学</p>
-    </div>
-    <div class="card-grid">
-      <div class="card">
-        <div class="card-icon">🎯</div>
-        <h3>按格式建模，而不是服务商</h3>
-        <p>选择目标端点支持的请求格式，再配置 Base URL、模型和鉴权方式。直连默认的本地 Ollama 和 LM Studio 时，API Key 可以留空。<a href="./docs/basic-usage.html#authentication">查看服务鉴权对照</a></p>
+  <main id="main">
+    <section class="hero wrap" aria-labelledby="hero-heading">
+      <div class="hero-copy">
+        <p class="kicker"><span class="rule-mark" aria-hidden="true"></span>Bob 文本翻译插件</p>
+        <h1 id="hero-heading">用<em>自己的模型</em>，<br>在 Bob 里翻译。</h1>
+        <p class="hero-description">接入常用的 AI 服务，或连接 Mac 上的本地模型。<br class="wide-only">划词后，直接在 Bob 中阅读译文。</p>
+        <div class="hero-actions">
+          <a class="button primary" id="download" href="https://github.com/wakewon/AiTranslate/releases/latest"><span class="download-icon" aria-hidden="true">↓</span>下载插件</a>
+          <a class="button" href="docs/basic-usage.html">安装指南 <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="compatibility"><span class="status-dot" aria-hidden="true"></span>适用于 macOS 上的 Bob 1.8.0 及以上版本</p>
       </div>
-      <div class="card">
-        <div class="card-icon">🎛️</div>
-        <h3>无限灵活的参数注入</h3>
-        <p>提供配套的「高级参数构建工具」，图形化生成 JSON 注入。轻松添加 <code>reasoning_effort</code>、<code>temperature</code>、甚至自定义 Header 等深层参数。</p>
+
+      <figure class="preview" aria-label="翻译示例">
+        <div class="paper-stack">
+          <div class="specimen">
+            <div class="sample-label"><span id="source-lang">英语原文</span><span class="language-code" id="source-code" lang="en">EN</span></div>
+            <p class="source-excerpt" id="source-excerpt" lang="en">A quiet morning,<br>an open book.</p>
+            <div class="translation">
+              <div class="sample-label"><span class="translation-label"><i aria-hidden="true"></i>简体中文</span><span class="language-code" lang="en">ZH</span></div>
+              <p class="translated-excerpt" id="translated-excerpt">清晨静好，书卷初开。</p>
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          <span>译文示例 <span class="counter" id="sample-index">01 / 03</span></span>
+          <span class="sample-controls" hidden>
+            <button type="button" id="previous-sample" aria-label="上一个译文示例">←</button>
+            <button type="button" id="next-sample" aria-label="下一个译文示例">→</button>
+          </span>
+        </figcaption>
+        <span class="sr-only" id="sample-announcement" role="status"></span>
+      </figure>
+    </section>
+
+    <section class="directory" id="providers" aria-labelledby="directory-heading">
+      <div class="wrap">
+        <div class="section-head">
+          <div><h2 id="directory-heading">服务商查询</h2>
+          <p>查找接口和鉴权方式，选择服务商后即可查看对应的 Bob 设置。</p></div>
+          <a class="text-link" href="tools/param-builder.html?provider=custom">配置其他服务商 <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="directory-tools" hidden>
+          <div class="filter-set" role="group" aria-label="服务商类型">
+            <button type="button" data-group="all" aria-pressed="true">全部</button>
+            <button type="button" data-group="cloud" aria-pressed="false">云服务</button>
+            <button type="button" data-group="gateway" aria-pressed="false">聚合平台</button>
+            <button type="button" data-group="local" aria-pressed="false">本地部署</button>
+            <button type="button" data-group="other" aria-pressed="false">其他</button>
+          </div>
+          <label class="search-box"><span class="magnifier" aria-hidden="true"></span><span class="sr-only">搜索服务商、模型或接口</span><input id="provider-search" type="search" placeholder="搜索服务商、模型或接口"></label>
+        </div>
+        <div id="directory-results" aria-busy="true">
+          <p class="directory-message" id="directory-message">正在读取服务商目录…</p>
+          <noscript><p>启用 JavaScript 后即可筛选服务商。也可以直接阅读<a href="docs/basic-usage.html#authentication">接口与鉴权指南</a>。</p></noscript>
+          <table class="provider-table" hidden>
+            <caption class="sr-only">服务商、请求格式、鉴权方式与配置入口</caption>
+            <thead><tr><th scope="col">服务商</th><th scope="col">请求格式</th><th scope="col">鉴权方式</th><th scope="col"><span class="sr-only">操作</span></th></tr></thead>
+            <tbody id="provider-rows"></tbody>
+          </table>
+        </div>
+        <div class="directory-foot" hidden>
+          <div class="directory-meta"><span id="directory-count" role="status"></span><a href="https://bobtranslate.com/service/">Bob 服务目录 ↗</a></div>
+          <div class="page-controls"><button id="page-prev" type="button" aria-label="上一页服务商">←</button><span id="page-indicator"></span><button id="page-next" type="button" aria-label="下一页服务商">→</button></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-icon">🚀</div>
-        <h3>原生沉浸体验</h3>
-        <p>完美契合 Bob 1.8.0+ 的流式输出（SSE）架构，响应极快，错误提示也十分完善。在 Bob 1.21.0+ 上还支持 Markdown 渲染，标题、列表、代码块、表格一目了然。</p>
+    </section>
+
+    <section class="guides wrap" aria-labelledby="guides-heading">
+      <div class="section-head"><h2 id="guides-heading">使用指南</h2><a class="text-link" href="docs/index.html">全部文档 <span aria-hidden="true">→</span></a></div>
+      <div class="guide-links">
+        <a href="docs/basic-usage.html"><strong>第一次使用 <span aria-hidden="true">↗</span></strong><span>从安装插件到完成第一次翻译。</span></a>
+        <a href="tools/param-builder.html#prompts"><strong>自定义翻译指令 <span aria-hidden="true">↗</span></strong><span>按场景生成提示词，调整译文风格。</span></a>
+        <a href="docs/disable-thinking.html"><strong>调整模型的思考模式 <span aria-hidden="true">↗</span></strong><span>核对模型支持的参数，缩短翻译等待时间。</span></a>
       </div>
-    </div>
-  </section>
+    </section>
+  </main>
 
-  <!-- Supported Formats -->
-  <section class="section">
-    <div class="section-header">
-      <h2>支持的主流请求格式</h2>
-      <p>在插件设置中，根据你的 API 供应商选择对应的格式</p>
-    </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>选项名称</th>
-            <th>底层格式</th>
-            <th>适用服务商/模型</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>OpenAI Chat Completions（通用兼容）</strong></td>
-            <td><code>/v1/chat/completions</code></td>
-            <td>适用于提供 OpenAI 兼容 Chat Completions 的服务，包括 DeepSeek、硅基流动、OpenRouter、智谱 GLM、火山方舟、阿里云百炼和 Ollama。</td>
-          </tr>
-          <tr>
-            <td><strong>OpenAI Responses API</strong></td>
-            <td><code>/v1/responses</code></td>
-            <td>适用于 OpenAI GPT-6 系列等支持 Responses 的模型。</td>
-          </tr>
-          <tr>
-            <td><strong>OpenAI Legacy Completions</strong></td>
-            <td><code>/v1/completions</code></td>
-            <td>老旧模型或部分遗留系统的单轮对话格式。</td>
-          </tr>
-          <tr>
-            <td><strong>Anthropic Claude Messages</strong></td>
-            <td><code>/v1/messages</code></td>
-            <td>适用于 Claude 原生 Messages 接口，自动发送 <code>anthropic-version</code> 版本头。</td>
-          </tr>
-          <tr>
-            <td><strong>Anthropic OpenAI 兼容</strong></td>
-            <td><code>/v1/chat/completions</code></td>
-            <td>部分基于 Anthropic 但提供 OpenAI 兼容接口的服务。</td>
-          </tr>
-          <tr>
-            <td><strong>Gemini generateContent</strong></td>
-            <td><code>/v1beta/models/{model}:generateContent</code></td>
-            <td>默认端点会从「模型」字段读取实际 ID 并拼入路径。手动覆盖时，请把 <code>{model}</code> 换成实际 ID。</td>
-          </tr>
-          <tr>
-            <td><strong>Gemini OpenAI 兼容</strong></td>
-            <td><code>/v1beta/openai/chat/completions</code></td>
-            <td>Gemini 官方 OpenAI 兼容接口，使用 Bearer 鉴权。</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Compatibility -->
-  <section class="section">
-    <div class="section-header">
-      <h2>Bob 版本兼容</h2>
-      <p>最低支持 Bob 1.8.0，各版本均支持流式输出。Markdown 渲染是 Bob 1.21.0 新增的能力，新旧版本均可正常使用</p>
-    </div>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>运行环境</th>
-            <th>译文显示</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Bob 1.8.0 ~ 1.20.x</strong></td>
-            <td>纯文本。插件里的「Markdown 渲染」选项不起作用。</td>
-          </tr>
-          <tr>
-            <td><strong>Bob 1.21.0+</strong> · macOS 13+</td>
-            <td>按插件里的「Markdown 渲染」选项显示，<strong>默认开启</strong>；关闭则为纯文本。</td>
-          </tr>
-          <tr>
-            <td><strong>Bob 1.21.0+</strong> · macOS 12</td>
-            <td>纯文本。Markdown 渲染需要 macOS 13 及以上。</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="card" style="margin-top: 24px;">
-      <h3>低版本 Bob 会出问题吗？</h3>
-      <p>不会报错，也不影响翻译。Bob 1.21.0 之前不识别新的译文结构，插件同时回传了旧版结构，低版本的显示效果和更新前一致。唯一的区别是：如果模型输出了 Markdown 语法，<code>#</code>、<code>**</code>、<code>|</code> 之类的标记会原样显示，可以在「自定义系统指令」中要求模型只输出纯文本。</p>
-      <p style="margin-top: 12px;">高版本中若遇到误渲染（例如翻译源码、公式或含有大量特殊符号的文本），可在插件选项中关闭「Markdown 渲染」，或在 Bob「偏好设置 - 翻译 - Markdown」中全局关闭。</p>
-    </div>
-  </section>
-
-
-  <!-- Installation -->
-  <section class="section">
-    <div class="section-header">
-      <h2>快速安装与启用</h2>
-    </div>
-    <div class="card">
-      <ol style="padding-left: 20px; line-height: 1.8;">
-        <li>在 <a href="https://github.com/wakewon/AiTranslate/releases" target="_blank" style="color: var(--accent-color); text-decoration: none;">GitHub Releases</a> 下载最新的 <code>.bobplugin</code> 文件并双击安装。</li>
-        <li>在 Bob 的设置 -> 服务 -> 文本翻译中，点击左下角 <code>+</code> 号，添加 <strong>Ai 翻译</strong>。</li>
-        <li>根据实际调用的端点，在插件设置中选择对应的 <strong>请求格式</strong>。</li>
-        <li>在 <strong>Base URL</strong> 中填写服务根地址。插件会按请求格式添加端点，例如 <code>/v1/chat/completions</code>。需要鉴权的端点请提供有效凭据，未开启鉴权的本地端点可留空。<a href="./docs/basic-usage.html#authentication">按服务核对 API Key 和鉴权方式</a></li>
-        <li>在 <strong>模型</strong> 中填写当前端点支持的模型 ID，例如 <code>gpt-6-luna</code> 或 <code>deepseek-flash</code>。<a href="./docs/basic-usage.html#model-ids">按服务查询模型 ID</a></li>
-        <li>(可选) 您可以打开<a href="./tools/param-builder.html" style="color: var(--accent-color); text-decoration: none;">高级参数构建工具</a>生成个性化参数（如关闭思考等）并粘贴到插件底部的“额外请求体”中。更多进阶玩法请访问<a href="./docs/index.html" style="color: var(--accent-color); text-decoration: none;">文档中心</a>阅读。</li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- Further Reading / Docs CTA -->
-  <section class="section" style="text-align: center; background: var(--bg-cta); border-radius: var(--radius-lg); margin: 40px 0; padding: 40px 24px;">
-    <div class="section-header" style="margin-bottom: 24px;">
-      <h2>探索更多进阶玩法</h2>
-      <p>想知道如何接入小众服务商，或者如何为满血版模型关闭“深度思考”？</p>
-    </div>
-    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-      <a href="./docs/basic-usage.html" class="btn btn-secondary">📖 阅读基础使用教程</a>
-      <a href="./docs/disable-thinking.html" class="btn btn-secondary">🧠 如何关闭深度思考</a>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
+  <footer class="site-footer">
+    <div class="wrap footer-wrap"><a class="brand" href="./index.html"><img src="./icon.png" width="22" height="22" alt="">AiTranslate</a><span>Bob 翻译插件</span><a href="https://github.com/wakewon/AiTranslate/issues">问题反馈 <span aria-hidden="true">↗</span></a></div>
   </footer>
-</div>
-
-<script>
-// Theme toggling logic
-const themeToggle = document.getElementById('themeToggle');
-const root = document.documentElement;
-
-function setTheme(theme) {
-  root.setAttribute('data-theme', theme);
-  themeToggle.classList.toggle('light', theme === 'light');
-  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
-}
-
-themeToggle.addEventListener('click', () => {
-  const next = root.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-  setTheme(next);
-});
-
-// Initialize theme
-try {
-  const saved = localStorage.getItem('ai-translate-theme');
-  if (saved) setTheme(saved);
-  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
-} catch(e) {}
-</script>
-
 </body>
 </html>

@@ -1,0 +1,448 @@
+{
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.openai.com",
+      "endpointOverride": "",
+      "models": [
+        "gpt-6-luna"
+      ],
+      "modelHint": "选择支持 Chat Completions 的文本模型。",
+      "note": "在 OpenAI API 平台创建密钥。温度和最大输出 Token 可先留空，部分模型只接受 max_completion_tokens。",
+      "docs": "https://developers.openai.com/api/docs/models/",
+      "bob": "https://bobtranslate.com/service/translate/openai.html"
+    },
+    {
+      "id": "anthropic",
+      "name": "Claude · Anthropic",
+      "group": "cloud",
+      "status": "supported",
+      "format": "anthropic_messages",
+      "authMode": "x-api-key",
+      "baseURL": "https://api.anthropic.com",
+      "endpointOverride": "",
+      "models": [
+        "claude-haiku-5-5"
+      ],
+      "modelHint": "填写 Claude API 的模型 ID。",
+      "note": "使用 Anthropic API 密钥并选择 x-api-key。插件会附上版本请求头，并为 Messages 请求填写必需的 max_tokens。",
+      "docs": "https://platform.claude.com/docs/en/models/overview",
+      "bob": "https://bobtranslate.com/service/translate/claude.html"
+    },
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "group": "cloud",
+      "status": "supported",
+      "format": "gemini_generate_content",
+      "authMode": "auto",
+      "baseURL": "https://generativelanguage.googleapis.com",
+      "endpointOverride": "",
+      "models": [
+        "gemini-3.8-flash"
+      ],
+      "modelHint": "填写支持 generateContent 的模型 ID，省略 models/ 前缀。",
+      "note": "在 Google AI Studio 创建 API Key。保留默认端点，插件会随流式开关切换方法。",
+      "docs": "https://ai.google.dev/api/generate-content",
+      "bob": "https://bobtranslate.com/service/translate/gemini.html"
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.deepseek.com",
+      "endpointOverride": "/chat/completions",
+      "models": [
+        "deepseek-flash"
+      ],
+      "modelHint": "使用 DeepSeek 官方 API 的模型名。",
+      "note": "使用开放平台的密钥。插件会读取回复中的译文；思考模式可按所选模型的说明单独设置。",
+      "docs": "https://api-docs.deepseek.com/",
+      "bob": "https://bobtranslate.com/service/translate/deepseek.html"
+    },
+    {
+      "id": "qwen",
+      "name": "通义千问 · 阿里云百炼",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://{WorkspaceId}.cn-beijing.maas.aliyuncs.com",
+      "endpointOverride": "/compatible-mode/v1/chat/completions",
+      "models": [
+        "qwen-plus"
+      ],
+      "modelHint": "从当前业务空间复制支持 OpenAI 兼容接口的模型 ID。",
+      "note": "示例使用北京地域。请将 {WorkspaceId} 换成业务空间 ID，或直接复制控制台的地域域名，密钥须属于同一地域。",
+      "docs": "https://help.aliyun.com/zh/model-studio/compatibility-of-openai-with-dashscope",
+      "bob": "https://bobtranslate.com/service/translate/qwen.html"
+    },
+    {
+      "id": "glm",
+      "name": "智谱 GLM",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://open.bigmodel.cn",
+      "endpointOverride": "/api/paas/v4/chat/completions",
+      "models": [
+        "glm-5.3"
+      ],
+      "modelHint": "从智谱开放平台选择对话模型。",
+      "note": "使用通用 API 的密钥和端点。Bob 自带服务的免费调用资格与此处的开放平台账户分开计算。",
+      "docs": "https://docs.bigmodel.cn/cn/guide/start/quick-start",
+      "bob": "https://bobtranslate.com/service/translate/zhipu.html"
+    },
+    {
+      "id": "kimi",
+      "name": "Kimi · 月之暗面",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.moonshot.cn",
+      "endpointOverride": "",
+      "models": [
+        "kimi-k3.1-pro"
+      ],
+      "modelHint": "使用 Kimi 开放平台公布的模型 ID。",
+      "note": "示例为中国站端点。先将温度留空，再按当前型号的取值范围调整。",
+      "docs": "https://platform.moonshot.cn/docs/guide/start-using-kimi-api",
+      "bob": "https://bobtranslate.com/service/translate/kimi.html"
+    },
+    {
+      "id": "groq",
+      "name": "Groq",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.groq.com",
+      "endpointOverride": "/openai/v1/chat/completions",
+      "models": [
+        "openai/gpt-oss-20b"
+      ],
+      "modelHint": "从 Groq 控制台复制可用的文本生成模型 ID。",
+      "note": "Groq 提供 OpenAI 兼容接口。模型 ID 中的组织前缀也要保留。",
+      "docs": "https://console.groq.com/docs/models",
+      "bob": "https://bobtranslate.com/service/translate/groq.html"
+    },
+    {
+      "id": "grok",
+      "name": "Grok · xAI",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.x.ai",
+      "endpointOverride": "",
+      "models": [
+        "grok-4.7"
+      ],
+      "modelHint": "选择可通过 Chat Completions 调用的 Grok 型号。",
+      "note": "在开发者控制台创建 API 密钥。X 应用中的订阅和 API 账户分别管理。",
+      "docs": "https://docs.x.ai/developers/model-capabilities/legacy/chat-completions",
+      "bob": "https://bobtranslate.com/service/translate/grok.html"
+    },
+    {
+      "id": "azure",
+      "name": "Azure OpenAI",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "api-key",
+      "baseURL": "https://{resource}.openai.azure.com",
+      "endpointOverride": "/openai/v1/chat/completions",
+      "models": [],
+      "modelHint": "填写你在 Azure 中创建的部署名称。",
+      "note": "将 {resource} 替换为资源名称。此配置使用 v1 接口，资源密钥填入 API Key，可将额外查询参数留空。",
+      "docs": "https://learn.microsoft.com/en-us/azure/foundry/openai/api-version-lifecycle",
+      "bob": "https://bobtranslate.com/service/translate/azureopenai.html"
+    },
+    {
+      "id": "ernie",
+      "name": "文心一言 · 百度千帆",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://qianfan.baidubce.com",
+      "endpointOverride": "/v2/chat/completions",
+      "models": [],
+      "modelHint": "填写千帆预置服务的 model 值，或部署详情中的 API 名称。",
+      "note": "创建可访问该模型的千帆 V2 API Key，选择支持系统消息的文本生成模型。",
+      "docs": "https://cloud.baidu.com/doc/qianfan-api/s/wmwbl48n4",
+      "bob": "https://bobtranslate.com/service/translate/ernie.html"
+    },
+    {
+      "id": "doubao",
+      "name": "豆包 · 火山方舟",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://ark.cn-beijing.volces.com",
+      "endpointOverride": "/api/v3/chat/completions",
+      "models": [],
+      "modelHint": "填写已开通的模型 ID 或推理接入点 ID（ep- 开头）。",
+      "note": "示例为北京地域。接入点、地域和 API Key 请采用同一方舟账户的配置。",
+      "docs": "https://docs.volcengine.com/docs/ark/chat-api",
+      "bob": "https://bobtranslate.com/service/translate/doubao.html"
+    },
+    {
+      "id": "hunyuan",
+      "name": "腾讯混元",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.hunyuan.cloud.tencent.com",
+      "endpointOverride": "",
+      "models": [
+        "hunyuan-turbos-latest"
+      ],
+      "modelHint": "从混元控制台选择已开通的对话模型。",
+      "note": "选择混元 OpenAI 兼容接口的 API Key。云账户的 SecretId、SecretKey 用于另一套鉴权流程。",
+      "docs": "https://cloud.tencent.com/document/product/1729/111007",
+      "bob": "https://bobtranslate.com/service/translate/hunyuan.html"
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://openrouter.ai",
+      "endpointOverride": "/api/v1/chat/completions",
+      "models": [
+        "openrouter/auto"
+      ],
+      "modelHint": "保留组织名和斜线，例如 openrouter/auto。",
+      "note": "不同模型支持的参数各异。可查看所选模型的快照，再决定是否添加温度、推理等参数。",
+      "docs": "https://openrouter.ai/docs/quickstart",
+      "bob": "https://bobtranslate.com/service/translate/openrouter.html"
+    },
+    {
+      "id": "siliconflow",
+      "name": "硅基流动 · SiliconFlow",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.siliconflow.cn",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "从模型广场复制文本对话模型的完整 ID，包括组织前缀。",
+      "note": "示例为中国站。模型详情页列有该型号的调用权限和参数。",
+      "docs": "https://docs.siliconflow.cn/docs/userguide/quickstart",
+      "bob": "https://bobtranslate.com/service/translate/siliconflow.html"
+    },
+    {
+      "id": "aihubmix",
+      "name": "AIHubMix",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://aihubmix.com",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "选择支持 Chat Completions 的模型，保留 ID 中的前缀。",
+      "note": "使用 AIHubMix 的密钥，账户可用的模型以控制台为准。如果连接超时，Base URL 也可以填 https://api.aihubmix.com。",
+      "docs": "https://aihubmix.com/developers",
+      "bob": "https://bobtranslate.com/service/translate/aihubmix.html"
+    },
+    {
+      "id": "sophnet",
+      "name": "SophNet",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://www.sophnet.com",
+      "endpointOverride": "/api/open-apis/chat/completions",
+      "models": [],
+      "modelHint": "填写当前项目已开通的基础模型名称。",
+      "note": "在 SophNet 项目内启用 ChatCompletion 服务并创建密钥，使用该服务详情中的模型名。",
+      "docs": "https://www.sophnet.com/docs/component/quickstart.html",
+      "bob": "https://bobtranslate.com/service/translate/sophnet.html"
+    },
+    {
+      "id": "302ai",
+      "name": "302.AI",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.302.ai",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "复制 302.AI 模型目录中的对话模型 ID。",
+      "note": "选择兼容 OpenAI Chat 的模型，使用 302.AI 控制台分配的 API 密钥。",
+      "docs": "https://help.302.ai/docs/ji-cheng-dao-OpenAI-guan-fang-SDK",
+      "bob": "https://bobtranslate.com/service/translate/302ai.html"
+    },
+    {
+      "id": "gitee",
+      "name": "模力方舟 · Gitee AI",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://ai.gitee.com",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "复制模力方舟推理服务详情中的模型 ID。",
+      "note": "选择支持对话的无服务器推理服务，使用模力方舟的访问令牌。模型市场中的名称可能与调用 ID 不同。",
+      "docs": "https://ai.gitee.com/serverless-api",
+      "bob": "https://bobtranslate.com/service/translate/gitee.html"
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama",
+      "group": "local",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "http://localhost:11434",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "在终端运行 ollama list，复制已下载的对话模型名及标签。",
+      "note": "先启动 Ollama。默认本机服务可将 API Key 留空，远程部署请使用实际地址和鉴权。",
+      "docs": "https://docs.ollama.com/openai",
+      "bob": "https://bobtranslate.com/service/translate/ollama.html"
+    },
+    {
+      "id": "lmstudio",
+      "name": "LM Studio",
+      "group": "local",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "http://localhost:1234",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "使用本地服务器列出的模型标识符。",
+      "note": "在 Developer 中启动服务器并确认端口。若为服务启用了令牌验证，将鉴权方式改为 Bearer 并填写令牌。",
+      "docs": "https://lmstudio.ai/docs/developer/openai-compat",
+      "bob": "https://bobtranslate.com/service/translate/lmstudio.html"
+    },
+    {
+      "id": "bilibili",
+      "name": "bilibili 翻译",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "https://index-translate.bilibili.com",
+      "endpointOverride": "",
+      "models": [
+        "Index-Translate-35B-A3B"
+      ],
+      "modelHint": "使用官方公共端点提供的 Index-Translate 型号。",
+      "note": "官方端点允许 API Key 留空。官方示例在额外请求体中使用 {\"chat_template_kwargs\":{\"enable_thinking\":false}}，让模型直接返回译文。",
+      "docs": "https://github.com/bilibili/Index-Translate/blob/main/README_zh.md",
+      "bob": "https://bobtranslate.com/service/translate/bilibili.html"
+    },
+    {
+      "id": "together",
+      "name": "Together AI",
+      "group": "gateway",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://api.together.ai",
+      "endpointOverride": "",
+      "models": [
+        "MiniMaxAI/MiniMax-M3.1-Flash"
+      ],
+      "modelHint": "填写包含发布者前缀的模型 ID。",
+      "note": "在 Together 控制台选择已开通的对话模型，并使用当前项目的密钥。",
+      "docs": "https://docs.together.ai/docs/inference/openai-compatibility",
+      "bob": ""
+    },
+    {
+      "id": "ollama-cloud",
+      "name": "Ollama Cloud",
+      "group": "cloud",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "auto",
+      "baseURL": "https://ollama.com",
+      "endpointOverride": "",
+      "models": [
+        "gemma4:31b"
+      ],
+      "modelHint": "从 Ollama Cloud 的模型列表复制名称和标签。",
+      "note": "直接使用云端接口时，请填写 Ollama 账户的 API Key。",
+      "docs": "https://docs.ollama.com/api/openai-compatibility",
+      "bob": ""
+    },
+    {
+      "id": "vllm",
+      "name": "vLLM",
+      "group": "local",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "http://localhost:8000",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "填写服务启动时指定的模型名或 served-model-name。",
+      "note": "启动启用了聊天模板的推理服务。若启动时设置了 API Key，请选择 Bearer 并填写同一把密钥。",
+      "docs": "https://docs.vllm.ai/en/latest/serving/openai_compatible_server/",
+      "bob": ""
+    },
+    {
+      "id": "llama-cpp",
+      "name": "llama.cpp",
+      "group": "local",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "http://localhost:8080",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "从 /v1/models 复制模型名或启动时设置的别名。",
+      "note": "使用 llama-server 加载对话模型。若启用了 API Key，请选择 Bearer 并填写服务端密钥。",
+      "docs": "https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md",
+      "bob": ""
+    },
+    {
+      "id": "localai",
+      "name": "LocalAI",
+      "group": "local",
+      "status": "supported",
+      "format": "openai_chat",
+      "authMode": "none",
+      "baseURL": "http://localhost:8080",
+      "endpointOverride": "",
+      "models": [],
+      "modelHint": "从 /v1/models 复制已安装的聊天模型名称。",
+      "note": "先在 LocalAI 中安装并启动文本模型。地址和鉴权方式可按你的部署调整。",
+      "docs": "https://localai.io/docs/models/capabilities/text/text-generation/",
+      "bob": ""
+    },
+    {
+      "id": "yi",
+      "name": "零一万物",
+      "group": "other",
+      "status": "unavailable",
+      "models": [],
+      "modelHint": "Bob 已下线此服务。",
+      "note": "Bob 自 1.21.0 起下线了零一万物。旧配置迁移时，可在此目录选择其他对话服务。",
+      "docs": "https://bobtranslate.com/service/translate/yi.html",
+      "bob": "https://bobtranslate.com/service/translate/yi.html"
+    }
+  ]
+}

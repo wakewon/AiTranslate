@@ -120,6 +120,9 @@ jobs:
           test -f "$unpacked/main.js"
           test -f "$unpacked/README.md"
           test -f "$unpacked/tools/param-builder.html"
+          test -f "$unpacked/assets/offline-data.js"
+          test -f "$unpacked/assets/workbench.js"
+          test -f "$unpacked/docs/basic-usage.html"
           if jq -e 'has("icons")' "$unpacked/info.json" >/dev/null; then
             default_icon=$(jq -r '.icons[] | select(.identifier == "default" and .type == "file") | .filePath' "$unpacked/info.json")
             test -f "$unpacked/$default_icon"
@@ -262,7 +265,7 @@ jobs:
               gh release delete "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --yes
               gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
                 --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
-                --title "Ai 翻译 v$VERSION - 一个插件搞定所有大模型翻译" \
+                --title "Ai 翻译 v$VERSION" \
                 --notes-file "$NOTES_FILE"
               gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
             else
@@ -283,7 +286,7 @@ jobs:
             fi
             gh release create "$RELEASE_TAG" "release/$PACKAGE_NAME" \
               --repo "$GITHUB_REPOSITORY" --verify-tag --draft \
-              --title "Ai 翻译 v$VERSION - 一个插件搞定所有大模型翻译" \
+              --title "Ai 翻译 v$VERSION" \
               --notes-file "$NOTES_FILE"
             gh release edit "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease=false
           fi

@@ -1,157 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>文档中心 - AiTranslate</title>
-<link rel="icon" href="../favicon.ico" type="image/x-icon">
-<script>
-  (function() {
-    try {
-      const saved = localStorage.getItem('ai-translate-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } catch (e) {}
-  })();
-</script>
-<style>
-/* CSS Variables */
-:root {
-  --bg-primary: #F5F5F7;
-  --bg-nav: rgba(245, 245, 247, 0.8);
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F2F2F7;
-  --border-color: #E5E5EA;
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --accent-1: #007AFF;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-nav: rgba(0, 0, 0, 0.8);
-  --bg-secondary: #1C1C1E;
-  --bg-card: #1C1C1E;
-  --bg-card-hover: #2C2C2E;
-  --border-color: #38383A;
-  --text-primary: #F5F5F7;
-  --text-secondary: #A1A1A6;
-  --accent-1: #0A84FF;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
-body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
-
-.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
-.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
-
-/* Navbar */
-.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
-.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
-.nav-links { display: flex; gap: 24px; align-items: center; }
-.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
-.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
-.nav-right { display: flex; align-items: center; gap: 16px; }
-
-/* Theme Toggle */
-.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
-.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
-.theme-toggle.light::after { transform: translateX(22px); }
-.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
-
-/* Content */
-.header { text-align: center; margin-bottom: 40px; }
-.header h1 { font-size: 2rem; margin-bottom: 8px; }
-.header p { color: var(--text-secondary); }
-
-.doc-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
-@media (min-width: 640px) { .doc-grid { grid-template-columns: 1fr 1fr; } }
-
-.doc-card { display: block; text-decoration: none; color: inherit; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; box-shadow: var(--shadow-sm); transition: transform 0.2s, background 0.2s, box-shadow 0.2s; }
-.doc-card:hover { transform: translateY(-2px); background: var(--bg-card-hover); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-.doc-card-icon { font-size: 2rem; margin-bottom: 16px; }
-.doc-card h2 { font-size: 1.25rem; margin-bottom: 8px; color: var(--text-primary); }
-.doc-card p { color: var(--text-secondary); line-height: 1.5; font-size: 0.95rem; }
-
-.footer { text-align: center; margin-top: 60px; color: var(--text-secondary); font-size: 0.85rem; }
-
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="安装、使用 AiTranslate，查询服务商配置和常见问题。">
+  <title>使用指南 · AiTranslate</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/docs.css">
+  <script src="../assets/site.js"></script>
 </head>
 <body>
-
-<div class="app">
-  <nav class="navbar">
-    <a href="../index.html" class="logo">
-      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
-    </a>
-    <div class="nav-links">
-      <a href="../index.html">首页</a>
-      <a href="./index.html" class="active">文档中心</a>
-      <a href="../tools/param-builder.html">参数构建器</a>
-      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="wrap nav-wrap">
+      <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="../index.html#providers">服务商</a>
+        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="index.html" aria-current="page">使用文档</a>
+      </nav>
+      <div class="nav-tools">
+        <a class="repo-link" href="https://github.com/wakewon/AiTranslate">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-switch" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true"></span></button>
+      </div>
     </div>
-    <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle" title="切换主题">
-        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
-      </button>
-    </div>
-  </nav>
-
-  <div class="main-content">
-    <header class="header">
-      <h1>文档中心</h1>
-      <p>探索 AiTranslate 的全部潜能，从入门到进阶精通</p>
-    </header>
-
-    <div class="doc-grid">
-      <a href="./basic-usage.html" class="doc-card">
-        <div class="doc-card-icon">📖</div>
-        <h2>基础使用教程</h2>
-        <p>查找各服务的模型 ID、端点和鉴权方式，确认 API Key 能否留空。</p>
-      </a>
-
-      <a href="./disable-thinking.html" class="doc-card">
-        <div class="doc-card-icon">🧠</div>
-        <h2>进阶：关闭深度思考</h2>
-        <p>按模型和实际请求端点核对可用的 JSON 参数，关闭思考或降低推理强度。</p>
-      </a>
-    </div>
-
-    <footer class="footer">
-      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
-    </footer>
-  </div>
-</div>
-
-<script>
-const themeToggle = document.getElementById('themeToggle');
-const root = document.documentElement;
-function setTheme(theme) {
-  root.setAttribute('data-theme', theme);
-  themeToggle.classList.toggle('light', theme === 'light');
-  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
-}
-themeToggle.addEventListener('click', () => {
-  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-});
-try {
-  const saved = localStorage.getItem('ai-translate-theme');
-  if (saved) setTheme(saved);
-  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
-} catch(e) {}
-</script>
+  </header>
+  <main id="main" class="wrap guide-layout">
+    <nav class="guide-sidebar" aria-label="文档导航">
+      <span>使用文档</span>
+      <a href="index.html" aria-current="page">文档首页</a>
+      <a href="basic-usage.html">第一次翻译</a>
+      <a href="disable-thinking.html">调整推理参数</a>
+      <span>本页内容</span>
+      <a href="#guides">在 Bob 中使用</a>
+      <a href="#reference">查找配置</a>
+    </nav>
+    <article class="guide-article">
+      <header class="guide-intro">
+        <h1>使用指南</h1>
+        <p>用已有的云端服务或本地模型完成第一次翻译，再按需要调整译文格式和推理强度。</p>
+      </header>
+      <section id="guides">
+        <h2>在 Bob 中使用</h2>
+        <div class="guide-links">
+          <a class="guide-link" href="basic-usage.html">
+            <span class="guide-link-title">安装插件，完成第一次翻译</span>
+            <span class="guide-link-desc">添加文本翻译服务，填写地址、模型和密钥，用一句短文本验证配置。</span>
+          </a>
+          <a class="guide-link" href="basic-usage.html#prompts">
+            <span class="guide-link-title">编写翻译指令</span>
+            <span class="guide-link-desc">保留原文的段落、术语和代码，让模型按你的习惯给出译文。</span>
+          </a>
+          <a class="guide-link" href="disable-thinking.html">
+            <span class="guide-link-title">调整推理参数</span>
+            <span class="guide-link-desc">核对模型能否关闭思考、支持哪些档位，以及怎样填写额外请求体。</span>
+          </a>
+        </div>
+      </section>
+      <section id="reference">
+        <h2>查找配置</h2>
+        <dl class="guide-facts">
+          <div><dt><a href="../index.html#providers">服务商目录</a></dt><dd>查接口地址、请求格式和鉴权方式，从服务商条目进入对应的配置。</dd></div>
+          <div><dt><a href="../tools/param-builder.html">配置工作台</a></dt><dd>选择服务商或填写自建端点，准备要复制到 Bob 的字段和提示词。</dd></div>
+          <div><dt><a href="basic-usage.html#troubleshooting">常见问题</a></dt><dd>检查验证失败、流式响应为空，以及 Markdown 译文的显示方式。</dd></div>
+        </dl>
+      </section>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap footer-wrap"><a class="brand" href="../index.html"><img src="../icon.png" width="22" height="22" alt="">AiTranslate</a><span>Bob 翻译插件</span><a href="https://github.com/wakewon/AiTranslate/issues">问题反馈 <span aria-hidden="true">↗</span></a></div>
+  </footer>
 </body>
 </html>

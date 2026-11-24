@@ -1,0 +1,106 @@
+name: Refresh model catalog
+
+on:
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: model-catalog-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Refresh public metadata
+        id: refresh
+        continue-on-error: true
+        run: python3 scripts/update-model-catalog.py
+
+      - name: Validate plugin options and the resulting snapshot
+        id: changes
+        run: |
+          python3 scripts/update-model-catalog.py --check
+          if ! git diff --quiet -- data/model-catalog.json; then
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Preserve the updated snapshot
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: model-catalog
+          path: data/model-catalog.json
+          if-no-files-found: error
+
+      - name: Update the published catalog file
+        if: github.ref_name == github.event.repository.default_branch && steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          file=data/model-catalog.json
+          # The Contents API checks the old blob SHA, so a concurrent edit wins.
+          jq -n --arg branch "$PUBLISH_BRANCH" --arg sha "$(git rev-parse "HEAD:$file")" \
+            --rawfile snapshot "$file" \
+            '{branch: $branch, sha: $sha, content: ($snapshot | @base64), message: "Refresh public model metadata"}' \
+            | gh api --method PUT "repos/$GITHUB_REPOSITORY/contents/$file" --input - --jq '.commit.html_url'
+
+      - name: Refresh the branch-based Pages site when its copy is stale
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+          config=$(gh api "repos/$GITHUB_REPOSITORY/pages")
+          site=$(jq -er --arg branch "$PUBLISH_BRANCH" \
+            'select(.build_type == "legacy" and .source.branch == $branch and .source.path == "/") | .html_url' <<< "$config")
+          matches_live_catalog() {
+            local url="${site%/}/data/model-catalog.json?check=$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT-$1"
+            curl -fsSL --max-time 8 "$url" -o "$RUNNER_TEMP/live-catalog.json" \
+              && cmp -s data/model-catalog.json "$RUNNER_TEMP/live-catalog.json"
+          }
+
+          if matches_live_catalog initial; then
+            echo '线上模型目录已是最新。' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # Commits made with GITHUB_TOKEN do not trigger a branch-based Pages build.
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" --jq '.status'
+          for attempt in $(seq 1 24); do
+            sleep 5
+            if matches_live_catalog "$attempt"; then
+              echo '已确认 GitHub Pages 发布了本次模型快照。' >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+          done
+          echo 'Pages 尚未发布当前快照。请查看 Pages 构建记录，然后重新运行此工作流。' >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+
+      - name: Summarize the refresh
+        if: always()
+        env:
+          REFRESH: ${{ steps.refresh.outcome }}
+          CHANGED: ${{ steps.changes.outputs.changed }}
+        run: |
+          if [[ "$CHANGED" == true ]]; then
+            echo '本次运行已生成 model-catalog 下载件，可在运行详情的 Artifacts 中获取。' >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [[ "$REFRESH" != success ]]; then
+            echo '部分来源未能刷新，请查看刷新步骤的日志。先前通过校验的数据仍保留在快照中。' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi

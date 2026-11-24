@@ -1,19 +1,13 @@
-AiTranslate 是一个面向 Bob 的通用 AI 翻译插件，基于请求格式而不是服务商名称建模。无论你使用 OpenAI、Anthropic、Gemini 原生接口，还是 DeepSeek、智谱、硅基流动、Ollama 等兼容服务，都可以通过同一个插件完成配置。
+AiTranslate 是 Bob 的文本翻译插件，可连接云端 API 或本地模型。
 
-#### ✨ 核心能力
-- **多种请求格式**：支持 OpenAI Chat Completions、Responses API、Legacy Completions、Anthropic Messages、Anthropic OpenAI 兼容、Gemini generateContent 与 Gemini OpenAI 兼容格式。
-- **高度可配置**：可自由设置 Base URL、端点路径，并注入额外请求头、查询参数和请求体，适配不同服务商及高级参数。
-- **流式输出**：支持 SSE 流式响应，与 Bob 的实时翻译体验保持一致。
-- **配置辅助工具**：提供在线文档和高级参数构建工具，便于生成复杂 JSON 配置。
+## v{{VERSION}} 更新内容
 
-#### 🚀 本次更新（v{{VERSION}}）
 {{CHANGES}}
 
-#### 📦 安装方法
-1. 在下方 **Assets** 中下载 `{{PACKAGE_NAME}}`。
-2. 双击 `.bobplugin` 文件，Bob 会自动完成插件安装或升级。
-3. 在 Bob 的服务设置中填写 API 地址和模型 ID。需要鉴权的端点请提供有效凭据。
+## 安装与配置
 
-#### 📖 文档与反馈
-- 使用文档与配置教程：https://wakewon.wwang.de/AiTranslate/
-- 如果遇到兼容性问题或希望支持新的接口格式，欢迎在 GitHub Issues 中反馈。
+1. 在本页的 **Assets** 中下载 `{{PACKAGE_NAME}}`，双击文件即可安装或升级。
+2. 首次安装后，打开 Bob 的「偏好设置 → 翻译 → 服务」，在「文本翻译」列表中添加「Ai 翻译」。
+3. 在配置工作台选择服务商，按提示填写接口地址、鉴权方式和模型 ID。[打开配置工作台](https://wakewon.wwang.de/AiTranslate/tools/param-builder.html)
+
+遇到问题时，可先查阅[使用指南](https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html)，也可以到 [GitHub Issues](https://github.com/wakewon/AiTranslate/issues) 反馈。

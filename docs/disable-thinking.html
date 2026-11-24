@@ -1,276 +1,103 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>关闭深度思考 - AiTranslate</title>
-<link rel="icon" href="../favicon.ico" type="image/x-icon">
-<script>
-  (function() {
-    try {
-      const saved = localStorage.getItem('ai-translate-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } catch (e) {}
-  })();
-</script>
-<style>
-/* CSS Variables */
-:root {
-  --bg-primary: #F5F5F7;
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --border-color: #E5E5EA;
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --accent-1: #007AFF;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-secondary: #1C1C1E;
-  --bg-card: #1C1C1E;
-  --border-color: #38383A;
-  --text-primary: #F5F5F7;
-  --text-secondary: #A1A1A6;
-  --accent-1: #0A84FF;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
-body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
-
-.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
-.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
-
-/* Navbar */
-.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
-.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
-.nav-links { display: flex; gap: 24px; align-items: center; }
-.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
-.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
-.nav-right { display: flex; align-items: center; gap: 16px; }
-
-/* Theme Toggle */
-.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
-.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
-.theme-toggle.light::after { transform: translateX(22px); }
-.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
-
-/* Content */
-.header { text-align: center; margin-bottom: 40px; }
-.header h1 { font-size: 2rem; margin-bottom: 8px; }
-.header p { color: var(--text-secondary); }
-
-.card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); line-height: 1.6; }
-.card h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-1); }
-.card p { margin-bottom: 12px; }
-pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
-.code-wrapper pre { margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; line-height: 1.5; overflow-x: auto; }
-.code-wrapper code { padding: 0; background: transparent; }
-.code-wrapper { position: relative; margin-top: 12px; }
-.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-.copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
-.copy-btn.success { color: #34C759; border-color: #34C759; background: rgba(52, 199, 89, 0.1); }
-a { color: var(--accent-1); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-/* Prompt Generator */
-.pg-form { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-.pg-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
-.pg-field label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
-.pg-field input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; }
-.pg-field input:focus { outline: none; border-color: var(--accent-1); }
-.pg-btn { padding: 10px 20px; background: var(--accent-1); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; height: 41px; white-space: nowrap; }
-.pg-btn:hover { opacity: 0.9; }
-
-@media (max-width: 600px) {
-  .pg-form { flex-direction: column; align-items: stretch; }
-  .pg-btn { height: 44px; }
-}
-
-.table-container { overflow-x: auto; margin-bottom: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); }
-table { width: 100%; border-collapse: collapse; text-align: left; }
-th, td { padding: 12px 16px; border-bottom: 1px solid var(--border-color); }
-th { background: var(--bg-primary); font-weight: 500; color: var(--text-secondary); font-size: 0.9rem; }
-tr:last-child td { border-bottom: none; }
-
-.footer { text-align: center; margin-top: 40px; color: var(--text-secondary); font-size: 0.85rem; }
-
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="按服务商、模型和端点调整推理强度，在 Bob 中填写并验证额外请求体。">
+  <title>调整推理参数 · AiTranslate</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/docs.css">
+  <script src="../assets/site.js"></script>
 </head>
 <body>
-
-<div class="app">
-  <nav class="navbar">
-    <a href="../index.html" class="logo">
-      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
-    </a>
-    <div class="nav-links">
-      <a href="../index.html">首页</a>
-      <a href="./index.html">文档中心</a>
-      <a href="../tools/param-builder.html">参数构建器</a>
-      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="wrap nav-wrap">
+      <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="../index.html#providers">服务商</a>
+        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="index.html" aria-current="page">使用文档</a>
+      </nav>
+      <div class="nav-tools">
+        <a class="repo-link" href="https://github.com/wakewon/AiTranslate">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-switch" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true"></span></button>
+      </div>
     </div>
-    <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle" title="切换主题">
-        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
-      </button>
-    </div>
-  </nav>
-
-  <div class="main-content">
-    <header class="header">
-      <h1>进阶：如何为模型“关闭思考”？</h1>
-    <p>按模型和请求端点选择参数，关闭思考或降低推理强度</p>
   </header>
-
-  <div class="card">
-    <h2>1. 什么是请求头和请求体？</h2>
-    <p>AiTranslate 插件支持在 Bob 配置界面的高级设置中注入 <strong>额外请求头 (Headers)</strong>、<strong>额外查询参数 (Query)</strong> 和 <strong>额外请求体 (Body)</strong>。它们都接收合法的 JSON 格式字符串。</p>
-    <p>对于关闭深度思考（思维链）这种操作，<strong>几乎都是通过修改“请求体 (Body)”来实现的</strong>，因为这属于修改发给模型的具体指令参数。</p>
-    <p>你可以使用我们提供的 <a href="../tools/param-builder.html">参数构建工具</a>，快速生成所需的 JSON 字符串，然后复制粘贴到 Bob 的「额外请求体」输入框中即可。</p>
-    <p>服务密钥和鉴权应按实际端点单独配置。<a href="./basic-usage.html#authentication">查看各服务的鉴权方式</a></p>
-  </div>
-
-  <div class="card">
-    <h2>2. 各大平台关闭思考的 JSON 模板</h2>
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>适用服务商 / 模型</th>
-            <th>所需的 JSON 结构（填入额外请求体）</th>
-            <th>说明</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>DeepSeek 官方 Chat Completions</td>
-            <td><code>{ "thinking": { "type": "disabled" } }</code></td>
-            <td>适用于官方文档列出的模型和端点。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></td>
-          </tr>
-          <tr>
-            <td>OpenAI Chat Completions</td>
-            <td><code>{ "reasoning_effort": "none" }</code></td>
-            <td>使用顶层 <code>reasoning_effort</code>。只有支持 <code>none</code> 的模型才可用这个值。<a href="https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create">Chat Completions 参数</a></td>
-          </tr>
-          <tr>
-            <td>OpenAI Responses</td>
-            <td><code>{ "reasoning": { "effort": "none" } }</code></td>
-            <td><code>gpt-6-luna</code> 支持 <code>none</code>。<code>gpt-6-astra</code> 和 <code>gpt-6.1-sol</code> 的最低档位为 <code>low</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></td>
-          </tr>
-          <tr>
-            <td>智谱 GLM-5.3 Chat Completions</td>
-            <td><code>{ "thinking": { "type": "enabled" }, "reasoning_effort": "low" }</code></td>
-            <td>思考始终开启，<code>low</code> 是最低档位。<a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">GLM-5.3 模型文档</a></td>
-          </tr>
-          <tr>
-            <td>通义千问 / 阿里云百炼</td>
-            <td><code>{ "enable_thinking": false }</code></td>
-            <td>适用于支持关闭思考的混合思考模型。<a href="https://help.aliyun.com/zh/model-studio/deep-thinking">百炼思考模式</a></td>
-          </tr>
-          <tr>
-            <td>Ollama OpenAI 兼容 Chat Completions</td>
-            <td><code>{ "reasoning_effort": "none" }</code></td>
-            <td>实际效果取决于模型支持的档位。原生 <code>/api/chat</code> 的参数需单独核对。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>3. 通过 AI 助手获取配置方案</h2>
-    <p>如果您使用了一个尚未列出的全新推理模型（或者服务商的 API 发生了更新），不确定该如何关闭深度思考，您可以直接将以下提示词发送给 AI（如 ChatGPT / Claude），让它查阅最新的官方文档并为您提供准确的配置参数：</p>
-
-    <div class="pg-form">
-      <div class="pg-field">
-        <label for="dtProvider">服务商或实际端点</label>
-        <input type="text" id="dtProvider" placeholder="例如 Ollama /v1/chat/completions">
-      </div>
-      <div class="pg-field">
-        <label for="dtModel">模型名称</label>
-        <input type="text" id="dtModel" placeholder="例如 deepseek-flash、glm-5.3">
-      </div>
-      <button class="pg-btn" onclick="generateDtPrompt()">生成提示词</button>
-    </div>
-
-    <div class="code-wrapper">
-      <button class="copy-btn" id="dtCopyBtn" style="display: none;" onclick="copyPrompt(this)">复制提示词</button>
-      <pre><code id="dtPromptOutput" style="color: var(--text-secondary);">请在上方输入服务商和模型名称，然后点击“生成提示词”。</code></pre>
-    </div>
-  </div>
-
-    <footer class="footer">
-      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
-    </footer>
-  </div>
-</div>
-
-<script>
-const themeToggle = document.getElementById('themeToggle');
-const root = document.documentElement;
-function setTheme(theme) {
-  root.setAttribute('data-theme', theme);
-  themeToggle.classList.toggle('light', theme === 'light');
-  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
-}
-themeToggle.addEventListener('click', () => {
-  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-});
-try {
-  const saved = localStorage.getItem('ai-translate-theme');
-  if (saved) setTheme(saved);
-  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
-} catch(e) {}
-
-function generateDtPrompt() {
-  const provider = document.getElementById('dtProvider').value.trim();
-  const model = document.getElementById('dtModel').value.trim();
-  const output = document.getElementById('dtPromptOutput');
-  const copyBtn = document.getElementById('dtCopyBtn');
-  
-  if (!provider || !model) {
-    alert('请填写服务商名称和模型名称！');
-    return;
-  }
-  
-  output.style.color = '';
-  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.wwang.de/AiTranslate/）。
-
-请查阅【${provider}】上【${model}】的官方 API 文档，确认实际请求端点和模型是否支持关闭思考或降低推理强度。若服务同时提供多个端点，请按端点分别说明。
-
-请给出可直接粘贴到插件「额外请求体」的 JSON 对象。插件会把它合并到实际 HTTP 请求体。SDK 的 extra_body 包装层无需填写。OpenAI Chat Completions 使用顶层 reasoning_effort，Responses 使用嵌套的 reasoning.effort。Ollama 等服务的原生和兼容端点也应分开核对。
-
-只有模型和端点都支持时才给出关闭思考的示例。如果只能降低推理强度，说明最低支持档位。如果官方文档未确认支持，请明确说明。请用纯文本和独立 JSON 代码块回答，并附上官方文档链接。`;
-
-  copyBtn.style.display = 'block';
-}
-
-function copyPrompt(btn) {
-  const pre = btn.nextElementSibling;
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    const originalText = btn.innerText;
-    btn.innerText = '已复制!';
-    btn.classList.add('success');
-    setTimeout(() => {
-      btn.innerText = originalText;
-      btn.classList.remove('success');
-    }, 2000);
-  });
-}
-</script>
+  <main id="main" class="wrap guide-layout">
+    <nav class="guide-sidebar" aria-label="文档导航">
+      <span>使用文档</span>
+      <a href="index.html">文档首页</a>
+      <a href="basic-usage.html">第一次翻译</a>
+      <a href="disable-thinking.html" aria-current="page">调整推理参数</a>
+      <span>本页内容</span>
+      <a href="#where">填写位置</a>
+      <a href="#examples">接口参数</a>
+      <a href="#verify">验证配置</a>
+    </nav>
+    <article class="guide-article">
+      <header class="guide-intro">
+        <h1>调整推理参数</h1>
+        <p>有些模型会先推理再给出译文。翻译短句时，如果等待时间比较长，可以降低推理强度。支持关闭推理的模型也可以直接输出译文。</p>
+      </header>
+      <section id="where">
+        <h2>把参数填在哪里</h2>
+        <p>在 Bob 的「Ai 翻译」服务设置中找到「额外请求体 (JSON)」，填入当前接口接受的 JSON 对象。已有其他参数时，将新字段加进同一对花括号内。</p>
+        <p>有些 SDK 把自定义字段放在 <code>extra_body</code> 中。插件直接发送 HTTP 请求，复制到 Bob 时只需保留里面的字段。<a href="../tools/param-builder.html#parameters">在工作台编辑 JSON</a></p>
+      </section>
+      <section id="examples">
+        <h2>按接口查参数</h2>
+        <p>先认准实际调用的平台，再核对模型支持的档位。同一款模型经第三方平台调用时，以该平台的接口说明为准。</p>
+        <details class="guide-fold" open>
+          <summary>DeepSeek 官方 Chat Completions</summary>
+          <p>使用支持思考开关的模型时，将 <code>thinking.type</code> 设为 <code>disabled</code>。<a href="https://api-docs.deepseek.com/guides/thinking_mode/">DeepSeek 思考模式</a></p>
+          <pre><code>{"thinking": {"type": "disabled"}}</code></pre>
+        </details>
+        <details class="guide-fold">
+          <summary>OpenAI Responses 与 Chat Completions</summary>
+          <p>同一个模型换用这两个接口时，参数所在的位置会变。例如，要使用 <code>low</code> 档位，先确认模型支持该值，再选择对应的写法。支持 <code>none</code> 的模型可以把值改为 <code>none</code>。<a href="https://developers.openai.com/api/docs/guides/reasoning">OpenAI 推理指南</a></p>
+          <h3>Responses API</h3>
+          <pre><code>{"reasoning": {"effort": "low"}}</code></pre>
+          <h3>Chat Completions</h3>
+          <pre><code>{"reasoning_effort": "low"}</code></pre>
+        </details>
+        <details class="guide-fold">
+          <summary>Google Gemini · generateContent</summary>
+          <p>选择「Gemini generateContent」和实际使用的模型。如果「JSON 参数」显示「当前模型的思考等级」，选中需要的档位，再把生成的 JSON 复制到 Bob 的「额外请求体」。例如，<code>gemini-4-hydrogen</code> 可以用 <code>low</code> 降低推理强度。</p>
+          <pre><code>{"generationConfig": {"thinkingConfig": {"thinkingLevel": "low"}}}</code></pre>
+          <p>Gemini 2.5 系列用 <code>thinkingBudget</code> 控制推理预算，允许的范围因型号而异。<a href="https://aistudio.google.com/docs/thinking?generate-content=true">Google 思考参数说明</a> · <a href="../tools/param-builder.html?provider=gemini#parameters">配置 Gemini 参数</a></p>
+        </details>
+        <details class="guide-fold">
+          <summary>通义千问 · 阿里云百炼</summary>
+          <p>通过百炼的 OpenAI 兼容 Chat Completions 使用支持此开关的混合思考模型时，可将 <code>enable_thinking</code> 设为 <code>false</code>。<a href="https://help.aliyun.com/zh/model-studio/deep-thinking">百炼深度思考说明</a></p>
+          <pre><code>{"enable_thinking": false}</code></pre>
+        </details>
+        <details class="guide-fold">
+          <summary>智谱 · GLM-5.3</summary>
+          <p>GLM-5.3 始终启用思考。要减少推理量，可以选择其最低档位 <code>low</code>。<a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">GLM-5.3 参数说明</a></p>
+          <pre><code>{"thinking": {"type": "enabled"}, "reasoning_effort": "low"}</code></pre>
+        </details>
+        <details class="guide-fold">
+          <summary>Ollama · OpenAI 兼容接口</summary>
+          <p>先从本地服务的 <code>/api/show</code> 查看模型支持的推理档位。兼容接口可用 <code>reasoning_effort</code>，<code>none</code> 的实际效果取决于模型，例如 GPT-OSS 会按最低档位运行。<a href="https://docs.ollama.com/api/openai-compatibility">Ollama 兼容接口</a></p>
+        </details>
+        <p>使用其他服务时，可在工作台填写服务商和模型名称，生成一段供 AI 助手查官方资料的提问。<a href="../tools/param-builder.html#thinking">生成推理参数查询提示词</a></p>
+      </section>
+      <section id="verify">
+        <h2>验证参数是否生效</h2>
+        <ol>
+          <li>先将「额外请求体」留空，翻译一句短文本，确认当前地址和模型能正常返回译文。</li>
+          <li>只加入准备测试的参数并保存，再译同一句话。遇到 <code>400</code> 错误时，查看返回信息提到的字段名和允许值。</li>
+          <li>如果 Bob 能显示译文，但你不确定模型是否仍在推理，可到服务商控制台查看这次请求的用量。服务商如提供推理 Token 数，可用它核对变化。清空新增字段即可恢复模型默认行为。</li>
+        </ol>
+      </section>
+      <p class="guide-next"><a href="basic-usage.html#troubleshooting">查看连接与显示问题</a></p>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap footer-wrap"><a class="brand" href="../index.html"><img src="../icon.png" width="22" height="22" alt="">AiTranslate</a><span>Bob 翻译插件</span><a href="https://github.com/wakewon/AiTranslate/issues">问题反馈 <span aria-hidden="true">↗</span></a></div>
+  </footer>
 </body>
 </html>

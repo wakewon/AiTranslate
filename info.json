@@ -3,7 +3,7 @@
   "version": "1.2.0",
   "category": "translate",
   "name": "Ai 翻译",
-  "summary": "通用 AI 翻译插件，支持 OpenAI / Anthropic / Gemini 等主流格式，一个插件搞定所有 AI 翻译服务。",
+  "summary": "在 Bob 中连接云端或本地模型，支持 OpenAI、Claude 和 Gemini 等接口格式。",
   "icon": "icon.png",
   "author": "wakewon",
   "homepage": "https://wakewon.wwang.de/AiTranslate/",
@@ -122,10 +122,10 @@
       "identifier": "model",
       "type": "text",
       "title": "模型",
-      "desc": "填写当前端点支持的模型 ID，例如 gpt-6-luna、claude-haiku-5-5、gemini-3.8-flash、deepseek-flash 或 glm-5.3。Azure OpenAI 填部署名，自托管服务填服务器列出的 ID。Gemini 原生使用默认路径时可留空，插件会使用内置模型 ID。覆盖 Gemini 原生端点时以路径里的模型 ID 为准。",
+      "desc": "填写当前端点支持的模型 ID，可在主页的配置工作台查看示例。Azure OpenAI 填部署名，自托管服务填服务器列出的 ID。Gemini 原生使用默认路径时可留空，插件会使用内置模型 ID。覆盖 Gemini 原生端点时以路径里的模型 ID 为准。",
       "textConfig": {
         "type": "visible",
-        "placeholderText": "例如 gpt-6-luna"
+        "placeholderText": "服务商提供的模型 ID"
       }
     },
     {
@@ -241,7 +241,7 @@
       "identifier": "extraBody",
       "type": "text",
       "title": "额外请求体 (JSON)",
-      "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。可添加任意高级参数。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n提示: 强烈建议前往主页「文档中心」阅读配置教程。你可以使用「高级参数构建工具」自动生成。",
+      "desc": "可选。JSON 格式的额外请求体参数，会深度合并到请求体中。使用当前端点和模型支持的字段。\n\n示例: {\"top_p\": 0.9, \"frequency_penalty\": 0.5}\n\n在主页的「配置工作台」中可以编辑字段并复制生成的 JSON。",
       "textConfig": {
         "type": "visible",
         "height": 140,

@@ -1,364 +1,149 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>基础使用教程 - AiTranslate</title>
-<link rel="icon" href="../favicon.ico" type="image/x-icon">
-<script>
-  (function() {
-    try {
-      const saved = localStorage.getItem('ai-translate-theme');
-      if (saved) {
-        document.documentElement.setAttribute('data-theme', saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-        document.documentElement.setAttribute('data-theme', 'dark');
-      }
-    } catch (e) {}
-  })();
-</script>
-<style>
-/* CSS Variables */
-:root {
-  --bg-primary: #F5F5F7;
-  --bg-nav: rgba(245, 245, 247, 0.8);
-  --bg-secondary: #FFFFFF;
-  --bg-card: #FFFFFF;
-  --border-color: #E5E5EA;
-  --text-primary: #1D1D1F;
-  --text-secondary: #86868B;
-  --accent-1: #007AFF;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-}
-
-[data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-nav: rgba(0, 0, 0, 0.8);
-  --bg-secondary: #1C1C1E;
-  --bg-card: #1C1C1E;
-  --border-color: #38383A;
-  --text-primary: #F5F5F7;
-  --text-secondary: #A1A1A6;
-  --accent-1: #0A84FF;
-}
-
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif; font-size: 15px; }
-body { background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; transition: background 0.3s ease, color 0.3s ease; }
-
-.app { max-width: 1000px; margin: 0 auto; padding: 0 24px; }
-.main-content { max-width: 800px; margin: 0 auto; padding: 40px 0 80px; }
-
-/* Navbar */
-.navbar { position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; margin: 0 -24px; background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); }
-.logo { font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-primary); text-decoration: none; }
-.nav-links { display: flex; gap: 24px; align-items: center; }
-.nav-links a { color: var(--text-secondary); font-size: 0.95rem; font-weight: 500; text-decoration: none; }
-.nav-links a:hover, .nav-links a.active { color: var(--text-primary); }
-.nav-right { display: flex; align-items: center; gap: 16px; }
-
-/* Theme Toggle */
-.theme-toggle { position: relative; width: 48px; height: 26px; border-radius: 13px; background: var(--bg-secondary); border: 1px solid var(--border-color); cursor: pointer; display: flex; align-items: center; padding: 0; }
-.theme-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: var(--text-primary); transition: transform 0.3s; }
-.theme-toggle.light::after { transform: translateX(22px); }
-.theme-toggle-icons { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font-size: 11px; opacity: 0.5; pointer-events: none; }
-
-/* Content */
-.header { text-align: center; margin-bottom: 40px; }
-.header h1 { font-size: 2rem; margin-bottom: 8px; }
-.header p { color: var(--text-secondary); }
-
-.card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); line-height: 1.6; }
-#authentication, #gemini-endpoint, #model-ids { scroll-margin-top: 84px; }
-.card h2 { font-size: 1.3rem; margin-bottom: 16px; color: var(--accent-1); }
-.card h3 { font-size: 1.1rem; margin: 16px 0 8px; }
-.card p { margin-bottom: 12px; }
-.card ul { margin-left: 20px; margin-bottom: 16px; }
-.card li { margin-bottom: 8px; }
-.doc-details { border-top: 1px solid var(--border-color); margin-top: 16px; padding-top: 12px; }
-.doc-details summary { color: var(--accent-1); cursor: pointer; font-weight: 600; }
-.doc-details[open] summary { margin-bottom: 12px; }
-.model-table { width: 100%; border-collapse: collapse; text-align: left; margin-bottom: 12px; }
-.model-table th, .model-table td { border-bottom: 1px solid var(--border-color); padding: 8px 6px; vertical-align: top; }
-.model-table code { overflow-wrap: anywhere; }
-code { background: var(--bg-primary); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
-pre { background: var(--bg-primary); padding: 16px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.9em; margin-bottom: 16px; border: 1px solid var(--border-color); white-space: pre-wrap; word-break: break-all; }
-.code-wrapper pre { margin: 0; white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.9rem; line-height: 1.5; overflow-x: auto; }
-.code-wrapper code { padding: 0; background: transparent; }
-
-/* Prompt Generator */
-.pg-form { display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-.pg-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
-.pg-field label { font-size: 0.9rem; color: var(--text-secondary); font-weight: 500; }
-.pg-field input { padding: 10px 14px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; }
-.pg-field input:focus { outline: none; border-color: var(--accent-1); }
-.pg-btn { padding: 10px 20px; background: var(--accent-1); color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; height: 41px; white-space: nowrap; }
-.pg-btn:hover { opacity: 0.9; }
-
-@media (max-width: 600px) {
-  .pg-form { flex-direction: column; align-items: stretch; }
-  .pg-btn { height: 44px; }
-}
-
-.code-wrapper { position: relative; margin-top: 12px; }
-.copy-btn { position: absolute; top: 8px; right: 8px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-secondary); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
-.copy-btn:hover { background: var(--border-color); color: var(--text-primary); }
-.copy-btn.success { color: #34C759; border-color: #34C759; background: rgba(52, 199, 89, 0.1); }
-a { color: var(--accent-1); text-decoration: none; }
-a:hover { text-decoration: underline; }
-
-.footer { text-align: center; margin-top: 40px; color: var(--text-secondary); font-size: 0.85rem; }
-
-@media (max-width: 640px) {
-  .nav-links { display: none; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="在 Bob 中安装 AiTranslate，填写模型、请求格式和鉴权方式，验证第一次翻译。">
+  <title>第一次翻译 · AiTranslate</title>
+  <link rel="icon" href="../favicon.ico">
+  <link rel="stylesheet" href="../assets/site.css">
+  <link rel="stylesheet" href="../assets/docs.css">
+  <script src="../assets/site.js"></script>
 </head>
 <body>
-
-<div class="app">
-  <nav class="navbar">
-    <a href="../index.html" class="logo">
-      <img src="../icon-large.png" alt="AiTranslate" style="width: 32px; height: 32px; border-radius: 6px;"> AiTranslate
-    </a>
-    <div class="nav-links">
-      <a href="../index.html">首页</a>
-      <a href="./index.html">文档中心</a>
-      <a href="../tools/param-builder.html">参数构建器</a>
-      <a href="https://github.com/wakewon/AiTranslate" target="_blank">GitHub</a>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+  <header class="site-header">
+    <div class="wrap nav-wrap">
+      <a class="brand" href="../index.html"><img src="../icon.png" width="30" height="30" alt="">AiTranslate</a>
+      <nav class="site-nav" aria-label="主导航">
+        <a href="../index.html#providers">服务商</a>
+        <a href="../tools/param-builder.html">配置工作台</a>
+        <a href="index.html" aria-current="page">使用文档</a>
+      </nav>
+      <div class="nav-tools">
+        <a class="repo-link" href="https://github.com/wakewon/AiTranslate">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-switch" type="button" aria-label="切换明暗主题" title="切换明暗主题"><span aria-hidden="true"></span></button>
+      </div>
     </div>
-    <div class="nav-right">
-      <button class="theme-toggle" id="themeToggle" title="切换主题">
-        <span class="theme-toggle-icons"><span>🌙</span><span>☀️</span></span>
-      </button>
-    </div>
-  </nav>
-
-  <div class="main-content">
-    <header class="header">
-      <h1>基础使用教程</h1>
-    <p>从零开始，教你如何接入任意 AI 翻译服务</p>
   </header>
+  <main id="main" class="wrap guide-layout">
+    <nav class="guide-sidebar" aria-label="文档导航">
+      <span>使用文档</span>
+      <a href="index.html">文档首页</a>
+      <a href="basic-usage.html" aria-current="page">第一次翻译</a>
+      <a href="disable-thinking.html">调整推理参数</a>
+      <span>本页内容</span>
+      <a href="#install">安装与启用</a>
+      <a href="#format">地址与格式</a>
+      <a href="#model-ids">模型 ID</a>
+      <a href="#authentication">鉴权方式</a>
+      <a href="#prompts">翻译指令</a>
+      <a href="#troubleshooting">常见问题</a>
+    </nav>
+    <article class="guide-article">
+      <header class="guide-intro">
+        <h1>第一次翻译</h1>
+        <p>先在 Bob 里添加「Ai 翻译」，再接入你已有的模型。第一次只需填好地址、模型和鉴权信息，提示词和额外参数都可以留空。</p>
+      </header>
+      <section id="install">
+        <h2>安装并添加服务</h2>
+        <ol>
+          <li>打开最新版的发布页，在 Assets 下下载后缀为 <code>.bobplugin</code> 的安装包，双击安装。插件需要 Bob 1.8.0 或更高版本。<a href="https://github.com/wakewon/AiTranslate/releases/latest">下载插件</a></li>
+          <li>在 Bob 的「偏好设置 → 翻译 → 服务」中选中「文本翻译」，点击列表下方的加号，选择「Ai 翻译」。</li>
+          <li>在服务商目录选中你的服务，进入配置工作台，把对应的请求格式、地址和模型 ID 填回 Bob。如果服务需要密钥，将它填入 Bob 的「API Key」。<a href="../index.html#providers">查询服务商</a></li>
+          <li>点击「验证」。插件会发送一次非流式请求，将 <code>hello</code> 译成简体中文。验证通过后，开启服务并点击「保存」，就可以在 Bob 中划词翻译了。<a href="https://bobtranslate.com/guide/advance/service.html">Bob 添加服务说明</a></li>
+        </ol>
+      </section>
+      <section id="format">
+        <h2>填写地址和请求格式</h2>
+        <p>在服务商文档里找到发送请求的网址。以 OpenAI 的 <code>https://api.openai.com/v1/chat/completions</code> 为例，「Base URL」填 <code>https://api.openai.com</code>，选择 Chat Completions 后，插件会补上后半段路径。</p>
+        <p>如果服务商用的路径不同，在「端点路径覆盖」中填写从 <code>/</code> 开始的完整路径。插件会将它直接接在 Base URL 后面。把 <code>/v1</code> 同时写进这两个字段会导致地址重复。</p>
+        <details class="guide-fold">
+          <summary>查看七种请求格式的默认路径</summary>
+          <table class="guide-table">
+            <thead><tr><th scope="col">Bob 中的请求格式</th><th scope="col">默认路径</th></tr></thead>
+            <tbody>
+              <tr><td>OpenAI Chat Completions（通用兼容）</td><td><code>/v1/chat/completions</code></td></tr>
+              <tr><td>OpenAI Responses API</td><td><code>/v1/responses</code></td></tr>
+              <tr><td>OpenAI Legacy Completions</td><td><code>/v1/completions</code></td></tr>
+              <tr><td>Anthropic Claude Messages</td><td><code>/v1/messages</code></td></tr>
+              <tr><td>Anthropic OpenAI 兼容</td><td><code>/v1/chat/completions</code></td></tr>
+              <tr><td>Gemini generateContent</td><td>按模型和流式开关生成，见下文</td></tr>
+              <tr><td>Gemini OpenAI 兼容</td><td><code>/v1beta/openai/chat/completions</code></td></tr>
+            </tbody>
+          </table>
+        </details>
+        <details class="guide-fold">
+          <summary>其他兼容服务怎么填？</summary>
+          <p>Together AI 的 Chat Completions 可以使用默认格式，Base URL 填 <code>https://api.together.ai</code>。模型名称通常包含提供方前缀，要从 Together 当前的模型列表完整复制。<a href="https://docs.together.ai/docs/inference/openai-compatibility">Together AI 接口说明</a></p>
+          <p>使用 DeepSeek 的 Anthropic 兼容接口时，选择「Anthropic Claude Messages」，Base URL 填 <code>https://api.deepseek.com</code>，端点路径覆盖填 <code>/anthropic/v1/messages</code>。<a href="https://api-docs.deepseek.com/guides/anthropic_api/">DeepSeek 的 Anthropic 接口</a></p>
+          <p>使用 vLLM、llama.cpp 或 LocalAI 自建服务时，先确认服务器提供的接口和模型 ID。在工作台的「自定义服务商」中填入实际地址，就可以生成配置查询提示词。<a href="../tools/param-builder.html?provider=custom#lookup">查询自定义配置</a></p>
+        </details>
+        <h3 id="gemini-endpoint">Gemini 原生接口</h3>
+        <p>选择「Gemini generateContent」，Base URL 填 <code>https://generativelanguage.googleapis.com</code>，「端点路径覆盖」留空。在「模型」里填写模型 ID，省略 <code>models/</code> 前缀。插件会构造 <code>/v1beta/models/{model}:generateContent</code>，开启流式时自动改用 <code>:streamGenerateContent?alt=sse</code>。</p>
+        <p>如果代理要求你手填路径，请把 <code>{model}</code> 换成实际 ID，并选择与流式开关对应的接口。插件会原样发送这条路径。<a href="https://ai.google.dev/api/generate-content">Gemini 接口文档</a></p>
+      </section>
+      <section id="model-ids">
+        <h2>找到正确的模型 ID</h2>
+        <p>到实际提供 API 的平台查 ID，再把它完整复制到「模型」。同一个模型在不同平台可能有不同的名称。</p>
+        <dl class="guide-facts">
+          <div><dt>云端 API</dt><dd>在服务商控制台确认该模型支持文本生成，且已向你的账号、项目和地区开放。<a href="../index.html#providers">从目录查官方文档</a></dd></div>
+          <div><dt>Azure OpenAI</dt><dd>填资源中自定义的部署名称。可以在部署详情中复制。<a href="https://learn.microsoft.com/en-us/azure/developer/ai/how-to/switching-endpoints#specify-the-model">Microsoft 部署说明</a></dd></div>
+          <div><dt>本地服务</dt><dd>Ollama 填 <code>ollama list</code> 列出的名称，保留冒号后的标签。LM Studio、vLLM 等服务填当前服务器提供的模型 ID。<a href="https://lmstudio.ai/docs/developer/openai-compat/models">LM Studio 模型列表</a></dd></div>
+        </dl>
+      </section>
+      <section id="authentication">
+        <h2>选择鉴权方式</h2>
+        <p>通常保留「自动（按请求格式）」，在「API Key」里粘贴原始密钥。插件对 Gemini 原生接口使用 <code>x-goog-api-key</code>，对其他六种格式添加 <code>Authorization: Bearer</code> 请求头。</p>
+        <details class="guide-fold">
+          <summary>服务商指定了其他请求头或 URL 参数</summary>
+          <p>按接口要求，在「鉴权方式」里选择 <code>x-api-key</code>、<code>x-goog-api-key</code>、<code>api-key</code> 或 URL 查询参数 <code>key</code>。例如，Azure 用资源密钥时选 <code>api-key</code>，用 Microsoft Entra 访问令牌时选 Bearer。<a href="https://learn.microsoft.com/en-us/rest/api/microsoft-foundry/azureopenai/chat#authentication">Azure 鉴权说明</a></p>
+          <p>使用 Claude 的跨工作区密钥时，在「额外请求头」填写目标工作区的 <code>anthropic-workspace-id</code>。<a href="https://platform.claude.com/docs/en/manage-claude/authentication">Claude 鉴权说明</a></p>
+        </details>
+        <details class="guide-fold">
+          <summary>本地 Ollama 或 LM Studio 需要填密钥吗？</summary>
+          <p>直连默认的本地 Ollama 或 LM Studio 时，「API Key」留空即可。LM Studio 开启鉴权后要填服务器签发的令牌。经代理访问时要看代理的设置，直连 Ollama Cloud 则要填云端密钥。<a href="https://docs.ollama.com/api/authentication">Ollama 鉴权</a> · <a href="https://lmstudio.ai/docs/developer/core/authentication">LM Studio 鉴权</a></p>
+        </details>
+        <details class="guide-fold">
+          <summary>已经在额外字段里配置了凭据</summary>
+          <p>自动模式遇到已有的标准鉴权头或查询参数 <code>key</code> 时，会沿用你提供的值。若服务用自定义名称，可选「手动或无需鉴权」，再填写额外请求头或额外查询参数。请求头名称不区分大小写。留空「API Key」也会跳过自动鉴权。</p>
+        </details>
+      </section>
+      <section id="prompts">
+        <h2>让译文保留原文格式</h2>
+        <p>插件已有默认翻译指令。需要保留术语、代码或 Markdown 结构时，可以把固定要求写在「自定义系统指令」里。下面是一组翻译技术文档的示例。</p>
+        <h3>自定义系统指令</h3>
+        <pre><code>你是技术文档译者。保留代码、变量名和 Markdown 结构，只输出译文。</code></pre>
+        <h3>自定义用户指令</h3>
+        <pre><code>请将下面的 $sourceLang 原文译成 $targetLang。
 
-  <div class="card">
-    <h2>快速安装与启用</h2>
-    <ol style="padding-left: 20px; line-height: 1.8; margin-top: 12px;">
-      <li>在 <a href="https://github.com/wakewon/AiTranslate/releases" target="_blank">GitHub Releases</a> 下载最新的 <code>.bobplugin</code> 文件并双击安装。</li>
-      <li>在 Bob 的设置 -> 服务 -> 文本翻译中，点击左下角 <code>+</code> 号，添加 <strong>Ai 翻译</strong>。</li>
-      <li>根据实际调用的端点，在插件设置中选择对应的 <strong>请求格式</strong>。服务提供 OpenAI 兼容 Chat Completions 时，可选默认的 OpenAI Chat 格式。</li>
-      <li>在 <strong>Base URL</strong> 中填写服务根地址。插件会按请求格式添加端点，例如 <code>/v1/chat/completions</code>。根据实际端点选择 <strong>鉴权方式</strong>，并按服务要求填写有效密钥。无需鉴权的服务可留空。<a href="#authentication">查看各服务的鉴权要求</a></li>
-      <li>在 <strong>模型</strong> 中填写当前端点支持的模型 ID。Azure OpenAI 填部署名，自托管服务填本机已加载或已部署的 ID。<a href="#model-ids">查看模型 ID 示例</a></li>
-      <li>(可选) 您可以打开<a href="../tools/param-builder.html">高级参数构建工具</a>生成个性化参数（如关闭思考等）并粘贴到插件底部的“额外请求体”中。更多进阶玩法请访问<a href="./index.html">文档中心</a>阅读。</li>
-    </ol>
-  </div>
-
-  <div class="card">
-    <h2>1. 请求格式怎么选？</h2>
-    <p>本插件支持 7 种细分的 API 请求格式选项，它们决定了插件如何与大模型通信：</p>
-    <ul>
-      <li><strong>OpenAI Chat Completions（通用兼容）:</strong> 最通用的格式，绝大多数国产模型（DeepSeek、Kimi、豆包、智谱等）和第三方中转站（硅基流动、OpenRouter）都兼容此格式。</li>
-      <li><strong>OpenAI Responses API:</strong> 适用于 OpenAI GPT-6 系列等支持 Responses 的模型。</li>
-      <li><strong>OpenAI Legacy Completions:</strong> 老旧模型或部分遗留系统的单轮对话格式。</li>
-      <li><strong>Anthropic Claude Messages:</strong> Claude 官方原生端点专用。</li>
-      <li><strong>Anthropic OpenAI 兼容:</strong> 部分基于 Anthropic 但提供 OpenAI 兼容接口的服务。</li>
-      <li><strong>Gemini generateContent:</strong> 谷歌 Gemini 官方原生端点专用。</li>
-      <li><strong>Gemini OpenAI 兼容:</strong> 部分基于 Gemini 但提供 OpenAI 兼容接口的服务。</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <h2>2. Base URL 和端点（Endpoint）填写指南</h2>
-    <p><strong>Base URL (基础网址)</strong> 是服务商的根地址。<strong>端点 (Endpoint)</strong> 则是具体的接口路径。根据不同的 API 格式，插件会自动拼接路径，但有时你需要自己手动调整端点：</p>
-
-    <h3>案例 A：DeepSeek 官方 API</h3>
-    <p>参考文档：<a href="https://api-docs.deepseek.com/zh-cn/" target="_blank">DeepSeek 官方文档</a></p>
-    <ul>
-      <li><strong>请求格式：</strong> OpenAI Chat Completions</li>
-      <li><strong>Base URL：</strong> <code>https://api.deepseek.com</code> （不要带 /v1）</li>
-      <li><strong>自定义端点：</strong> 留空 （插件默认使用的请求格式会自动补充 <code>/v1/chat/completions</code>）</li>
-    </ul>
-
-    <h3 id="gemini-endpoint">案例 B：Google Gemini 原生 API</h3>
-    <p>Gemini 原生接口把模型 ID 放在 URL 路径里。官方文档中的 <code>{model}</code> 表示实际模型 ID。<a href="https://ai.google.dev/api/generate-content?hl=en" target="_blank">Gemini 端点文档</a></p>
-    <ul>
-      <li>「请求格式」选 <strong>Gemini generateContent</strong>，「Base URL」填 <code>https://generativelanguage.googleapis.com</code>。</li>
-      <li><strong>使用默认端点</strong>时，「端点路径覆盖」留空，在「模型」中只填实际 ID，例如 <code>gemini-3.8-flash</code>。插件会自动加上 <code>models/</code> 前缀，拼出 <code>/v1beta/models/gemini-3.8-flash:generateContent</code>。开启流式时，使用 <code>:streamGenerateContent?alt=sse</code>。如果「模型」也留空，当前内置值为 <code>gemini-2.5-flash</code>。</li>
-      <li><strong>手动覆盖端点</strong>时，直接填写包含实际模型 ID 的完整路径，例如 <code>/v1beta/models/gemini-3.8-flash:generateContent</code>。插件按原样使用覆盖路径，<code>{model}</code> 不会被替换。请求使用路径中的模型，流式开关也不会改写该路径。</li>
-    </ul>
-    
-    <h3>案例 C：智谱 GLM 官方 API（特殊后缀）</h3>
-    <p>智谱的 Chat Completions 使用自定义路径。<a href="https://docs.bigmodel.cn/api-reference/模型-api/对话补全" target="_blank">智谱官方文档</a></p>
-    <ul>
-      <li><strong>请求格式：</strong> OpenAI Chat Completions</li>
-      <li><strong>Base URL：</strong> <code>https://open.bigmodel.cn</code></li>
-      <li><strong>自定义端点：</strong> <code>/api/paas/v4/chat/completions</code>（填写后，插件将不再自动补充路径，而是完全使用你填写的端点）</li>
-    </ul>
-    <p>OpenRouter 和 Groq 也需要覆盖端点路径。OpenRouter 使用 <code>/api/v1/chat/completions</code>，Groq 使用 <code>/openai/v1/chat/completions</code>。<a href="https://openrouter.ai/developers">OpenRouter</a> · <a href="https://console.groq.com/docs/openai">Groq</a></p>
-
-    <details class="doc-details" id="model-ids">
-      <summary>各服务的模型 ID 示例与官方目录</summary>
-      <p>示例核对于 <time datetime="2026-11-07">2026 年 11 月 7 日</time>。请以当前端点、账号和地区可用的模型列表为准。</p>
-      <table class="model-table">
-        <thead>
-          <tr><th scope="col">服务</th><th scope="col">模型 ID 示例或取值规则</th><th scope="col">官方来源</th></tr>
-        </thead>
-        <tbody>
-          <tr><th scope="row">OpenAI</th><td><code>gpt-6-luna</code>、<code>gpt-6.1-sol</code>、<code>gpt-6-astra</code></td><td><a href="https://developers.openai.com/api/docs/models">模型目录</a></td></tr>
-          <tr><th scope="row">Claude</th><td><code>claude-haiku-5-5</code>、<code>claude-sonnet-5-5</code>、<code>claude-opus-5-5</code></td><td><a href="https://platform.claude.com/docs/en/models/overview">模型目录</a></td></tr>
-          <tr><th scope="row">Gemini</th><td><code>gemini-3.8-flash</code>、<code>gemini-3.5-flash-lite</code></td><td><a href="https://ai.google.dev/gemini-api/docs/models?hl=en">模型目录</a></td></tr>
-          <tr><th scope="row">Azure OpenAI</th><td>填自己创建的部署名。可部署模型及版本按地区和部署类型查询。</td><td><a href="https://learn.microsoft.com/en-us/azure/developer/ai/how-to/switching-endpoints#specify-the-model">部署名</a> · <a href="https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/models">模型目录</a></td></tr>
-          <tr><th scope="row">DeepSeek 官方</th><td><code>deepseek-flash</code>、<code>deepseek-v4-pro</code></td><td><a href="https://api-docs.deepseek.com/quick_start/pricing/">模型目录</a></td></tr>
-          <tr><th scope="row">硅基流动</th><td><code>deepseek-ai/DeepSeek-V4.1-Flash</code></td><td><a href="https://www.siliconflow.cn/models?page=1&amp;q=DeepSeek">模型中心</a></td></tr>
-          <tr><th scope="row">智谱</th><td><code>glm-5.3</code></td><td><a href="https://docs.bigmodel.cn/cn/guide/models/text/glm-5.3">模型文档</a></td></tr>
-          <tr><th scope="row">Kimi</th><td><code>kimi-k3.1-pro</code></td><td><a href="https://platform.kimi.com/docs/api/chat">调用示例</a></td></tr>
-          <tr><th scope="row">火山方舟</th><td><code>doubao-seed-2-1-lite-260915</code>、<code>doubao-seed-2-1-pro-260915</code>，或自己创建的推理接入点 ID</td><td><a href="https://docs.volcengine.com/docs/ark/model-list?lang=zh">模型目录</a></td></tr>
-          <tr><th scope="row">阿里云百炼</th><td><code>qwen3.8-flash</code>、<code>qwen3.8-max</code></td><td><a href="https://help.aliyun.com/zh/model-studio/text-generation-model/">模型目录</a></td></tr>
-          <tr><th scope="row">OpenRouter</th><td><code>openai/gpt-6-luna</code></td><td><a href="https://openrouter.ai/openai/gpt-6-luna">模型页</a> · <a href="https://openrouter.ai/models">模型目录</a></td></tr>
-          <tr><th scope="row">Groq</th><td><code>openai/gpt-oss-20b</code>（生产）、<code>qwen/qwen3.8-27b</code>（预览）</td><td><a href="https://console.groq.com/docs/models">模型目录</a></td></tr>
-          <tr><th scope="row">Together AI</th><td><code>deepseek-ai/DeepSeek-V4.1-Flash</code></td><td><a href="https://docs.together.ai/docs/serverless/models">模型目录</a></td></tr>
-          <tr><th scope="row">Ollama 本地</th><td>填 <code>ollama list</code> 列出的名称，例如已安装的 <code>qwen3.8:27b</code>。</td><td><a href="https://ollama.com/library/qwen3.8/tags">模型标签</a></td></tr>
-          <tr><th scope="row">Ollama Cloud</th><td>直连 <code>ollama.com</code> 时可用 <code>kimi-k3.1-pro</code>。经本地 Ollama 转发时使用本地列出的标签，例如 <code>kimi-k3.1-pro:cloud</code>。</td><td><a href="https://ollama.com/library/kimi-k3.1-pro">模型调用示例</a></td></tr>
-          <tr><th scope="row">LM Studio、vLLM、llama.cpp、LocalAI</th><td>填部署实际提供的模型 ID，可从服务的模型列表获取。</td><td><a href="https://lmstudio.ai/docs/developer/openai-compat/models">LM Studio</a> · <a href="#authentication">自托管服务</a></td></tr>
-        </tbody>
-      </table>
-    </details>
-  </div>
-
-  <div class="card" id="authentication">
-    <h2>3. 鉴权方式和 API Key 怎么填？</h2>
-    <ul>
-      <li><strong>通常选「自动」。</strong>填写有效 API Key 后，Gemini 原生用 <code>x-goog-api-key</code>，其余格式用 Bearer。</li>
-      <li><strong>无需鉴权才直接留空。</strong>默认的本地 Ollama 和 LM Studio 无需占位密钥。下列官方云端接口和启用了鉴权的代理需要有效凭据。</li>
-      <li><strong>端点要求其他方式时</strong>，在「鉴权方式」里指定请求头或 URL 参数，例如 Azure 资源密钥可选 <code>api-key</code>。自行配置凭据时可把 API Key 留空。</li>
-    </ul>
-
-    <details class="doc-details">
-      <summary>逐家鉴权对照与官方来源</summary>
-      <h3>本地和自托管接口</h3>
-      <ul>
-        <li><strong>Ollama 本地</strong>直连 <code>http://localhost:11434</code> 时留空即可。官方 SDK 示例里的 <code>api_key="ollama"</code> 只用于构造 OpenAI SDK 客户端，同页的 HTTP 示例直接省略鉴权头。用本地 Ollama 登录并转发云模型时，插件仍连接本地端口。<a href="https://docs.ollama.com/api/authentication">鉴权</a> · <a href="https://docs.ollama.com/api/openai-compatibility">OpenAI 兼容接口</a></li>
-        <li><strong>LM Studio</strong>默认关闭鉴权，可以留空。服务器开启 Require Authentication 后，填 LM Studio 生成的 API Token，使用 Bearer。<a href="https://lmstudio.ai/docs/developer/core/authentication">LM Studio 鉴权</a></li>
-        <li><strong>vLLM 和 llama.cpp</strong>未配置服务端密钥时可以留空。启动时配置了 <code>--api-key</code> 或等效设置，就给插件填真实密钥，使用 Bearer。<a href="https://docs.vllm.ai/en/latest/cli/serve/#-api-key">vLLM 启动选项</a> · <a href="https://docs.vllm.ai/en/latest/serving/online_serving/renderer/">vLLM 请求示例</a> · <a href="https://github.com/ggml-org/llama.cpp/tree/master/tools/server">llama.cpp</a></li>
-        <li><strong>LocalAI</strong>两种服务端鉴权都未开启时可以留空。启用 API Key 鉴权时，填有效密钥，使用 Bearer 或服务支持的 <code>x-api-key</code>。<a href="https://localai.io/docs/features/authentication/">LocalAI 鉴权</a></li>
-      </ul>
-      <p>经由反向代理、托管平台或私有网关访问时，以该入口的鉴权规则为准。入口要求密钥时，使用有效凭据。</p>
-
-      <h3>官方托管推理接口</h3>
-      <ul>
-        <li><strong>OpenAI</strong>使用有效 API Key 或访问令牌，通过 Bearer 发送。<a href="https://developers.openai.com/api/reference/overview#authentication">OpenAI 鉴权</a></li>
-        <li><strong>Anthropic Claude</strong>原生 Messages 推荐 Bearer，也支持旧版 <code>x-api-key</code>。OpenAI 兼容接口使用 Bearer。跨工作区密钥需要额外的 <code>anthropic-workspace-id</code>。<a href="https://platform.claude.com/docs/en/manage-claude/authentication">Claude 鉴权</a> · <a href="https://platform.claude.com/docs/en/cli-sdks-libraries/libraries/openai-sdk">OpenAI 兼容接口</a></li>
-        <li><strong>Google Gemini</strong>原生 <code>generateContent</code> 用有效密钥和 <code>x-goog-api-key</code>。OpenAI 兼容端点 <code>/v1beta/openai/chat/completions</code> 用 Bearer。只有目标端点明确支持通过 URL 收密钥时才选查询参数 <code>key</code>。<a href="https://ai.google.dev/api#authentication">Gemini 原生接口</a> · <a href="https://ai.google.dev/gemini-api/docs/openai">OpenAI 兼容接口</a></li>
-        <li><strong>Azure OpenAI</strong>使用资源 API Key 时，可选 <code>api-key</code>。使用 Microsoft Entra ID 时，用有效访问令牌和 Bearer。v1 Chat Completions 的路径为 <code>/openai/v1/chat/completions</code>。<a href="https://learn.microsoft.com/en-us/rest/api/microsoft-foundry/azureopenai/chat#authentication">Azure OpenAI 鉴权</a> · <a href="https://learn.microsoft.com/en-us/azure/developer/ai/how-to/switching-endpoints">Microsoft Entra ID</a></li>
-        <li><strong>DeepSeek、硅基流动、智谱 GLM、OpenRouter、Groq、Together AI</strong>的官方 Chat Completions 都要求各自的有效 API Key，使用 Bearer。<a href="https://api-docs.deepseek.com/api/deepseek-api/">DeepSeek</a> · <a href="https://docs.siliconflow.cn/docs/api/chat-completions-post">硅基流动</a> · <a href="https://docs.bigmodel.cn/api-reference/模型-api/对话补全">智谱</a> · <a href="https://openrouter.ai/developers">OpenRouter</a> · <a href="https://console.groq.com/docs/api-reference">Groq</a> · <a href="https://docs.together.ai/reference/chat-completions">Together AI</a></li>
-        <li><strong>DeepSeek Anthropic 兼容接口</strong>也要求有效的 DeepSeek API Key，支持 Bearer 或 <code>x-api-key</code>。选择 Claude Messages 格式时，可用根地址 <code>https://api.deepseek.com</code> 和覆盖路径 <code>/anthropic/v1/messages</code>。<a href="https://api-docs.deepseek.com/guides/anthropic_api/">DeepSeek Anthropic 兼容接口</a></li>
-        <li><strong>Kimi、火山方舟（豆包）、阿里云百炼（千问）</strong>的 OpenAI 兼容 Chat Completions 使用各自的有效 API Key 和 Bearer。<a href="https://platform.kimi.com/docs/api/chat">Kimi</a> · <a href="https://docs.volcengine.com/docs/ark/base-url-and-authentication">火山方舟</a> · <a href="https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-chat-completions">阿里云百炼</a></li>
-        <li><strong>Ollama Cloud</strong>直连 <code>ollama.com</code> 时必须提供有效的 Ollama 密钥。OpenAI 兼容接口和托管的 Anthropic 兼容 Messages 接口都使用 Bearer。<a href="https://docs.ollama.com/api/authentication">Ollama Cloud 鉴权</a></li>
-      </ul>
-
-      <h3>插件如何发送</h3>
-      <p>可手动指定 <code>Authorization: Bearer</code>、<code>x-api-key</code>、<code>x-goog-api-key</code>、<code>api-key</code> 或 URL 查询参数 <code>key</code>，再把原始密钥填进 API Key。Bearer 前缀由插件添加。</p>
-      <p>自动模式优先使用你已配置的上述鉴权头或 <code>key</code> 查询参数。自定义其他凭据时，选择「手动或无需鉴权」，并按服务要求填写额外请求头或查询参数。</p>
-    </details>
-  </div>
-
-  <div class="card">
-    <h2>4. 通过 AI 助手获取配置方案</h2>
-    <p>输入实际使用的服务或部署方式和模型，再将生成的提示词发给 AI 助手。它会按具体端点核对鉴权与路径，也可以帮你查询模型支持的<a href="./disable-thinking.html">推理参数</a>。</p>
-
-    <div class="pg-form">
-      <div class="pg-field">
-        <label for="basicProvider">服务商或部署方式</label>
-        <input type="text" id="basicProvider" placeholder="例如 Ollama 本地、Ollama Cloud">
-      </div>
-      <div class="pg-field">
-        <label for="basicModel">模型名称</label>
-        <input type="text" id="basicModel" placeholder="例如 deepseek-flash、qwen3.8:27b">
-      </div>
-      <button class="pg-btn" onclick="generateBasicPrompt()">生成提示词</button>
-    </div>
-
-    <div class="code-wrapper">
-      <button class="copy-btn" id="basicCopyBtn" style="display: none;" onclick="copyPrompt(this)">复制提示词</button>
-      <pre><code id="basicPromptOutput" style="color: var(--text-secondary);">请在上方输入服务商和模型名称，然后点击“生成提示词”。</code></pre>
-
-    </div>
-  </div>
-
-    <footer class="footer">
-      <p>&copy; 2026 wakewon / AiTranslate. Designed with ♥ for the Bob Community.</p>
-    </footer>
-  </div>
-</div>
-
-<script>
-const themeToggle = document.getElementById('themeToggle');
-const root = document.documentElement;
-function setTheme(theme) {
-  root.setAttribute('data-theme', theme);
-  themeToggle.classList.toggle('light', theme === 'light');
-  try { localStorage.setItem('ai-translate-theme', theme); } catch(e) {}
-}
-themeToggle.addEventListener('click', () => {
-  setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
-});
-try {
-  const saved = localStorage.getItem('ai-translate-theme');
-  if (saved) setTheme(saved);
-  else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
-} catch(e) {}
-
-function generateBasicPrompt() {
-  const provider = document.getElementById('basicProvider').value.trim();
-  const model = document.getElementById('basicModel').value.trim();
-  const output = document.getElementById('basicPromptOutput');
-  const copyBtn = document.getElementById('basicCopyBtn');
-  
-  if (!provider || !model) {
-    alert('请填写服务商名称和模型名称！');
-    return;
-  }
-  
-  output.style.color = '';
-  output.textContent = `我正在配置一款名为 AiTranslate 的翻译插件（https://wakewon.wwang.de/AiTranslate/）。
-
-请按【${provider}】上【${model}】的实际 HTTP 推理端点查阅官方 API 文档，并给出以下六个插件字段的值。先区分本地部署、官方托管和第三方代理。如果同一服务存在多种部署方式且无法从输入判断，请分别列出条件。
-
-1. 请求格式。选择与目标端点匹配的一项。若七种格式都不兼容，请明确说明。以下是插件自动拼接的路径。
-   - OpenAI Chat Completions（通用兼容）和 Anthropic OpenAI 兼容均为 \`/v1/chat/completions\`
-   - OpenAI Responses API 为 \`/v1/responses\`
-   - OpenAI Legacy Completions 为 \`/v1/completions\`
-   - Anthropic Claude Messages 为 \`/v1/messages\`
-   - Gemini generateContent 默认将实际模型名拼进 \`/v1beta/models/模型名:generateContent\`。流式模式使用 \`:streamGenerateContent?alt=sse\`
-   - Gemini OpenAI 兼容为 \`/v1beta/openai/chat/completions\`
-2. Base URL。给出协议、主机和必要的端口，如 \`http://localhost:11434\`。
-3. 端点路径覆盖。如果默认拼接结果已经等于官方路径，明确写「留空」，并在「模型」中给出实际 ID。否则给出以 / 开头的完整路径。覆盖路径按原样使用，请将官方路径里的 {model} 换成实际模型 ID，并确认流式要求。请同时给出拼接后的最终请求地址，省略任何密钥。
-4. 模型。按目标端点的官方目录或账号可用的模型列表核对实际 API 模型 ID。Azure OpenAI 使用部署名，自托管使用服务器提供的 ID。同一模型在不同服务上的 ID 可能不同，请保留完整前缀、大小写和标签。插件文档的示例和官方目录入口见 https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#model-ids 。
-5. 鉴权方式。从「自动（按请求格式）」「Authorization: Bearer」「x-api-key」「x-goog-api-key」「api-key」「URL 查询参数 key」「手动或无需鉴权」中选择。「自动」为 Gemini 原生发送 x-goog-api-key，其余格式发送 Bearer。可参考插件文档 https://wakewon.wwang.de/AiTranslate/docs/basic-usage.html#authentication 的逐家鉴权对照。如果端点还需要额外请求头或查询参数，分别给出可复制的 JSON 对象，凭据值只使用说明性占位符。
-6. API Key。请核对 HTTP 请求是否必须携带有效凭据。需要鉴权时，说明应在本机填写哪种有效密钥或令牌，Bearer 前缀由插件添加。HTTP 端点无需鉴权时，明确写「留空」，即使 SDK 构造器的示例要求填写非空值。通过额外请求头或查询参数提供完整凭据时，也可将 API Key 留空。请勿索取真实密钥，或把 SDK 占位值当作插件配置。
-
-可选进阶项。只在该模型和端点支持时给出关闭或降低推理强度的「额外请求体」JSON。OpenAI 的 Chat Completions 使用顶层 reasoning_effort，Responses 使用嵌套的 reasoning.effort。具体档位请按模型文档核对。无法确认或不支持时，明确说明。
-
-请逐项说明判断依据并附上官方文档链接。使用纯文本和独立 JSON 代码块，以便复制到对应的插件字段。`;
-
-  copyBtn.style.display = 'block';
-}
-
-function copyPrompt(btn) {
-  const pre = btn.nextElementSibling;
-  navigator.clipboard.writeText(pre.innerText).then(() => {
-    const originalText = btn.innerText;
-    btn.innerText = '已复制!';
-    btn.classList.add('success');
-    setTimeout(() => {
-      btn.innerText = originalText;
-      btn.classList.remove('success');
-    }, 2000);
-  });
-}
-</script>
+$text</code></pre>
+        <p>插件会把 <code>$text</code> 换成选中的原文，把两个语言变量换成 Bob 提供的语言名称。自行填写用户指令时记得保留 <code>$text</code>。<a href="../tools/param-builder.html#prompts">在工作台生成翻译指令</a></p>
+      </section>
+      <section id="troubleshooting">
+        <h2>排查常见问题</h2>
+        <details class="guide-fold">
+          <summary>提示 401 或 403</summary>
+          <p>检查密钥是否属于当前 Base URL 对应的平台，是否有权访问该模型。选择 Bearer 时只填令牌本身，插件会添加前缀。</p>
+        </details>
+        <details class="guide-fold">
+          <summary>提示 404 或找不到模型</summary>
+          <p>将 Base URL 与端点路径拼在一起，与服务商文档逐段比较。再查模型 ID 的拼写、地区和部署名称。</p>
+        </details>
+        <details class="guide-fold">
+          <summary>验证通过，翻译时提示「流式响应为空」</summary>
+          <p>「验证」使用非流式请求。先关闭「流式输出」再翻译同一句话。如果这样能收到译文，请核对端点的流式接口和代理的 SSE 支持。</p>
+        </details>
+        <details class="guide-fold">
+          <summary>译文里能看到 Markdown 标记</summary>
+          <p>Bob 1.21.0 及以上搭配 macOS 13 及以上可以渲染 Markdown。检查插件里的「Markdown 渲染」和 Bob 的「偏好设置 → 翻译 → Markdown」。较早的版本会按纯文本显示。需要纯文本译文时，也可以在系统指令中指定。<a href="https://bobtranslate.com/blog/2026-09-21-markdown-plugin.html">Bob 的 Markdown 支持说明</a></p>
+        </details>
+      </section>
+      <p class="guide-next"><a href="disable-thinking.html">继续阅读《调整推理参数》</a></p>
+    </article>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap footer-wrap"><a class="brand" href="../index.html"><img src="../icon.png" width="22" height="22" alt="">AiTranslate</a><span>Bob 翻译插件</span><a href="https://github.com/wakewon/AiTranslate/issues">问题反馈 <span aria-hidden="true">↗</span></a></div>
+  </footer>
 </body>
 </html>
