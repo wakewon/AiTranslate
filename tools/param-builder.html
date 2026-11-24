@@ -40,7 +40,7 @@
         <label for="provider">你打算用哪个平台翻译？</label>
         <select id="provider" disabled><option value="">选择服务商</option><option value="custom">自定义服务商或代理</option></select>
         <p id="catalog-status" class="bench-help" role="status">正在读取服务商目录…</p>
-        <div id="start-shortcuts">
+        <div id="start-shortcuts" hidden>
           <p class="bench-help">已有 API Key？选择发给你密钥的平台。也可以从这里开始。</p>
           <div class="bench-shortcuts">
             <button type="button" data-preset="bilibili"><strong>先试译一句</strong><span>bilibili 翻译，无需密钥</span></button>
@@ -137,46 +137,46 @@
               <label class="bench-choice"><input id="lookup-connection" type="radio" name="question" value="connection" checked><span><strong>我该在 Bob 里填什么？</strong><small>查清服务地址、模型名称，以及密钥应填在哪里。</small></span></label>
               <label class="bench-choice"><input id="lookup-thinking" type="radio" name="question" value="thinking"><span><strong>怎样让译文更快出现？</strong><small>核对这个模型能否缩短思考时间，以及需要改哪一项。</small></span></label>
             </fieldset>
-            <div class="bench-question-action"><div><h3 id="question-title">配置问题</h3><p id="question-context" class="bench-help"></p></div><button type="button" class="bench-primary" data-copy="lookup-output">复制问题</button></div>
+            <div class="bench-question-action"><div><h3 id="question-title">配置问题</h3><p id="question-context" class="bench-help"></p></div><button type="button" class="bench-primary" data-copy="lookup-output" disabled>复制问题</button></div>
             <button type="button" id="choose-for-lookup" class="bench-text">先选择服务商 ↑</button>
-            <details class="bench-details" id="lookup-preview"><summary>预览要发给助手的问题</summary><pre id="lookup-output"></pre></details>
+            <details class="bench-details" id="lookup-preview" hidden><summary>预览要发给助手的问题</summary><pre id="lookup-output"></pre></details>
           </div>
         </section>
         <section class="bench-tool">
           <h3><button type="button" class="bench-tool-toggle" id="tab-prompts" aria-expanded="false" aria-controls="prompts">调整译文风格<span aria-hidden="true"></span></button></h3>
           <div id="prompts" class="bench-panel" aria-labelledby="tab-prompts" hidden>
             <p class="bench-description">日常翻译可以沿用默认指令。想让邮件更得体、技术术语更一致时，选一种场景，把生成的两段文字分别粘贴到 Bob 的同名字段。</p>
-          <label for="scene">翻译场景</label>
-          <select id="scene"><option value="general">日常文本</option><option value="technical">技术文档</option><option value="mail">商务邮件</option></select>
-          <div class="bench-snippet"><div class="bench-section-title"><h3>自定义系统指令</h3><button type="button" data-copy="system-output">复制</button></div><pre id="system-output"></pre></div>
-          <div class="bench-snippet"><div class="bench-section-title"><h3>自定义用户指令</h3><button type="button" data-copy="user-output">复制</button></div><pre id="user-output"></pre></div>
-        </div>
+            <label for="scene">翻译场景</label>
+            <select id="scene"><option value="general">日常文本</option><option value="technical">技术文档</option><option value="mail">商务邮件</option></select>
+            <div class="bench-snippet"><div class="bench-section-title"><h3>自定义系统指令</h3><button type="button" data-copy="system-output">复制</button></div><pre id="system-output"></pre></div>
+            <div class="bench-snippet"><div class="bench-section-title"><h3>自定义用户指令</h3><button type="button" data-copy="user-output">复制</button></div><pre id="user-output"></pre></div>
+          </div>
         </section>
         <section class="bench-tool">
           <h3><button type="button" class="bench-tool-toggle" id="tab-parameters" aria-expanded="false" aria-controls="parameters">编辑高级参数<span aria-hidden="true"></span></button></h3>
           <div id="parameters" class="bench-panel" aria-labelledby="tab-parameters" hidden>
-          <p class="bench-description">按模型文档添加参数，再把生成的 JSON 粘贴到 Bob 的「额外请求体」。</p>
-          <div id="thinking-field" hidden>
-            <label for="thinking-level">当前模型的思考等级</label>
-            <select id="thinking-level"></select>
-          </div>
-          <label for="template">从参数示例开始</label>
-          <div class="bench-template"><select id="template">
-            <option value="">选择示例</option>
-            <option value="reasoning_effort">Chat Completions · reasoning_effort</option>
-            <option value="reasoning">Responses · reasoning.effort</option>
-            <option value="thinking">DeepSeek · thinking.type</option>
-            <option value="chat_template_kwargs" id="bilibili-template" hidden>bilibili 翻译 · chat_template_kwargs</option>
-            <option value="enable_thinking">通义千问 · enable_thinking</option>
-            <option value="top_p">采样概率 · top_p</option>
-            <option value="top_k">采样范围 · top_k</option>
-            <option value="response_format">输出格式 · response_format</option>
-          </select><button type="button" id="add-template" disabled>加入</button></div>
-          <p class="bench-help">同一家服务商的不同模型也可能支持不同的参数。<a href="../docs/disable-thinking.html">查看思考参数说明</a></p>
-          <div id="param-rows"></div>
-          <button type="button" class="bench-add" id="add-row">＋ 添加参数</button>
-          <div class="bench-snippet"><div class="bench-section-title"><h3>JSON 预览</h3><button type="button" data-copy="json-output">复制 JSON</button></div><pre id="json-output">{}</pre></div>
-          <p id="param-error" role="status" class="bench-error"></p>
+            <p class="bench-description">按模型文档添加参数，再把生成的 JSON 粘贴到 Bob 的「额外请求体」。</p>
+            <div id="thinking-field" hidden>
+              <label for="thinking-level">当前模型的思考等级</label>
+              <select id="thinking-level"></select>
+            </div>
+            <label for="template">从参数示例开始</label>
+            <div class="bench-template"><select id="template">
+              <option value="">选择示例</option>
+              <option value="reasoning_effort">Chat Completions · reasoning_effort</option>
+              <option value="reasoning">Responses · reasoning.effort</option>
+              <option value="thinking">DeepSeek · thinking.type</option>
+              <option value="chat_template_kwargs" id="bilibili-template" hidden>bilibili 翻译 · chat_template_kwargs</option>
+              <option value="enable_thinking">通义千问 · enable_thinking</option>
+              <option value="top_p">采样概率 · top_p</option>
+              <option value="top_k">采样范围 · top_k</option>
+              <option value="response_format">输出格式 · response_format</option>
+            </select><button type="button" id="add-template" disabled>加入</button></div>
+            <p class="bench-help">同一家服务商的不同模型也可能支持不同的参数。<a href="../docs/disable-thinking.html">查看思考参数说明</a></p>
+            <div id="param-rows"></div>
+            <button type="button" class="bench-add" id="add-row">＋ 添加参数</button>
+            <div class="bench-snippet"><div class="bench-section-title"><h3>JSON 预览</h3><button type="button" data-copy="json-output">复制 JSON</button></div><pre id="json-output">{}</pre></div>
+            <p id="param-error" role="status" class="bench-error"></p>
           </div>
         </section>
       </div>
